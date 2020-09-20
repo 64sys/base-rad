@@ -1,0 +1,1295 @@
+' Gambas module file
+
+'''Coding utilities.
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+' This module contains methods to manage code data
+
+Export
+
+'' Create a collection with the project metadata contained in the ".project" file. Then, the tags to access to information are:<br>
+'' Title, Startup, Icon, Version, <b>Component</b>, Description, <b>Authors</b>, Language, Vendor, Iconart, Iconurl, Iconset, Iconlic, TabSize, Translate, SourcePath, Maintainer, Address, Url, License, Prefix, PackageName, CreateEachDirectory, RuntimeVersion, Packager, Systems, SameFiles, Menus, Groups.<br>
+'' Note: All the tags return a <b>String</b> except for Component and Authors that return a <b>Variant</b>[]
+
+Public Function ProjInfo(strPath As String) As Collection
+
+  Dim ctn As Collection = ["Title": "~", "Startup": "~", "Icon": "~", "Version": "~", "Component": [], "Description": "~", "Authors": [], "Language": "~", "Vendor": "~", "Iconart": "~", "Iconurl": "~", "Iconset": "~", "Iconlic": "~"]
+  Dim str As String
+  Dim stx As New String[]
+  Dim i As Integer
+  Dim tag As String
+  Dim att As String
+
+  If Exist(strPath) Then
+    str = File.Load(strPath)
+    stx = Split(str, "\n")
+
+    If stx.Count > 0 Then
+      For i = 0 To stx.Max
+        If InStr(stx[i], "=") > 0 Then
+          tag = Split(stx[i], "=")[0]
+          att = Split(stx[i], "=")[1]
+          att = Replace(att, "\"", "")
+          If ctn.Exist(tag) Then
+            Select tag
+              Case "Component", "Authors"
+                ctn[tag].Add(att)
+              Case Else
+                ctn[tag] = att
+            End Select
+          Else
+            ctn.Add(att, tag)
+          Endif
+        Endif
+      Next
+    Endif
+  Endif
+  Return ctn
+
+End
+
+'' List all modules
+
+Public Function ProjData(strPath As String) As Collection
+
+  Dim cDat As New Collection
+  Dim cMet As New Collection
+  Dim cMod As New Collection
+  Dim stx As New String[]
+  Dim str As String
+
+  Dim stxFiles As New String[]
+  Dim strFile As String
+  Dim strFileExt As String
+  Dim stxText As New String[]
+  Dim int As Integer
+  Dim strFileBase As String
+  Dim strType As String
+  Dim strMethod As String
+  Dim cGar As New Collection
+  Dim cVar As New Collection
+  Dim mode As String
+  Dim stx1 As String[]
+  Dim xCode As New String[]
+  Dim metComm As String
+  Dim bDesc As Boolean
+
+  '' strPath It is the root directory that is passed to the function, and from there it will look for the .project files
+  stxFiles = fil.ScanFiles(strPath, ["module", "class"])
+  stxFiles.Sort
+
+  If stxFiles.Count > 0 Then
+    For Each strFile In stxFiles
+      strFileExt = File.Ext(strFile)
+      strFileBase = File.BaseName(strFile)
+      bDesc = False
+
+      cMod["Name"] = strFileBase
+      cVar.Clear
+      cGar.Clear
+
+      Select strFileExt
+        Case "module" ', "class"
+          mode = "global"
+          stxText = fil.FileLoadRaw(strFile)
+
+          For int = 0 To stxText.Max
+
+            strMethod = cdg.CodeTag(Replace(stxText[int], "\t", " "))
+            strType = Split(strMethod, "\t")[0]
+            Print strType & "\t" & Split(strMethod, "\t")[1]
+
+            Select strType
+
+              Case "Method Start"
+                mode = "local"
+
+                str = Split(strMethod, "\t")[1]
+                str = vag.RSpaces(str)
+                str = Replace(str, " ''", "'")
+                str = Replace(str, " '", "'")
+                str = Replace(str, " As ", " ")
+
+                If InStr(str, "'") Then
+                  stx = Split(Split(str, "'")[0], " ")
+                  cMet["Comment"] = Split(str, "'")[1]
+                Else
+                  stx1 = Split(str, " ")
+                Endif
+
+                If stx1.Count >= 3 Then
+                  If InStr(stx1[2], "(") > 0 Then
+                    cMet["Name"] = Split(stx1[2], "(")[0]
+                  Else
+                    cMet["Name"] = stx1[2]
+                  Endif
+
+                  cMet["Scope"] = stx1[0]
+                  cMet["Type"] = stx1[1]
+                Endif
+                If metComm <> "" Then
+                  cMet["Description"] = metComm
+                Endif
+                xCode.Clear
+
+              Case "Method End"
+                mode = "none"
+                cMet["Code"] = xCode
+                If cMet["Name"] Then
+
+                  If cMod.Exist("Methods") = False Then
+                    cMod["Methods"] = [cMet["Name"]: cMet.Copy()]
+                  Else
+                    cMod["Methods"].Add(cMet.Copy(), cMet["Name"])
+                  Endif
+
+                  cMet.Clear
+                  metComm = ""
+                Else
+                  Print "Error"
+                Endif
+
+              Case "Code"
+                mode = "local"
+                str = Split(strMethod, "\t")[1]
+                str = vag.RSpaces(str)
+                xCode.Add(str)
+                's &= str & "\n"
+
+              Case "Commentary 1"
+                If InStr(LCase(Split(strMethod, "\t")[1]), "gambas class file") > 0 Then
+                  mode = "global"
+                  cMod.Add("class", "Type")
+                Else
+                  If InStr(LCase(Split(strMethod, "\t")[1]), "gambas module file") > 0 Then
+                    cMod.Add("module", "Type")
+                    mode = "global"
+                  Endif
+                Endif
+              Case "Blank Line"
+                'skip
+
+              Case "Commentary 2"
+                bDesc = True
+                str = Split(strMethod, "\t")[1]
+                str = Replace(str, "''", "")
+                metComm &= str
+
+                ' If mode = "global" Then
+                '   cMod["Description"] = metComm
+                '   metComm = ""
+                ' Endif
+
+              Case "Commentary 3"
+                If bDesc = False Then
+                  str = Split(strMethod, "\t")[1]
+                  str = Replace(str, "'''", "")
+                  str = vag.RSpaces(str)
+                  cMod["Description"] = str
+                Endif
+
+              Case "Variable Local"
+                mode = "local"
+                str = Split(strMethod, "\t")[1]
+                str = vag.RSpaces(str)
+                str = Replace(str, " ''", "'")
+                str = Replace(str, " '", "'")
+                str = Replace(str, " As New ", " ")
+                str = Replace(str, " As ", " ")
+
+                If InStr(str, "'") Then
+                  stx = Split(Split(str, "'")[0], " ")
+                  cVar["Comment"] = vag.RSpaces(Split(str, "'")[1])
+                Else
+                  stx = Split(str, " ")
+                Endif
+
+                If stx.Count >= 3 Then
+                  cVar["Name"] = stx[1]
+                  cVar["Scope"] = stx[0]
+                  cVar["Type"] = stx[2]
+
+                  If cMet.Exist("Variables") = False Then
+                    cMet["Variables"] = [cVar["Name"]: cVar.Copy()]
+                  Else
+                    cMet["Variables"].Add(cVar.Copy(), cVar["Name"])
+                  Endif
+                  cVar.Clear
+                Endif
+              Case "Variable Public", "Variable Private"
+                mode = "global"
+                str = Split(strMethod, "\t")[1]
+                str = vag.RSpaces(str)
+                str = Replace(str, " ''", "'")
+                str = Replace(str, " '", "'")
+                str = Replace(str, " As New ", " ")
+                str = Replace(str, " As ", " ")
+
+                If InStr(str, "'") Then
+                  stx = Split(Split(str, "'")[0], " ")
+                  cGar["Comment"] = vag.RSpaces(Split(str, "'")[1])
+                Else
+                  stx = Split(str, " ")
+                Endif
+
+                If stx.Count >= 3 Then
+                  cGar["Name"] = stx[1]
+                  cGar["Scope"] = stx[0]
+                  cGar["Type"] = stx[2]
+                Endif
+                If cGar Then
+                  If cMod.Exist("Variables") = False Then
+                    cMod["Variables"] = [cGar["Name"]: cGar.Copy()]
+                  Else
+                    cMod["Variables"].Add(cGar.Copy(), cGar["Name"])
+                  Endif
+                Endif
+
+            End Select
+          Next
+      End Select
+      cDat.Add(cMod.Copy(), strFile)
+      cMod.Clear
+    Next
+  End If
+  Return cDat
+
+End
+' Public Function ProjData(strPath As String) As Collection
+'
+'   Dim cDat As New Collection
+'   'Dim cCls As New Collection
+'   'Dim cMod As New Collection
+'
+'   Dim stxFiles As New String[]
+'   Dim strFile As String
+'   Dim strFileExt As String
+'   Dim stxText As New String[]
+'   Dim int As Integer
+'   Dim intEnd As Integer
+'   Dim strFileBase As String
+'   Dim strType As String
+'   Dim intPlus As Integer
+'   Dim strMethod As String
+'   Dim strCode As String
+'   Dim stxCode As New String[]
+'   Dim stxVars As New String[]
+'   Dim stxPart As New String[]
+'   Dim stxMethod As New String[]
+'   'Dim stxProj As New String[]
+'   Dim strTypeCode As String
+'   Dim intInit As Integer
+'
+'   '' strPath It is the root directory that is passed to the function, and from there it will look for the .project files
+'   stxFiles = fil.ScanDirs(strPath, ["module", "class"])
+'   stxFiles.Sort
+'
+'   If stxFiles.Count > 0 Then
+'     For Each strFile In stxFiles
+'       strFileExt = File.Ext(strFile)
+'       strFileBase = File.BaseName(strFile)
+'
+'       Select strFileExt
+'         Case "module", "class"
+'           stxText = fil.FileLoadRaw(strFile)
+'
+'           For int = 0 To stxText.Max
+'             intInit = int
+'             strMethod = CodeTag(Replace(stxText[int], "\t", " "))
+'
+'             strType = Split(strMethod, "\t")[0]
+'
+'             If strType = "Method Start" Then
+'               ' Resto del código
+'               stxPart = Split(strMethod, "()")
+'               stxMethod = CodeMthod(stxPart)
+'
+'               intPlus = 1
+'               stxCode.Clear
+'
+'               If int + intPlus <= stxText.Max Then
+'
+'                 Repeat
+'
+'                   strCode = CodeTag(Replace(stxText[int + intPlus], "\t", " "))
+'                   strTypeCode = Split(strCode, "\t")[0]
+'                   Select strTypeCode
+'                     Case "Commentary 1", "Blank Line", "Method End"
+'                       'skip
+'                     Case "Variable Local"
+'                       stxVars.Add(Split(strCode, "\t")[1])
+'                       'skip
+'                     Case Else
+'                       stxCode.Add(Split(strCode, "\t")[1])
+'                   End Select
+'
+'                   If (int + intPlus) < stxText.Max Then
+'                     Inc IntPlus
+'                   Endif
+'                   If strTypeCode = "Method End" Then
+'
+'                     intEnd = int + intPlus
+'                     Break
+'                   Else
+'                     intEnd = int
+'                   Endif
+'
+'                 Until int + intPlus >= stxText.Max
+'
+'               Endif
+'
+'               '' Here is the complete method
+'
+'               cDat.Add([stxMethod, stxCode, stxVars], strFile)
+'
+'               'stxProj.Add(strFile & "\t" & strFileBase & "\t" & stxMethod.Join("\n") & "\t" & stxCode.Join("\n") & "\t" & stxVars.Join("\n") & "\t" & CStr(intInit) & "\t" & CStr(intEnd))
+'
+'             Endif
+'           Next
+'       End Select
+'     Next
+'   End If
+'
+'   'Return stxProj
+'   Return cDat
+'
+' End
+
+'' It parses a text string that is passed as a parameter and, in the context of a code snippet, returns what that phrase is.
+
+Public Function CodeTag(str As String) As String
+
+  Dim stxStruc As New String[]
+  Dim stxSTmp As New String[]
+  Dim stxCoin As New Integer[] 'Coincidencia
+  Dim int1 As Integer
+  Dim int2 As Integer
+  Dim int3 As Integer 'Coincidencia
+  Dim inxCoin As New Integer[]
+  Dim intCoin As Integer
+  Dim strOutput As String
+  Dim strType As String
+  Dim strJob As String
+  Dim stxSplitText As String[]
+  Dim strIsComment As String
+  Dim intCh As Integer
+
+  stxStruc = cdg.CodeStructure()
+  stxCoin.Clear
+
+  strJob = Replace(str, "  ", " ")
+  strJob = Replace(strJob, " '", "'")
+
+  Select strJob
+    Case "", " ", "  ", "   "
+      For int1 = 0 To stxStruc.Max
+        If stxStruc[int1] = "##Blank Line" Then
+          inxCoin.Add(1)
+        Else
+          inxCoin.Add(0)
+        Endif
+      Next
+
+    Case Else
+
+      If String.Mid(strJob, 1, 1) = " " Then
+        ' verificar si es una linea comentada
+        stxSplitText = vag.SplitText(strJob)
+        strIsComment = "no"
+
+        For intCh = 0 To stxSplitText.Max
+          If stxSplitText[intCh] = " " Then
+            Select intCh
+              Case stxSplitText.Max
+                'skip
+              Case Else
+                If stxSplitText[intCh + 1] = "'" Then
+                  ' La fraase es un comentario
+                  strIsComment = "yes"
+                  Break
+                Endif
+            End Select
+
+          Endif
+        Next
+        Select strIsComment
+          Case "yes"
+            strJob = "'c"
+        End Select
+      Endif
+
+      For int1 = 0 To stxStruc.Max ' alrededor de 50 frases
+        stxSTmp = Split(stxStruc[int1], "#")
+        int3 = 0
+
+        If String.Mid(strJob, 1, 1) = stxSTmp[0] Then
+          For int2 = 1 To stxSTmp.Max - 1
+            If InStr(strJob, stxSTmp[int2]) > 0 Then
+              Inc int3
+            Endif
+          Next
+          inxCoin.Add(int3)
+        Else 'si la 1º letra no coincide > es 0, es decir no hay coincidencia
+          inxCoin.Add(int3) ' en esta instancia int3 vale 0
+        Endif
+      Next
+  End Select
+
+  For intCoin = 0 To stxStruc.Max
+    If inxCoin[intCoin] > 0 Then
+      If inxCoin[intCoin] = uty.ArrayMax(inxCoin) Then
+        strType = Split(stxStruc[intCoin], "#")[Split(stxStruc[intCoin], "#").Max]
+      Endif
+
+    Endif
+  Next
+
+  Select strType
+    Case ""
+      strType = "Code"
+  End Select
+
+  strOutput = strType & "\t" & str
+
+  Return strOutput
+
+End
+
+Public Function CodeMthod(stxPart As String[]) As String[]
+
+  Dim intPart As Integer
+  Dim stxFunc As New String[]
+  Dim strFast As String
+  Dim strMode As String
+  Dim strScope As String
+  Dim strType As String
+  Dim strName As String
+  Dim stxMethd As New String[]
+  Dim strDesc As String
+  Dim strRetn As String
+  Dim strArgs As String
+  Dim stxArgs As New String[]
+  Dim strExtr As String
+  Dim strTemp As String
+  Dim intRetn As Integer
+  Dim intDesc As Integer
+
+  intRetn = 0
+  For intPart = 0 To stxPart.Max
+
+    Select intPart
+      Case 0
+        strTemp = Split(stxPart[0], "\t")[1]
+
+        stxFunc = Split(strTemp, " ")
+
+        If stxFunc.Find("Fast") > -1 Then
+          strFast = "Fast"
+        Else
+          strFast = ""
+        Endif
+
+        If stxFunc.Find("Static") > -1 Then
+          strMode = "Static"
+        Else
+          strMode = ""
+        Endif
+
+        If stxFunc.Find("Public") > -1 Then
+          strScope = "Public"
+        Else
+          If stxFunc.Find("Private") > -1 Then
+            strScope = "Private"
+          Else
+            strScope = "Other"
+          Endif
+        Endif
+
+        If stxFunc.Find("Function") > -1 Then
+          strType = "Function"
+        Else
+          If stxFunc.Find("Procedure") > -1 Then
+            strType = "Procedure"
+          Else
+            If stxFunc.Find("Sub") > -1 Then
+              strType = "Sub"
+            Endif
+          Endif
+        Endif
+        strName = stxFunc[stxFunc.Max]
+        ' ---------------
+      Case 1
+        strArgs = Replace(stxPart[1], ", ", "#")
+        strArgs = Replace(strArgs, " As ", "~")
+        If InStr(strArgs, "#") > 0 Then
+          stxArgs = Split(strArgs, "#") ' intArg1>Integer#strArg2>String
+        Else
+          If InStr(strArgs, "~") > 0 Then
+            stxArgs.Add(strArgs)
+          Endif
+        Endif
+        ' ---------------
+      Case 2
+        strExtr = Replace(stxPart[2], " As ", "\tReturn: ")
+        strExtr = Replace(strExtr, "''", "\tDescription: ")
+
+        If InStr(strExtr, "\tReturn: ") > 0 Then
+          intDesc = InStr(strExtr, "\tReturn: ")
+          If intRetn > 0 Then
+            strDesc = String.Mid(strExtr, intRetn + 9)
+          Endif
+        Else
+          strRetn = ""
+        Endif
+
+        If InStr(strExtr, "\tDescription: ") > 0 Then
+          intDesc = InStr(strExtr, "\tDescription: ")
+          If intDesc > 0 Then
+            strDesc = String.Mid(strExtr, intDesc + 14)
+          Endif
+        Else
+          strDesc = ""
+        Endif
+
+    End Select
+  Next
+
+  stxMethd.Add(strFast) '
+  stxMethd.Add(strMode) '
+  stxMethd.Add(strScope) '
+  stxMethd.Add(strType) '
+  stxMethd.Add(strName) '
+  stxMethd.Add(Replace(stxArgs.Join("/"), "~", " As "))
+  stxMethd.Add(strRetn) '
+  stxMethd.Add(strDesc) '
+
+  Return stxMethd
+
+End
+
+''Create an array with the gambas special case subrutines and the event names.
+
+Public Function SpecialSubs() As String[]
+
+  Dim stx As New String[]
+
+  stx = ["Main", "_New", "_Free", "_Activate", "_Change", "_Click", "_DblClick", "_Drag", "_DragLeave", "_DragMove", "_Drop", "_Enter", "_Filter", "_GotFocus", "_KeyPress", "_KeyRelease", "_Leave", "_LostFocus", "_Menu", "_MouseDown", "_MouseDrag", "_MouseMove", "_MouseUp", "_MouseWheel", "_Select", "_Read", "_Write", "_Open"]
+
+  Return stx
+
+End
+
+''Create an array with the gambas language structures that, for example, can be used to interpret the code.
+
+Public Function CodeStructure() As String[]
+
+  Dim stxStructure As New String[]
+  ' "X#Function #As " X es el primer caracter de comienzo de la línea de código
+
+  stxStructure.Add("F#Function #Method Start")
+  stxStructure.Add("S#Sub #Method Start")
+  stxStructure.Add("S#Sub #) As #Method Start")
+  stxStructure.Add("P#Public #Sub #Method Start")
+  stxStructure.Add("P#Private #Sub #Method Start")
+  stxStructure.Add("P#Public #Procedure #Method Start")
+  stxStructure.Add("P#Private #Procedure #Method Start")
+
+  stxStructure.Add("E#End#Method End")
+  stxStructure.Add(" #Dim #As #Variable Local")
+  stxStructure.Add("P#Public # As #Variable Public")
+  stxStructure.Add("P#Private # As #Variable Private")
+  stxStructure.Add("P#Public #Function #) As #Method Start")
+  stxStructure.Add("P#Private #Function #) As #Method Start")
+
+  stxStructure.Add("'#'#Commentary 1")
+  stxStructure.Add("'#''#Commentary 2")
+  stxStructure.Add("'#'''#Commentary 3")
+  stxStructure.Add("##Blank Line")
+  stxStructure.Add(" #If #Then#Conditional structure Start")
+  stxStructure.Add(" #If #Then #Break#Conditional structure Start-End")
+  stxStructure.Add(" #Else#Conditional structure Middle")
+  stxStructure.Add(" #Endif#Conditional structure End")
+  stxStructure.Add(" #For #To #Loop Control Start")
+  stxStructure.Add(" #For #To #Step #Loop Control Start")
+  stxStructure.Add(" #For #Each #Loop Control Start")
+  stxStructure.Add(" #For #Each #In #Loop Control Start")
+  stxStructure.Add(" #Repeat#Loop Control Start")
+  stxStructure.Add(" #Do #While #Loop Control Start")
+  stxStructure.Add(" #While #Loop Control Start")
+  stxStructure.Add(" #Do#Loop Control Start")
+  stxStructure.Add(" #Continue#Loop Control Middle")
+  stxStructure.Add(" #Next#Loop Control End")
+  stxStructure.Add(" #Loop#Loop Control End")
+  stxStructure.Add(" #Until#Loop Control End")
+  stxStructure.Add(" #Wend#Loop Control End")
+  stxStructure.Add(" #Inc #Increment")
+  stxStructure.Add(" #Wait #Wait")
+  stxStructure.Add(" #Select #Select Control Start")
+  stxStructure.Add(" #Select Case #Select Control Start")
+  stxStructure.Add(" #Case #Select Control Middle")
+  stxStructure.Add(" #End Select#Select Control End")
+  stxStructure.Add(" #Open # For Input#Open Stream")
+  stxStructure.Add(" #Open # For Read#Open Stream")
+  stxStructure.Add(" #Open # For Write#Open Stream")
+  stxStructure.Add(" #Open # For Output#Open Stream")
+  stxStructure.Add(" #Open # For Create#Open Stream")
+  stxStructure.Add(" #Open # For Append#Open Stream")
+  stxStructure.Add(" #Open # For Watch#Open Stream")
+  stxStructure.Add(" #Print #Print")
+  ' Faltan mas estructuras
+  stxStructure.Add(" #Close #Close Stream")
+  stxStructure.Add(" #Kill #Shell Command")
+  stxStructure.Add(" #Shell #Shell Command")
+  stxStructure.Add(" #Shell #To #Shell Command")
+  stxStructure.Add(" #Move #Shell Command")
+  stxStructure.Add(" #Copy #Shell Command")
+  stxStructure.Add(" #Catch#Error Catch")
+  stxStructure.Add(" #Try #Error Try")
+  stxStructure.Add(" #Return #Method Middle")
+
+  Return stxStructure
+
+End
+
+'' Read the method and code matrices of the project and then analyze the relationships between them generating a matrix with these relationships.
+
+Public Function RelationProj(stxClass As String[], stxMet As String[], stxCod As String[]) As String[]
+
+  Dim stxReltn As New String[] ' Lista de métodos
+  Dim intCod As Integer
+  Dim intMet As Integer
+
+  For intCod = 0 To stxCod.Max
+    'Print "// " & stxClass[intCod] & "." & stxMet[intCod]
+
+    For intMet = 0 To stxMet.Max
+
+      Select stxClass[intMet] = stxClass[intCod]
+        Case True
+
+          If InStr(stxCod[intCod], stxMet[intMet] & "(") > 0 Then
+            stxReltn.Add(stxClass[intCod] & "." & stxMet[intCod] & "\t" & stxClass[intMet] & "." & stxMet[intMet])
+          Else
+            stxReltn.Add(stxClass[intMet] & "." & stxMet[intMet])
+          Endif
+        Case False
+
+          If InStr(stxCod[intCod], stxClass[intMet] & "." & stxMet[intMet] & "(") > 0 Then
+            stxReltn.Add(stxClass[intCod] & "." & stxMet[intCod] & "\t" & stxClass[intMet] & "." & stxMet[intMet])
+          Else
+            stxReltn.Add(stxClass[intMet] & "." & stxMet[intMet])
+          Endif
+      End Select
+
+    Next
+  Next
+
+  Return stxReltn
+
+End
+
+'' Read all the classes and modules of a gambas project, collect information from it in an open way and translate it into a text matrix.
+
+Public Function DokuProj(strPath As String) As String[]
+
+  Dim stxFiles As New String[]
+  Dim strFile As String
+  Dim strFileExt As String
+  Dim stxText As New String[]
+  Dim int As Integer
+  Dim intEnd As Integer
+  Dim strFileBase As String
+  Dim strType As String
+  Dim intPlus As Integer
+  Dim strMethod As String
+  Dim strCode As String
+  Dim stxCode As New String[]
+  Dim stxVars As New String[]
+  Dim stxPart As New String[]
+  Dim stxMethod As New String[]
+  Dim stxProj As New String[]
+  Dim strTypeCode As String
+  Dim intInit As Integer
+
+  '' strPath It is the root directory that is passed to the function, and from there it will look for the .project files
+  stxFiles = fil.ScanFiles(strPath, [""])
+  stxFiles.Sort
+
+  If stxFiles.Count > 0 Then
+    For Each strFile In stxFiles
+      strFileExt = File.Ext(strFile)
+      strFileBase = File.BaseName(strFile)
+      Select strFileExt
+        Case "module", "class"
+          stxText = fil.FileLoadRaw(strFile)
+
+          For int = 0 To stxText.Max
+            intInit = int
+            strMethod = CodeTag(Replace(stxText[int], "\t", " "))
+            strType = Split(strMethod, "\t")[0]
+
+            If strType = "Method Start" Then
+              ' Resto del código
+              stxPart = Split(strMethod, "()")
+              stxMethod = CodeMthod(stxPart)
+
+              intPlus = 1
+              stxCode.Clear
+
+              If int + intPlus <= stxText.Max Then
+
+                Repeat
+
+                  strCode = CodeTag(Replace(stxText[int + intPlus], "\t", " "))
+                  strTypeCode = Split(strCode, "\t")[0]
+                  Select strTypeCode
+                    Case "Commentary 1", "Blank Line", "Method End"
+                      'skip
+                    Case "Variable Local"
+                      stxVars.Add(Split(strCode, "\t")[1])
+                      'skip
+                    Case Else
+                      stxCode.Add(Split(strCode, "\t")[1])
+                  End Select
+
+                  If (int + intPlus) < stxText.Max Then
+                    Inc IntPlus
+                  Endif
+                  If strTypeCode = "Method End" Then
+
+                    intEnd = int + intPlus
+                    Break
+                  Else
+                    intEnd = int
+                  Endif
+
+                Until int + intPlus >= stxText.Max
+
+              Endif
+
+              '' Here is the complete method
+
+              stxProj.Add(strFile & "\t" & strFileBase & "\t" & stxMethod.Join("\n") & "\t" & stxCode.Join("\n") & "\t" & stxVars.Join("\n") & "\t" & CStr(intInit) & "\t" & CStr(intEnd))
+
+            Endif
+          Next
+      End Select
+    Next
+  End If
+
+  Return stxProj
+
+End
+
+'' It returns an html with the functions of a module and all the data of these, as an input parameter it requires the root directory from which to search the modules.
+
+Public Function DokuHtml(strPath As String) As String
+
+  Dim stxFiles As String[]
+  Dim strHtml As String
+  Dim strFile As String
+  Dim strLine As String
+  Dim intPub As Integer
+  Dim strFunName As String
+  Dim strFunParam As String
+  Dim strFunReturn As String
+  Dim strFunDesc As String
+  Dim stxFunky As New String[]
+  Dim intPrm As Integer
+  Dim intModule As Integer        '' Number of modules
+  Dim intQty As Integer           '' Number of methods
+
+  Dim strKey As String
+  Dim strAttr As String
+
+  Dim stxInfo As New String[]
+  Dim strFunCode As String
+
+  stxInfo = sog.ProjInfo()
+
+  stxFiles = fil.ScanFiles(strPath, ["class", "module"])
+  strKey = "Public Function "
+  intPub = String.Len(strKey)
+  ' Header
+  strHtml &= "<!DOCTYPE html><html>"
+  strHtml &= "<head>" ""
+  strHtml &= "<meta charset=\"utf-8\"/>"
+  strHtml &= "<meta name=\"description\"content=\" Wiki Of GEF " > " " ""
+  strHtml &= "<meta name=\"keywords\"content=\"Gambas, GEF" > " " ""
+  strHtml &= "<meta name=\"author\"content=\"" & stxInfo[2] & "\">"
+  strHtml &= "<meta name=\"viewport\"content=\"width=device-width, initial-scale=1.0\">"
+  strHtml &= "<title>" & Application.Name & "</title>"
+  strHtml &= "</head><body>"
+  strHtml &= "<style>.center {text-align: center;}</style>"
+  strHtml &= "<div class=\"center\">"
+  strHtml &= "<img src=\"./" & stxInfo[8] & "\" alt=\"Logo\" width=\"200\" height=\"200\">"
+  strHtml &= "</div>"
+
+  strHtml &= "<h1>" & Application.Name & "</h1>"
+  strHtml &= "<p>" & ("Author") & ": <b>" & stxInfo[2] & "</b></p>"
+  strHtml &= "<p>" & ("Vendor") & ": <b>" & stxInfo[3] & "</b></p>"
+  strHtml &= "<p>" & ("Version") & ": <b>" & stxInfo[4] & "</b></p>"
+  strHtml &= "<p>" & ("Date of this document") & ": <b>" & Format(Now(), "yyyy.mm.dd hh:nn:ss") & "</b></p>"
+  strHtml &= "<p>" & ("Components") & ": <b>" & Replace(stxInfo[5], ":", ", ") & "</b></p>"
+
+  strHtml &= "<p>" & Application.Name & " " & ("It is made up") & " <b>MMMOOODDDUUULLLOOOSSS</b> " & ("modules") & " y <b>FFUUNNCCIIOONNEESS</b> " & ("methods") & "</p>"
+
+  If stxFiles.Count > 0 Then
+    For Each strFile In stxFiles
+      If File.Ext(strFile) = "module" Then
+        strHtml &= "<h2>" & File.Name(strFile) & "</h2>"
+        Inc intModule
+
+        For Each strLine In fil.FileLoad(strFile)
+          If String.Left(strLine, intPub) = strKey Then
+            Inc intQty
+
+            strline = Replace(strline, strKey, "")
+            strline = Replace(strline, "(", "\t")
+            strline = Replace(strline, ") ", "\t")
+            strline = Replace(strline, " ''", "\t")
+
+            stxFunky.Clear
+            stxFunky = Split(strline, "\t")
+
+            Select stxFunky.Count
+              Case 0
+                strFunName = ""
+                strFunParam = ""
+                strFunReturn = ""
+                strFunDesc = ""
+                strFunCode = ""
+
+              Case 2
+                strFunName = stxFunky[0]
+                strFunParam = stxFunky[1]
+                strFunReturn = ""
+                strFunDesc = ""
+                strFunCode = ""
+
+              Case 3
+                strFunName = stxFunky[0]
+                strFunParam = stxFunky[1]
+                If String.len(stxFunky[2]) > 2 Then
+                  If String.Mid(stxFunky[2], 1, 3) = "As " Then
+                    strFunReturn = stxFunky[2]
+                    strFunDesc = ""
+                  Else
+                    strFunReturn = ""
+                    strFunDesc = stxFunky[2]
+                  Endif
+                Endif
+
+              Case 4
+                strFunName = stxFunky[0]
+                strFunParam = stxFunky[1]
+                strFunReturn = stxFunky[2]
+                strFunDesc = stxFunky[3]
+
+            End Select
+
+            strHtml &= "<h3>" & strFunName & "</h3>"
+
+            strFunParam = Replace(strFunParam, ", ", "\t")
+            strFunParam = Replace(strFunParam, "Optional ", "Optional~")
+            strFunParam = Replace(strFunParam, " As ", "#")
+
+            If strFunParam <> "" Then
+              strHtml &= "<ul>"
+              For intPrm = 0 To Split(strFunParam, "\t").Count - 1
+
+                strAttr = Split(Split(strFunParam, "\t")[intPrm], "#")[0]
+
+                If InStr(strAttr, "Optional") > 0 Then
+                  strHtml &= "<li><i>" & Split(strAttr, "~")[0] & "</i> <b>" & Split(strAttr, "~")[1] & "</b><i> As "
+                Else
+                  strHtml &= "<li><b>" & strAttr & "</b><i> As "
+                Endif
+
+                strHtml &= Split(Split(strFunParam, "\t")[intPrm], "#")[1] & "</i>" & "</li>"
+              Next
+              strHtml &= "</ul>"
+            Endif
+
+            strFunDesc = Replace(strFunDesc, "\n", "")
+            strHtml &= "<p>" & strFunDesc & "</p>"
+
+          Endif
+        Next
+
+      Endif
+    Next
+  Endif
+
+  strHtml = Replace(strHtml, "MMMOOODDDUUULLLOOOSSS", CStr(intModule))
+  strHtml = Replace(strHtml, "FFUUNNCCIIOONNEESS", CStr(intQty))
+
+  Return strHtml
+
+End
+
+'' Returns a wiki with the functions of a module and all their data, as an input parameter it requires the root directory from which to look for the modules.
+
+Public Function Dokuwiki(strPath As String) As String
+
+  Dim stxFiles As String[]
+  Dim strWiki As String
+  Dim strFile As String
+  Dim strLine As String
+  Dim intPub As Integer
+  Dim strFunName As String
+  Dim strFunParam As String
+  Dim strFunReturn As String
+  Dim strFunDesc As String
+  Dim stxFunky As New String[]
+  Dim intPrm As Integer
+
+  Dim strKey As String
+  Dim i As Integer
+  Dim intLine As Integer
+
+  stxFiles = fil.ScanFiles(strPath, ["class", "module"])
+  strKey = "Public Function "
+  intPub = String.Len(strKey)
+
+  If stxFiles.Count > 0 Then
+    For Each strFile In stxFiles
+      If File.Ext(strFile) = "module" Then
+        strWiki &= "### " & File.Name(strFile)
+        strWiki &= "\n"
+
+        intLine = 0
+        For Each strLine In fil.FileLoad(strFile)
+          If String.Left(strLine, intPub) = strKey Then
+
+            strline = Replace(strline, strKey, "")
+            strline = Replace(strline, "(", "\t")
+            strline = Replace(strline, ") ", "\t")
+            strline = Replace(strline, " ''", "\t")
+
+            stxFunky.Clear
+            stxFunky = Split(strline, "\t")
+
+            Select stxFunky.Count
+              Case 0
+                strFunName = ""
+                strFunParam = ""
+                strFunReturn = ""
+                strFunDesc = ""
+
+              Case 2
+                strFunName = stxFunky[0]
+                strFunParam = stxFunky[1]
+                strFunReturn = ""
+                strFunDesc = ""
+
+              Case 3
+                strFunName = stxFunky[0]
+                strFunParam = stxFunky[1]
+                If String.len(stxFunky[2]) > 2 Then
+                  If String.Mid(stxFunky[2], 1, 3) = "As " Then
+                    strFunReturn = stxFunky[2]
+                    strFunDesc = ""
+                  Else
+                    strFunReturn = ""
+                    strFunDesc = stxFunky[2]
+                  Endif
+                Endif
+
+              Case 4
+                strFunName = stxFunky[0]
+                strFunParam = stxFunky[1]
+                strFunReturn = stxFunky[2]
+                strFunDesc = stxFunky[3]
+
+            End Select
+
+            strWiki &= "*" & strFunName & "* " & " _" & strFunReturn & "_"
+            strWiki &= "\n"
+
+            strFunParam = Replace(strFunParam, ", ", "\t")
+            strFunParam = Replace(strFunParam, "Optional ", "Opt.")
+            strFunParam = Replace(strFunParam, " As ", "#")
+
+            If strFunParam <> "" Then
+              For i = 0 To Split(strFunParam, "\t").Count - 1
+                strWiki &= CStr(intPrm + 1) & ". " & Split(Split(strFunParam, "\t")[intPrm], "#")[0] & " _" & Split(Split(strFunParam, "\t")[intPrm], "#")[1] & "_"
+                strWiki &= "\n"
+              Next
+
+            Endif
+            strWiki &= Replace(strFunDesc, "\n", "")
+            strWiki &= "\n"
+
+          Endif
+          Inc intLine
+        Next
+
+      Endif
+    Next
+  Endif
+
+  Return strWiki
+
+End
+
+''Returns an array with the data of a prawn project hosted on the farm, as input parameter requires the project identifier.
+
+Public Function GetFarmInfo(strPath As String) As Collection
+
+  Dim ctn As New Collection
+  Dim strFile As String
+  Dim stxPro As New String[]
+  Dim int As Integer
+  Dim strTag As String
+  Dim strVal As String
+
+  '' Project standard information
+  ctn.Clear
+  ctn.Add([""], "Id")                             'gfidx:INTEGER PRIMARY KEY AUTOINCREMENT:Identificador
+  ctn.Add([""], "Name")                           'gfname:TEXT UNIQUE:Nombre
+  ctn.Add([""], "Version")                        'gfvers:TEXT:Versión
+  ctn.Add([""], "LastVersion")                    'gflast:TEXT:Última versión
+  ctn.Add([""], "Vendor")                         'gfvndr:TEXT:Vendedor
+  ctn.Add([""], "Release")                        'gfrel:TEXT:Lanzamiento
+  ctn.Add([""], "UploadDate")                     'gfupld:TEXT:Fecha de carga
+  ctn.Add([""], "Description")                    'gfdesc:TEXT:Descripción
+  ctn.Add([""], "URL")                            'gfurl:TEXT:URL
+  ctn.Add([""], "Size")                           'gfsize:TEXT:tamaño
+  ctn.Add([""], "RequiredGambasVersion")          'gfgver:TEXT:Versión requerida de Gambas
+  ctn.Add([""], "Checksum")                       'gfchk:TEXT:Suma de comprobación
+  ctn.Add([""], "DownloadCount")                  'gfdwlc:INTEGER:Cuenta de descargas
+  ctn.Add([""], "FullDownloadCount")              'gfdwlf:INTEGER:Cuenta de descargas completa
+  ctn.Add([""], "VoteCount")                      'gfvote:INTEGER:Recuento de votos
+  ctn.Add([""], "Owner")                          'gfownr:TEXT:Propietario
+  ctn.Add([""], "Size")                           'gfsize2:TEXT:tamaño
+  ctn.Add([""], "Tags")                           'gftags:TEXT:Etiquetas
+
+  strFile = strPath &/ ".farm"
+
+  If Stat(strFile).Type = gb.File Then
+    ''Loading the .farm file
+    stxPro = fil.FileLoad(strFile)
+
+    For int = 0 To stxPro.Max
+      Print stxPro[int]
+      Select InStr(stxPro[int], "=")
+        Case 0
+          'skip
+        Case Else
+          strTag = Split(stxPro[int], "=")[0]
+          strVal = Split(stxPro[int], "=")[1]
+          strVal = Replace(strVal, "\r", "")
+
+          If ctn.Exist(strTag) Then
+            If ctn[strTag][0] = "" Then
+              ctn[strTag] = [strVal]
+            Else
+              ctn[strTag].Add(strVal)
+            Endif
+          Else
+            ctn.Add([strVal], strTag)
+          Endif
+
+      End Select
+    Next
+  Endif
+  Return ctn
+
+End
+
+''Devuelve una matriz con los datos de un proyecto de gambas, como parametro de entrada requieres el direcotrio raíz del proyecto.
+
+Public Function GetProjectInfo(strPath As String) As Collection
+
+  Dim ctn As New Collection
+  'Dim strFile As String
+  Dim stxPro As New String[]
+  Dim int As Integer
+  Dim strTag As String
+  Dim strVal As String
+  'Dim s As String
+  Dim i As Integer
+  Dim st As String
+
+  ctn = GetProjectInfoTags()
+
+  ctn["Directory"] = [File.Dir(strPath)]
+
+  If Stat(strPath).Type = gb.File Then
+    stxPro = fil.FileLoad(strPath)
+    For int = 0 To stxPro.Max
+      Print stxPro[int]
+      Select InStr(stxPro[int], "=")
+        Case 0
+          Select String.Mid(stxPro[int], 1, 16)
+            Case "# Gambas Project"
+              strTag = "GambasProjectFile"
+              strVal = vag.Chek4SQL(Replace(stxPro[int], "# Gambas Project File ", ""))
+
+              If ctn.Exist("GambasProjectFile") Then
+                ctn["GambasProjectFile"] = [strVal]
+              Else
+                ctn.Add(strVal, "GambasProjectFile")
+              Endif
+
+            Case "# Compiled with "
+              strTag = "CompiledWithGambas"
+              strVal = vag.Chek4SQL(Replace(stxPro[int], "# Compiled with Gambas ", ""))
+
+              If ctn.Exist("CompiledWithGambas") Then
+                ctn["CompiledWithGambas"] = [strVal]
+              Else
+                ctn.Add([strVal], "CompiledWithGambas")
+              Endif
+          End Select
+
+        Case Else
+          strTag = Split(stxPro[int], "=")[0]
+          If strTag = "Authors" Then
+            st = Split(stxPro[int], "=")[1]
+            If st <> "" Then
+              For i = 1 To String.Len(st)
+                Print String.Mid(st, i, 1) & " " & Asc(String.Mid(st, i, 1))
+              Next
+            Endif
+          Endif
+          strVal = vag.Chek4SQL(Split(stxPro[int], "=")[1])
+
+          If InStr(strVal, "'") Then
+            Print "Error"
+          Endif
+
+          If ctn.Exist(strTag) Then
+            If ctn[strTag][0] = "" Then
+              ctn[strTag] = [strVal]
+            Else
+              ctn[strTag].Add(strVal)
+            Endif
+          Else
+            ctn.Add([strVal], strTag)
+          Endif
+
+      End Select
+    Next
+  Endif
+  Return ctn
+
+End
+
+'' Returns an array with the data of a shrimp project, as an input parameter you require the root directory of the project.
+
+Public Function GetProjectInfoTags(strPath As String) As Collection
+
+  Dim ctn As New Collection
+
+  '' Project standard information
+  ctn.Clear
+  ctn.Add([""], "Address")                        'prmail:TEXT:Correo electrónico
+  ctn.Add([""], "Arguments")                      '::
+  ctn.Add([""], "Authors")                        'prdev:INTEGER:Desarrollador del programa
+  ctn.Add([""], "Categories")                     'prpkct:TEXT:Categoría del paquete
+  ctn.Add([""], "CompiledWithGambas")             '::
+  ctn.Add([""], "Component")                      'prcomp:TEXT:Componentes empleados
+  ctn.Add([""], "ControlPublic")                  '::
+  ctn.Add([""], "CreateEachDirectory")            '::
+  ctn.Add([""], "CreateMenu")                     '::
+  ctn.Add([""], "CreateShortcut")                 '::
+  ctn.Add([""], "CurrentArgument")                '::
+  ctn.Add([""], "Dependencies")                   '::
+  ctn.Add([""], "Description")                    'prdesc:TEXT:Descripción del programa
+  ctn.Add([strPath], "Directory")                 '::
+  ctn.Add([""], "DoNotTranslate")                 '::
+  ctn.Add([""], "Environment")                    '::
+  ctn.Add([""], "ExecPath")                       '::
+  ctn.Add([""], "ExtraAutoconfTest")              '::
+  ctn.Add([""], "ExtraDependencies")              '::
+  ctn.Add([""], "ExtraDesktop")                   '::
+  ctn.Add([""], "ExtraFiles")                     '::
+  ctn.Add([""], "GambasProjectFile")              '::
+  ctn.Add([""], "GambasVersion")                  'prgver:TEXT:Versión de Gambas
+  ctn.Add([""], "Groups")                         'prpkgr:TEXT:Grupo del paquete
+  ctn.Add([""], "Icon")                           'pricon:TEXT:Icono del programa
+  ctn.Add([""], "KeepDebugInfo")                  '::
+  ctn.Add([""], "Language")                       'prlan:INTEGER:Idioma del programa
+  ctn.Add([""], "License")                        'prlic:INTEGER:Licencia del programa
+  ctn.Add([""], "Maintainer")                     'prmaint:TEXT:Mantenedor del programa
+  ctn.Add([""], "Menus")                          'prpkmu:TEXT:Menú del paquete
+  ctn.Add([""], "MimeTypes")                      '::
+  ctn.Add([""], "ModulePublic")                   '::
+  ctn.Add([""], "PackageName")                    'prpkna:TEXT:Nombre del paquete
+  ctn.Add([""], "Packager")                       'prpkge:TEXT:Empaquetador
+  ctn.Add([""], "PackageSignature")               '::
+  ctn.Add([""], "PackageVersion")                 '::
+  ctn.Add([""], "Prefix")                         'prpfix:INTEGER:Prfijo del vendedor
+  ctn.Add([""], "Profiling")                      '::
+  ctn.Add([""], "RedirectStderr")                 '::
+  ctn.Add([""], "RunAfter")                       '::
+  ctn.Add([""], "SameDependencies")               '::
+  ctn.Add([""], "SameFiles")                      '::
+  ctn.Add([""], "Screenshot")                     '::
+  ctn.Add([""], "SourcePath")                     '::
+  ctn.Add([""], "Startup")                        'prstrt:TEXT:Clase de inicio
+  ctn.Add([""], "Systems")                        'prsyst:TEXT:Sistemas para los que se empaqueto el programa
+  ctn.Add([""], "TabSize")                        'prtabz:INTEGER:Tamaño del tabulador
+  ctn.Add([""], "Tags")                           '::
+  ctn.Add([""], "Title")                          'prname:TEXT:Nombre del programa
+  ctn.Add([""], "Translate")                      'prtran:INTEGER:Cantidad de traducciones del prgrama
+  ctn.Add([""], "Type")                           '::
+  ctn.Add([""], "Url")                            'prurl:TEXT:Sitio web del programa
+  ctn.Add([""], "UseHttpServer")                  '::
+  ctn.Add([""], "UseRelease")                     '::
+  ctn.Add([""], "UseTerminal")                    '::
+  ctn.Add([""], "Vendor")                         'prvndr:TEXT:Vendedor del prgrama
+  ctn.Add([""], "VendorPrefix")                   '::
+  ctn.Add([""], "Version")                        'prver:TEXT:Versión del programa
+  ctn.Add([""], "VersionFile")                    '::
+  ctn.Add([""], "Warnings")                       '::
+  ctn.Add([""], "WebSite")                        'prweb:TEXT:Página web
+
+  Return ctn
+
+End
+
+'' List the shrimp project directories recursively from the directory passed to it as a parameter.
+
+Public Function GetProjectsDir(strPath As String) As String[]
+
+  Dim stxRaw As New String[]
+  Dim stx As New String[]
+  Dim int As Integer
+
+  stxRaw.Clear
+  stxRaw = RDir(strPath, "*.project", gb.File, True)
+  stx.Clear
+
+  For int = 0 To stxRaw.Max
+    If uty.DirGambas(strPath &/ File.Dir(stxRaw[int])) = True Then
+      If stx.Exist(strPath &/ stxRaw[int]) = False Then
+        stx.Add(strPath &/ stxRaw[int])
+      Endif
+    Endif
+  Next
+
+  Return stx
+
+End

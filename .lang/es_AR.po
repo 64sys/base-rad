@@ -1,0 +1,1216 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: base-rad 3.15.0\n"
+"POT-Creation-Date: 2020-08-15 17:48 UTC\n"
+"PO-Revision-Date: 2020-08-02 21:56 UTC\n"
+"Last-Translator: bmk <bmk@gaucho>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .project:1
+msgid "RADG"
+msgstr "RADG"
+
+#: .project:2
+msgid "Rapid Application Development for Gambas"
+msgstr "Desarrollo rápido de aplicaciones para Gambas"
+
+#: APPMain.class:124
+msgid "Presupuestos"
+msgstr "Presupuestos"
+
+#: APPMain.class:177
+msgid "This table does not have a single value field"
+msgstr "Esta tabla no tiene un solo campo de valor"
+
+#: APPMain.class:184
+msgid "This table has no primary key"
+msgstr "Esta tabla no tiene clave primaria"
+
+#: APPMain.class:288
+msgid "Table does not have a unique value field"
+msgstr "La tabla no tiene un campo de valor único"
+
+#: APPMain.class:291
+msgid "The table has no index"
+msgstr "La tabla no tiene índice."
+
+#: APPMain.class:294
+msgid "Table does not have a primary key field"
+msgstr "La tabla no tiene un campo de clave principal"
+
+#: APPMain.class:360 FExch.form:54
+msgid "Import"
+msgstr "Importar"
+
+#: APPMain.class:386
+msgid "Rename files"
+msgstr "Renombrar archivos"
+
+#: APPMain.form:30
+msgid "File"
+msgstr "Archivo"
+
+#: APPMain.form:34
+msgid "Edit"
+msgstr "Editar"
+
+#: APPMain.form:38
+msgid "Edition"
+msgstr "Edición"
+
+#: APPMain.form:45
+msgid "Tools"
+msgstr "Herramientas"
+
+#: APPMain.form:49
+msgid "Data import"
+msgstr "Importación de datos"
+
+#: APPMain.form:61 FConfig.form:29
+msgid "Preferences"
+msgstr "Preferencias"
+
+#: APPMain.form:68
+msgid "Help"
+msgstr "Ayuda"
+
+#: APPMain.form:76 FAbout.class:195
+msgid "About"
+msgstr "Acerca de"
+
+#: FAbout.class:136
+msgid "Source code"
+msgstr "Código fuente"
+
+#: FAbout.class:145
+msgid "Contact"
+msgstr "Contacto"
+
+#: FAbout.class:163
+msgid "License"
+msgstr "Licencia"
+
+#: FAbout.class:173
+msgid "The icon does not exist"
+msgstr "El icono no existe."
+
+#: FAbout.class:215
+msgid "Hello developers of"
+msgstr "Hola desarrolladores de"
+
+#: FConfig.class:88
+msgid "Configuration file does not exist"
+msgstr "El archivo de configuración no existe"
+
+#: FConfig.class:442
+msgid "Changes were saved"
+msgstr "Los cambios fueron guardados"
+
+#: FConfig.class:462
+msgid "New copy created"
+msgstr "Nueva copia creada"
+
+#: FConfig.class:475
+msgid "Preferences copy successfully archived"
+msgstr "Copia de preferencias archivada correctamente"
+
+#: FConfig.class:484
+msgid "Preferences restored"
+msgstr "Preferencias restauradas"
+
+#: FConfig.form:33
+msgid "New preferences"
+msgstr "Nuevas preferencias"
+
+#: FConfig.form:40
+msgid "Apply preferences changes"
+msgstr "Aplicar cambios de preferencias"
+
+#: FConfig.form:47
+msgid "Restore preferences"
+msgstr "Restaurar preferencias"
+
+#: FConfig.form:54
+msgid "Archive preferences"
+msgstr "Preferencias de archivo"
+
+#: FConfig.form:60
+msgid "Open log file"
+msgstr "Abrir archivo de registro"
+
+#: FConfig.form:67 FTLink.form:101
+msgid "Quit"
+msgstr "Dejar"
+
+#: FConfig.form:114
+msgid "Open configuration directory"
+msgstr "Abrir el directorio de configuración"
+
+#: FConfig.form:147
+msgid "Directories"
+msgstr "Directorios"
+
+#: FCustom.form:65 FEdit.form:74
+msgid "Save and exit"
+msgstr "Guardar y Salir"
+
+#: FCustom.form:73 FEdit.form:82
+msgid "Exit without saving"
+msgstr "Salir sin guardar"
+
+#: FCustom.form:86 FEdit.form:95
+msgid "Add register"
+msgstr "Agregar registro"
+
+#: FCustom.form:94 FEdit.form:103
+msgid "Delete register"
+msgstr "Eliminar registro"
+
+#: FCustom.form:102 FEdit.form:111
+msgid "Export data"
+msgstr "Exportar datos"
+
+#: FCustom.form:110 FEdit.form:119
+msgid "Show filters"
+msgstr "Mostrar filtros"
+
+#: FCustom.form:118 FEdit.form:127
+msgid "Edit table and field titles"
+msgstr "Editar títulos de tabla y campo"
+
+#: FCustom.form:126 FEdit.form:135
+msgid "Print"
+msgstr "Impresión"
+
+#: FCustom.form:269 FEdit.form:322
+msgid "aliments"
+msgstr "alimentos"
+
+#: FEdit.class:287 FExch.form:67 FList.form:38 FOptions.form:64
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: FEdit.class:287
+msgid "Do you want to save them?"
+msgstr "¿Quieres salvarlos?"
+
+#: FEdit.class:287
+msgid "Save"
+msgstr "Salvar"
+
+#: FEdit.class:287
+msgid "There are changes that were not saved in the database"
+msgstr "Hay cambios que no se guardaron en la base de datos"
+
+#: FEdit.class:341
+msgid "Add"
+msgstr "Añadir"
+
+#: FEdit.class:341
+msgid "Do you want to add them?"
+msgstr "¿Quieres agregarlos?"
+
+#: FEdit.class:341
+msgid "The following values do not exist in the reference tables"
+msgstr "Los siguientes valores no existen en las tablas de referencia"
+
+#: FEdit.class:355
+msgid "No data was saved in the database"
+msgstr "No se guardaron datos en la base de datos"
+
+#: FEdit.class:618
+msgid "Open link in browser"
+msgstr "Abrir enlace en el navegador"
+
+#: FEdit.class:660
+msgid "Error, table not found"
+msgstr "Error, tabla no encontrada"
+
+#: FEdit.class:1365
+msgid "Primary key field"
+msgstr "Campo clave principal"
+
+#: FEdit.class:1365
+msgid "Tipo"
+msgstr "Tipo"
+
+#: FEdit.class:1409
+msgid "Records could not be deleted"
+msgstr "Los registros no se pudieron eliminar"
+
+#: FEdit.class:1423
+msgid "Tab separated text"
+msgstr "Texto separado por tabuladores"
+
+#: FEdit.class:1439
+msgid "You must select a table before importing data"
+msgstr "Debe seleccionar una tabla antes de importar datos"
+
+#: FEdit.class:1762
+msgid "You must save the record first"
+msgstr "Debes guardar el registro primero"
+
+#: FEdit.class:1792
+msgid "Do you want to replace it?"
+msgstr "¿Quieres cambiarlo?"
+
+#: FEdit.class:1792
+msgid "Replaze"
+msgstr "Reemplazar"
+
+#: FEdit.class:1792
+msgid "The file already exists"
+msgstr "El archivo ya existe"
+
+#: FExch.class:280
+msgid "Choose a list separator character"
+msgstr "Elija un carácter separador de lista"
+
+#: FExch.form:39
+msgid "Open data file"
+msgstr "Abrir archivo de datos"
+
+#: FExch.form:45
+msgid "Skip index"
+msgstr "Saltar índice"
+
+#: FExch.form:53
+msgid "Import data"
+msgstr "Importar datos"
+
+#: FExch.form:66
+#, fuzzy
+msgid "Cancel import"
+msgstr "Importación de datos"
+
+#: FOptions.form:56
+msgid "OK"
+msgstr "Aceptar"
+
+#: FRen.form:25
+msgid "Mark all files"
+msgstr "Marcar todos los archivos"
+
+#: FRen.form:33
+msgid "Unmark all files"
+msgstr "Desmarcar todos los archivos"
+
+#: FRen.form:41
+msgid "Rename selected files"
+msgstr "Renombrar archivos seleccionados"
+
+#: FRen.form:42
+msgid "Rename"
+msgstr "Renombrar"
+
+#: FRen.form:49
+msgid "Restore moved files"
+msgstr "Restaurar archivos movidos"
+
+#: FRen.form:50
+msgid "Restore"
+msgstr "Restaurar"
+
+#: FTLink.form:30
+msgid "Refresh page"
+msgstr "Actualizar página"
+
+#: FTLink.form:38
+msgid "Create a PDF file"
+msgstr "Crea un archivo PDF"
+
+#: FTLink.form:46
+msgid "Open the template"
+msgstr "Abrir la plantilla"
+
+#: FTLink.form:62
+msgid "Print page"
+msgstr "Imprimir página"
+
+#: FTLink.form:70
+msgid "Open directory"
+msgstr "Directorio abierto"
+
+#: FTLink.form:78
+msgid "Overwrite reports"
+msgstr "Sobrescribir informes"
+
+#: FTLink.form:87
+msgid "Edit data"
+msgstr "Editar datos"
+
+#: Starter.module:82
+msgid "The database exists"
+msgstr "La base de datos existe"
+
+#: Starter.module:87
+msgid "Database is inconsistent"
+msgstr "La base de datos es inconsistente"
+
+#: Starter.module:98
+msgid "The database not exists"
+msgstr "La base de datos no existe."
+
+#: Starter.module:177
+msgid "Materials"
+msgstr "Materiales"
+
+#: Starter.module:179
+msgid "Item"
+msgstr "Ítem"
+
+#: Starter.module:180
+msgid "Budgets"
+msgstr "Presupuestos"
+
+#: Starter.module:181
+msgid "Material"
+msgstr "Material"
+
+#: Starter.module:182 dbs.module:1723
+msgid "Quantity"
+msgstr "Cantidad"
+
+#: Starter.module:186
+msgid "Budget"
+msgstr "Presupuesto"
+
+#: Starter.module:187 dbs.module:1734
+msgid "Client"
+msgstr "Cliente"
+
+#: Starter.module:188 dbs.module:1727
+msgid "Address"
+msgstr "Dirección"
+
+#: Starter.module:189 dbs.module:1715 epb.module:623
+msgid "Date"
+msgstr "Fecha"
+
+#: Starter.module:190
+msgid "Status"
+msgstr "Estado"
+
+#: Starter.module:191
+msgid "Contractors"
+msgstr "Contratistas"
+
+#: Starter.module:192
+msgid "VAT"
+msgstr "IVA"
+
+#: Starter.module:193
+msgid "Notes"
+msgstr "Notas"
+
+#: Starter.module:195
+msgid "States"
+msgstr "Estados"
+
+#: Starter.module:199
+msgid "Clients"
+msgstr "Clientes"
+
+#: Starter.module:202 dbs.module:1720
+msgid "Phone"
+msgstr "Teléfono"
+
+#: Starter.module:208
+msgid "Movile"
+msgstr "Movile"
+
+#: Starter.module:209
+msgid "Fax"
+msgstr "Fax"
+
+#: Starter.module:210
+msgid "Web"
+msgstr "Web"
+
+#: Starter.module:212
+msgid "Supplies types"
+msgstr "Tipos de suministros"
+
+#: Starter.module:214 dbs.module:1735
+msgid "Type"
+msgstr "Tipo"
+
+#: Starter.module:216
+msgid "Supplies"
+msgstr "Suministros"
+
+#: Starter.module:222
+msgid "Unit"
+msgstr "Unidad"
+
+#: Starter.module:223 dbs.module:1724
+msgid "Price"
+msgstr "Precio"
+
+#: Starter.module:224
+msgid "Image"
+msgstr "Imagen"
+
+#: Starter.module:226
+msgid "Units"
+msgstr "Unidades"
+
+#: Starter.module:230
+msgid "Vendors"
+msgstr "Vendedores"
+
+#: Starter.module:232 dbs.module:1728 uty.module:552
+msgid "Vendor"
+msgstr "Suministrador"
+
+#: Starter.module:235 dbs.module:1718
+msgid "Email"
+msgstr "Email"
+
+#: Starter.module:245
+msgid "Offer"
+msgstr "Oferta"
+
+#: Starter.module:262
+msgid "Vendor phone"
+msgstr "Teléfono del suministrador"
+
+#: Starter.module:264
+msgid "Client phone"
+msgstr "Teléfono del cliente"
+
+#: bat.module:1886 dbs.module:1379
+msgid "Extracting data from"
+msgstr "Extrayendo datos de"
+
+#: bat.module:1886 dbs.module:1379
+msgid "System"
+msgstr "Sistema"
+
+#: bat.module:1893 dbs.module:1386
+msgid "Formatting data from"
+msgstr "Formateo de datos de"
+
+#: bat.module:1901 dbs.module:1394
+msgid "Database completed"
+msgstr "Base de datos completada"
+
+#: cad.module:2220 xmg.module:880
+msgid "Program"
+msgstr "Programa"
+
+#: cad.module:2224 xmg.module:884
+#, fuzzy
+msgid "Application directory"
+msgstr "Directorio de la aplicación"
+
+#: cad.module:2234 xmg.module:894
+msgid "Window background color"
+msgstr ""
+
+#: cad.module:2246 xmg.module:906
+msgid "Desktop"
+msgstr "Escritorio"
+
+#: cad.module:2250 xmg.module:910
+msgid "Simple text editor by default"
+msgstr ""
+
+#: cad.module:2260 xmg.module:920
+#, fuzzy
+msgid "Program icons"
+msgstr "Programa"
+
+#: cad.module:2270
+msgid "Drawing window dark mode"
+msgstr ""
+
+#: cad.module:2279
+msgid "Draw originals"
+msgstr ""
+
+#: cad.module:2288
+msgid "Draw marked"
+msgstr ""
+
+#: cad.module:2297
+msgid "Draw only columns"
+msgstr ""
+
+#: cad.module:2306
+msgid "Draw bounds"
+msgstr ""
+
+#: cad.module:2315
+msgid "Dimensions format"
+msgstr ""
+
+#: cad.module:2324
+msgid "Color sellection"
+msgstr ""
+
+#: cad.module:2333
+msgid "Tool active"
+msgstr ""
+
+#: cad.module:2342
+msgid "Orthogonal"
+msgstr ""
+
+#: cad.module:2351
+msgid "Orthogonal forced"
+msgstr ""
+
+#: cad.module:2360
+msgid "Orthogonal ignored"
+msgstr ""
+
+#: cad.module:2369
+#, fuzzy
+msgid "Show inspector"
+msgstr "Mostrar filtros"
+
+#: dbs.module:1473
+msgid "Table and view field titles"
+msgstr "Tabla y vista de títulos de campo"
+
+#: dbs.module:1475
+msgid "View titles"
+msgstr "Ver títulos"
+
+#: dbs.module:1555
+#, fuzzy
+msgid "View field titles"
+msgstr "Ver títulos de campos"
+
+#: dbs.module:1717
+msgid "Name"
+msgstr "Nombre"
+
+#: dbs.module:1719
+msgid "Mobile"
+msgstr ""
+
+#: dbs.module:1725
+msgid "Trademark"
+msgstr ""
+
+#: dbs.module:1726 epb.module:621
+msgid "Description"
+msgstr "Descripción"
+
+#: dbs.module:1729
+msgid "Class"
+msgstr ""
+
+#: dbs.module:1730
+msgid "Code"
+msgstr "Código"
+
+#: dbs.module:1731
+msgid "City"
+msgstr "Ciudad"
+
+#: dbs.module:1732
+msgid "Symbol"
+msgstr "Símbolo"
+
+#: dbs.module:1733
+msgid "Job"
+msgstr "Trabajo"
+
+#: dbs.module:1736
+msgid "Color"
+msgstr "Color"
+
+#: dsk.module:110
+#, fuzzy
+msgid "Select File"
+msgstr "Seleccione Archivo"
+
+#: dsk.module:119
+msgid "Filter"
+msgstr "Filtro"
+
+#: dsk.module:141
+#, fuzzy
+msgid "Select directory"
+msgstr "Directorio del archivo"
+
+#: dsk.module:196
+msgid "Hi"
+msgstr "Hola"
+
+#: epb.module:444
+msgid "Cubierta"
+msgstr "Cubierta"
+
+#: epb.module:510
+msgid "Acknowledgment"
+msgstr "Reconocimiento"
+
+#: epb.module:605
+msgid "Title"
+msgstr "Título"
+
+#: epb.module:605
+msgid "Title of the work"
+msgstr "Título del trabajo"
+
+#: epb.module:607
+msgid "Subtitle"
+msgstr "Subtítulo"
+
+#: epb.module:607
+msgid "Subtitle of the work"
+msgstr "Subtítulo de la obra"
+
+#: epb.module:609
+msgid "Language"
+msgstr "Idioma"
+
+#: epb.module:609
+msgid "Language in which the work is written"
+msgstr "Idioma en el que está escrito el trabajo"
+
+#: epb.module:611
+msgid "Identifier"
+msgstr "Identificador"
+
+#: epb.module:611
+msgid "Unique identifier, URI or ISBN can be good options"
+msgstr "Identificador único, URI o ISBN pueden ser buenas opciones"
+
+#: epb.module:614
+msgid "Primary author"
+msgstr "Autor principal"
+
+#: epb.module:614
+msgid "The main author of the work"
+msgstr "El autor principal de la obra"
+
+#: epb.module:615
+msgid "Contributor"
+msgstr "Contribuyente"
+
+#: epb.module:615
+msgid "This identifies other people who had a lesser role, such as writing the prelude or illustrating where images play a minor role in the post. This entry can also include an attribute that defines the role. Please note that Book producer (bkp) would be a good role for the person who created the ePub from another source"
+msgstr "Esto identifica a otras personas que tuvieron un papel menor, como escribir elpreludio o ilustración donde las imágenes juegan un papel menor en la publicación. EstaLa entrada también puede incluir un atributo que define el rol. Tenga en cuenta queEl productor de libros (bkp) sería un buen papel para la persona que creó el ePubde otra fuente"
+
+#: epb.module:617
+msgid "A person, organization or service that edited the book"
+msgstr "Una persona, organización o servicio que editó el libro"
+
+#: epb.module:617
+msgid "Publisher"
+msgstr "Editor"
+
+#: epb.module:619
+msgid "Subject"
+msgstr "Asignatura"
+
+#: epb.module:619
+msgid "The subject does not have a standard form"
+msgstr "El sujeto no tiene una forma estándar"
+
+#: epb.module:621
+msgid "This field typically contains the description used to describe the content of the book on a retail site or press release"
+msgstr "Este campo normalmente contiene la descripción utilizada para describir el contenido.del libro en un sitio minorista o comunicado de prensa"
+
+#: epb.module:623
+msgid "Publication date"
+msgstr "Fecha de publicación"
+
+#: epb.module:625
+msgid "Gender, category"
+msgstr "Género, categoría"
+
+#: epb.module:625
+msgid "General categories, functions, genres"
+msgstr "Categorías generales, funciones, géneros"
+
+#: epb.module:627
+msgid "Format"
+msgstr "Formato"
+
+#: epb.module:629
+msgid "Derivation of"
+msgstr "Derivación de"
+
+#: epb.module:629
+msgid "Previous source from which the publication is derived"
+msgstr "Fuente anterior de la cual se deriva la publicación"
+
+#: epb.module:631
+msgid "Auxiliary source and its relation to the publication"
+msgstr "Fuente auxiliar y su relación con la publicación"
+
+#: epb.module:631
+msgid "Auxiliary sources"
+msgstr "Fuentes auxiliares"
+
+#: epb.module:633
+msgid "Scope"
+msgstr "Alcance"
+
+#: epb.module:633
+msgid "The length or scope of the content of the publication"
+msgstr "La extensión o el alcance del contenido de la publicación"
+
+#: epb.module:635
+msgid "Rights"
+msgstr "Derechos"
+
+#: sog.module:107
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: sog.module:948
+msgid "Analizador de argumentos"
+msgstr ""
+
+#: sog.module:949
+msgid "Enlaces para cairo"
+msgstr ""
+
+#: sog.module:950
+msgid "Gráficos"
+msgstr ""
+
+#: sog.module:951
+msgid "Clipper"
+msgstr ""
+
+#: sog.module:952
+msgid "Números complejo"
+msgstr ""
+
+#: sog.module:953
+msgid "Compresión"
+msgstr ""
+
+#: sog.module:954
+msgid "Compresión con bzlib2"
+msgstr ""
+
+#: sog.module:955
+msgid "Compresión con zlib"
+msgstr ""
+
+#: sog.module:956
+msgid "Encriptación con crypt"
+msgstr ""
+
+#: sog.module:957
+msgid "Tipos de datos abstractos"
+msgstr ""
+
+#: sog.module:958
+msgid "Acceso a base de datos, bibliotecas comunes"
+msgstr ""
+
+#: sog.module:959
+msgid "Controles vinculados a base de datos"
+msgstr ""
+
+#: sog.module:960
+msgid "Acceso a base de datos MySQL"
+msgstr ""
+
+#: sog.module:961
+msgid "Acceso a base de datos ODBC"
+msgstr ""
+
+#: sog.module:962
+msgid "Acceso a base de datos PostgreSQL"
+msgstr ""
+
+#: sog.module:963
+msgid "Acceso a base de datos SQLite3"
+msgstr ""
+
+#: sog.module:964
+msgid "Enlaces para DBUS"
+msgstr ""
+
+#: sog.module:965
+msgid "Soporte para KDE y Unity en protocolos Dbus para iconos en la bandeja de tareas"
+msgstr ""
+
+#: sog.module:966
+msgid "Compatibilidad con proyectos de Portland"
+msgstr ""
+
+#: sog.module:967
+msgid "Escritorio GNOME"
+msgstr ""
+
+#: sog.module:968
+#, fuzzy
+msgid "Componente X11"
+msgstr "Componentes"
+
+#: sog.module:969
+msgid "Sintaxis"
+msgstr ""
+
+#: sog.module:970
+msgid "Resaltado de sintaxis"
+msgstr ""
+
+#: sog.module:971
+msgid "Formularios"
+msgstr ""
+
+#: sog.module:972
+msgid "Diálogos estándar mejorados"
+msgstr ""
+
+#: sog.module:973
+#, fuzzy
+msgid "Editor de texto"
+msgstr "Tema del editor"
+
+#: sog.module:974
+msgid "Gestión de interfaz de documentos múltiples"
+msgstr ""
+
+#: sog.module:975
+msgid "Vista previa genérica e impresión"
+msgstr ""
+
+#: sog.module:976
+msgid "Iconos"
+msgstr ""
+
+#: sog.module:977
+msgid "Emulador de terminal"
+msgstr ""
+
+#: sog.module:979
+msgid "Biblioteca Científica GNU"
+msgstr ""
+
+#: sog.module:983
+msgid "Servidor HTTP"
+msgstr ""
+
+#: sog.module:984
+msgid "Efectos de imagen"
+msgstr ""
+
+#: sog.module:985
+msgid "Efectos de imagen, efectos"
+msgstr ""
+
+#: sog.module:986
+msgid "Efectos de imagen, enlaces IMLIB"
+msgstr ""
+
+#: sog.module:987
+msgid "Efectos de imagen: E/S"
+msgstr ""
+
+#: sog.module:990
+msgid "Sistema de registro"
+msgstr ""
+
+#: sog.module:991
+msgid "Visor de mapas en línea"
+msgstr ""
+
+#: sog.module:992
+msgid "Sintaxis de marcado"
+msgstr ""
+
+#: sog.module:993
+msgid "Medios"
+msgstr ""
+
+#: sog.module:994
+msgid "Reproductor multimedia"
+msgstr ""
+
+#: sog.module:995
+#, fuzzy
+msgid "Cliente memcached"
+msgstr "Teléfono del cliente"
+
+#: sog.module:996
+msgid "Gestión de mensajes MIME"
+msgstr ""
+
+#: sog.module:999
+msgid "Red"
+msgstr ""
+
+#: sog.module:1000
+msgid "Red, avanzado"
+msgstr ""
+
+#: sog.module:1001
+#, fuzzy
+msgid "Cliente POP3"
+msgstr "Cliente"
+
+#: sog.module:1002
+msgid "Protocolo SMTP"
+msgstr ""
+
+#: sog.module:1003
+msgid "OpenAL"
+msgstr ""
+
+#: sog.module:1004
+msgid "OpenGL"
+msgstr ""
+
+#: sog.module:1005
+msgid "OpenGL: subcomponente del lenguaje de sombreado GL"
+msgstr ""
+
+#: sog.module:1006
+msgid "Utilidad OpenGL"
+msgstr ""
+
+#: sog.module:1007
+msgid "Motor de juegos SDL"
+msgstr ""
+
+#: sog.module:1008
+msgid "OpenSSL"
+msgstr ""
+
+#: sog.module:1009
+msgid "Opciones"
+msgstr ""
+
+#: sog.module:1010
+msgid "Expresiones regulares"
+msgstr ""
+
+#: sog.module:1012
+msgid "Qt GUI"
+msgstr ""
+
+#: sog.module:1013
+msgid "Qt GUI extendido"
+msgstr ""
+
+#: sog.module:1014
+msgid "OpenGL con kit de herramientas QT"
+msgstr ""
+
+#: sog.module:1016
+msgid "Informes"
+msgstr ""
+
+#: sog.module:1018
+msgid "Interfaz para escanear imágenes proporcionada por el las herramientas SANE"
+msgstr ""
+
+#: sog.module:1023
+msgid "Utilidades"
+msgstr ""
+
+#: sog.module:1024
+msgid "Librería de señales del sistema operativo"
+msgstr ""
+
+#: sog.module:1025
+msgid "Emulador de terminal VT-100"
+msgstr ""
+
+#: sog.module:1026
+msgid "Emulador de terminal VT-102"
+msgstr ""
+
+#: sog.module:1027
+msgid "Rutinas de utilidad de intérprete."
+msgstr ""
+
+#: sog.module:1029
+msgid "Video para Linux"
+msgstr ""
+
+#: sog.module:1030
+msgid "Compatibilidad com Visual Basic (tm)"
+msgstr ""
+
+#: sog.module:1031
+msgid "CGI para aplicaciones web"
+msgstr ""
+
+#: sog.module:1032
+msgid "Analizador y generador de feeds web"
+msgstr ""
+
+#: sog.module:1033
+msgid "Controles gráficos para aplicaciones web"
+msgstr ""
+
+#: uty.module:551
+msgid "Author"
+msgstr "Autor"
+
+#: uty.module:553
+msgid "Version"
+msgstr "Versión"
+
+#: uty.module:554
+msgid "Date of this document"
+msgstr ""
+
+#: uty.module:555
+msgid "Components"
+msgstr "Componentes"
+
+#: uty.module:557
+msgid "It is made up"
+msgstr ""
+
+#: uty.module:557
+#, fuzzy
+msgid "methods"
+msgstr "métodos"
+
+#: uty.module:557
+msgid "modules"
+msgstr "módulos"
+
+#: vag.module:478
+msgid "Spaces at the beginning and at the end"
+msgstr "Espacios al principio y al final"
+
+#: vag.module:480
+#, fuzzy
+msgid "Space at the start"
+msgstr "Espacio al final"
+
+#: vag.module:484
+msgid "Space at the end"
+msgstr "Espacio al final"
+
+#: vag.module:489
+msgid "Repeated"
+msgstr "Repetido"
+
+#: vag.module:516
+msgid "Excluded"
+msgstr "Excluido"
+
+#: vag.module:520
+msgid "More than one capital letter"
+msgstr "Más de una letra mayúscula"
+
+#~ msgid "Extension"
+#~ msgstr "Extensión"
+
+#~ msgid "Column separator"
+#~ msgstr "Separador de columna"
+
+#~ msgid "Variable"
+#~ msgstr "Variable"
+
+#~ msgid "Customization"
+#~ msgstr "Personalización"
+
+#~ msgid "Current table"
+#~ msgstr "Tabla actual"
+
+#~ msgid "Password"
+#~ msgstr "Contraseña"
+
+#~ msgid "User"
+#~ msgstr "Usuario"
+
+#~ msgid "Port"
+#~ msgstr "Puerto"
+
+#~ msgid "Server"
+#~ msgstr "Servidor"
+
+#~ msgid "Database file"
+#~ msgstr "Archivo de base de datos"
+
+#~ msgid "Query"
+#~ msgstr "Consulta"
+
+#~ msgid "Database engine"
+#~ msgstr "Motor de base de datos"
+
+#~ msgid "Database"
+#~ msgstr "Base de datos"
+
+#~ msgid "Output directory five"
+#~ msgstr "Directorio de salida cinco"
+
+#~ msgid "Output directory four"
+#~ msgstr "Directorio de salida cuatro"
+
+#~ msgid "Output directory three"
+#~ msgstr "Directorio de salida tres"
+
+#~ msgid "Output directory two"
+#~ msgstr "Directorio de salida dos"
+
+#~ msgid "Output directory one"
+#~ msgstr "Directorio de salida uno"
+
+#~ msgid "Overwrite output files"
+#~ msgstr "Sobrescribir archivos de salida"
+
+#~ msgid "Output"
+#~ msgstr "Salida"
+
+#~ msgid "Videos directory"
+#~ msgstr "Directorio de videos"
+
+#~ msgid "Photographs directory"
+#~ msgstr "Directorio de fotografías"
+
+#~ msgid "Music directory"
+#~ msgstr "Directorio de música"
+
+#~ msgid "Documents directory"
+#~ msgstr "Directorio de documentos"
+
+#~ msgid "Gambaas projects directory"
+#~ msgstr "Directorio de proyectos de Gambaas"
+
+#~ msgid "Scan"
+#~ msgstr "Escanear"
+
+#~ msgid "Application icons "
+#~ msgstr "Iconos de la aplicació"
+
+#~ msgid "Default text editor"
+#~ msgstr "Editor de texto predeterminado"
+
+#~ msgid "Space at the beginning"
+#~ msgstr "Espacio al principio"
+
+#~ msgid "It consists of "
+#~ msgstr "Consiste en"
+
+#~ msgid "Document date"
+#~ msgstr "Fecha del documento"
+
+#~ msgid "Provider"
+#~ msgstr "Proveedor"
+
+#~ msgid "Select dir"
+#~ msgstr "Seleccione dir"
+
+#~ msgid "Mark"
+#~ msgstr "marca"
+
+#~ msgid "Cell phone"
+#~ msgstr "Móvil"
+
+#~ msgid "Index"
+#~ msgstr "Índice"

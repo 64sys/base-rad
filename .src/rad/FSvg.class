@@ -1,0 +1,83 @@
+' Gambas class file
+
+'
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+Export
+
+Public Sub _new(Optional sPath As String)
+
+  If sPath Then
+    Run(sPath)
+  Else
+    Run("")
+  Endif
+
+End
+
+'' This form tags the text value of each element of the svg, saving the work of editing one by one.
+
+Public Sub Run(Optional sPath As String)
+
+  Dim document As New XmlDocument
+  Dim element As New XmlElement
+  Dim node As XmlNode
+  Dim strOut As String             ''Name of the output file a copy with the modifications.
+  Dim strTag As String
+  Dim stxTags As New String[]
+  Dim stxErrors As New String[]
+  Dim strErrPath As String
+  Dim stx As New String[]
+
+  If sPath = "" Then
+    stx = dsk.FileChooser(User.Home, ["svg"])
+    If stx.Count > 0 Then
+      sPath = stx[0]
+    Endif
+  Endif
+
+  strOut = File.Dir(sPath) &/ File.BaseName(sPath) & "~." & File.Ext(sPath)
+  If Exist(sPath) Then
+    Me.Show
+    strErrPath = File.Dir(sPath) &/ File.BaseName(sPath) & ".err"
+    document.Open(sPath)
+    stxTags.Clear
+    stxErrors.Clear
+    '' Text
+    For Each element In document.GetElementsByTagName("text", gb.IgnoreCase)
+
+      strTag = Replace(element.Value, "\n", "")
+      strTag = Replace(strTag, " ", "")
+      If InStr(strTag, "tg.") > 0 Or InStr(strTag, "tr.") > 0 Then
+        For Each node In element.Attributes
+          Select node.Name
+            Case "id"
+              Print node.Value & " : " & element.Value
+              node.Value = strTag
+          End Select
+        Next
+      Endif
+    Next
+  Endif
+  document.Save(strOut, False)
+
+End

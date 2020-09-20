@@ -1,0 +1,88 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,64,56)
+  Arrangement = Arrange.Vertical
+  { pnlTools Panel
+    MoveScaled(1,1,62,5)
+    Arrangement = Arrange.Horizontal
+    { tobRefresh ToolButton apptools
+      Name = "tobRefresh"
+      MoveScaled(0,0,5,5)
+      Tag = "refresh"
+      ToolTip = ("Refresh page")
+      Picture = Picture["icon:/22/refresh"]
+    }
+    { tobPDF ToolButton apptools
+      Name = "tobPDF"
+      MoveScaled(7,0,5,5)
+      Tag = "pdf"
+      ToolTip = ("Create a PDF file")
+      Picture = Picture["icon:/22/pdf"]
+    }
+    { tobSVG ToolButton apptools
+      Name = "tobSVG"
+      MoveScaled(13,0,5,5)
+      Tag = "svg"
+      ToolTip = ("Open the template")
+      Picture = Picture["icon:/22/star"]
+    }
+    { tobOpenSVG ToolButton apptools
+      Name = "tobOpenSVG"
+      MoveScaled(18,0,5,5)
+      Tag = "open"
+      ToolTip = ("Open the template")
+      Picture = Picture["icon:/22/open"]
+    }
+    { tobPrint ToolButton apptools
+      Name = "tobPrint"
+      MoveScaled(23,0,5,5)
+      Tag = "print"
+      ToolTip = ("Print page")
+      Picture = Picture["icon:/22/print"]
+    }
+    { tobOpenDir ToolButton apptools
+      Name = "tobOpenDir"
+      MoveScaled(29,0,5,5)
+      Tag = "directory"
+      ToolTip = ("Open directory")
+      Picture = Picture["icon:/22/directory"]
+    }
+    { tobOverwrite ToolButton apptools
+      Name = "tobOverwrite"
+      MoveScaled(36,0,5,5)
+      Tag = "locked"
+      ToolTip = ("Overwrite reports")
+      Picture = Picture["icon:/22/apply"]
+      Toggle = True
+    }
+    { tobExtractTags ToolButton apptools
+      Name = "tobExtractTags"
+      MoveScaled(41,0,5,5)
+      Tag = "tag"
+      ToolTip = ("Edit data")
+      Picture = Picture["icon:/22/link"]
+    }
+    { Panel1 Panel
+      MoveScaled(52,0,2,4)
+      Expand = True
+    }
+    { tobExit ToolButton apptools
+      Name = "tobExit"
+      MoveScaled(55,0,5,5)
+      Visible = False
+      Tag = "quit"
+      ToolTip = ("Quit")
+      Picture = Picture["icon:/22/close"]
+    }
+  }
+  { pnlPage Panel
+    MoveScaled(1,7,62,48)
+    Expand = True
+    Arrangement = Arrange.Vertical
+    { picTemplate PictureBox
+      MoveScaled(4,4,16,16)
+      Expand = True
+    }
+  }
+}

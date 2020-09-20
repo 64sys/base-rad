@@ -1,0 +1,90 @@
+' Gambas class file
+
+'
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+Export
+
+Private Observer As Observer        '' Observador usado antes de salir para advertir que hay cambios sin guardar.
+'------------------------------------------------------------------------------
+' Variables que se pasaron desde el módulo de inicio
+Private con As New Connection       '' Conexión a la base de datos
+Private adi As String               '' Directorio del programa
+Private dbc As String               '' Archivo de configuracion de la base de datos
+Private apc As String               '' Archivo de configuracion del programa
+Private etx As String               '' Editor de texto plano por ddefecto
+Private lgg As Logger               '' Registro de eventos de la aplicación.
+'------------------------------------------------------------------------------ cex.Add(lgg, "AppLog")           ' Registro de eventos de la aplicación.
+Private tab As String               '' Tabla editada
+Private iky As String               '' Clave del registro editado
+
+Public Sub _new(cin As Collection)
+
+  Run(cin)
+
+End
+
+Private Sub Run(cin As Collection)
+
+  Dim obj As Object
+  Dim ictn As New Collection
+  Dim z As Integer
+  Dim iSet As String
+
+  Observer = New Observer(Me) As "Observer"
+
+  '' Estableciendo la conexion a la base de datos
+  con = cin["Connex"]           ' Conexión a la base de datos
+  adi = cin["AppDir"]           ' Directorio del programa
+  apc = cin["AppCfg"]           ' Archivo de configuracion del programa
+  dbc = cin["DbsCfg"]           ' Archivo de configuracion de la base de datos
+  etx = cin["AppEdi"]           ' Editor de texto plano por defecto
+  lgg = cin["AppLog"]           ' Registro de eventos de la aplicación.
+  tab = cin["CTable"]           ' Registro de eventos de la aplicación.
+  iky = cin["RegKey"]           ' Clave del registro editado (-1 registro nuevo).
+
+  iSet = xmg.GetVar("Theme.Icons", apc)
+  ictn = dsk.GNumix(iSet & "/")
+
+  For Each obj In Me.Controls
+    Select Object.Type(obj)
+      Case "ToolButton"
+        If obj.Picture Then
+          If obj.W = obj.H Then
+            z = obj.W
+            If ictn.Exist(obj.Tag) Then
+              If Exist(ictn[obj.Tag]) Then
+                If Stat(ictn[obj.Tag]).Type = gb.File Or Stat(ictn[obj.Tag]).Type = gb.Link Then
+                  obj.Picture = Image.Load(ictn[obj.Tag]).Stretch(20, 20).Picture
+                  Print "> Control con icono: " & obj.Tag
+                Endif
+              Endif
+            Endif
+          Endif
+        Endif
+    End Select
+  Next
+
+  Me.Menus.Hide
+  Me.Show()
+
+End

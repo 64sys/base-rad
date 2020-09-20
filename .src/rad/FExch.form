@@ -1,0 +1,82 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,88,54)
+  Expand = True
+  Arrangement = Arrange.Vertical
+  { Panel1 Panel
+    MoveScaled(1,1,86,46)
+    Expand = True
+    Arrangement = Arrange.Vertical
+    Padding = 2
+    { Panel2 Panel
+      MoveScaled(1,2,77,5)
+      Arrangement = Arrange.Horizontal
+      { tboLoad ToolButton menimport
+        Name = "tboLoad"
+        MoveScaled(1,0,5,5)
+        Tag = "open"
+        ToolTip = ("Open data file")
+        Picture = Picture["icon:/22/open"]
+      }
+      { CheckBox1 CheckBox
+        MoveScaled(8,0,16,5)
+        Text = ("Skip index")
+      }
+      { tboImport ToolButton menimport
+        Name = "tboImport"
+        MoveScaled(33,0,13,5)
+        Enabled = False
+        Tag = "import"
+        ToolTip = ("Import data")
+        Text = ("Import")
+        Picture = Picture["icon:/22/exec"]
+      }
+      { Spring2 Spring
+        MoveScaled(57,0,4,4)
+      }
+      { tboCancel Button menimport
+        Name = "tboCancel"
+        MoveScaled(62,0,13,5)
+        Tag = "quit"
+        ToolTip = ("Cancel import")
+        Text = ("Cancel")
+        Picture = Picture["icon:/22/cancel"]
+      }
+    }
+    { GridViewExisting GridView
+      MoveScaled(2,8,60,16)
+      Expand = True
+      Border = False
+    }
+    { Panel4 Panel
+      MoveScaled(2,25,62,2)
+      Background = Color.TextBackground
+      Arrangement = Arrange.Horizontal
+      { Spring3 Spring
+        MoveScaled(2,0,5,2)
+      }
+      { ProgressBar1 ProgressBar
+        MoveScaled(11,0,37,2)
+        Expand = True
+        Border = False
+      }
+      { Spring1 Spring
+        MoveScaled(54,0,4,2)
+      }
+    }
+    { GridViewImport GridView
+      MoveScaled(2,29,60,16)
+      Expand = True
+      Border = False
+    }
+  }
+  { Panel3 Panel
+    MoveScaled(1,48,86,5)
+    Arrangement = Arrange.Horizontal
+    { Label1 Label
+      MoveScaled(10,0,24,4)
+      Expand = True
+    }
+  }
+}

@@ -1,0 +1,92 @@
+' Gambas class file
+
+'
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+Export
+
+Private oco As New Collection
+
+Public Sub _new()
+
+End
+
+Public Sub Run(ByRef ctn As Collection)
+
+  Dim vrt As Variant
+  Dim v As Variant
+  Dim chk As CheckBox
+
+  oco = ctn
+
+  pnlBoxes.Children.Clear
+
+  For Each vrt In ctn
+    Select TypeOf(vrt)
+      Case 16
+        For Each v In vrt
+          chk = New CheckBox(pnlBoxes)
+          With chk
+            .Name = ctn.Key
+            .Tag = v[0]
+            .Text = v[2]
+            .Value = v[1]
+            .H = 35
+            .Expand = True
+          End With
+        Next
+    End Select
+  Next
+
+  Me.ShowModal()
+
+End
+
+Public Sub btnOK_Click()
+
+  Dim o As Object
+  Dim vrt As Variant
+  Dim t As Variant
+
+  For Each vrt In oco
+    If TypeOf(vrt) = 16 Then
+      For Each t In vrt
+        For Each o In pnlBoxes.Children
+          If Object.Type(o) = "CheckBox" Then
+            If o.Tag = t[0] Then
+              t[1] = o.Value
+            Endif
+          Endif
+        Next
+      Next
+    Endif
+  Next
+
+  Me.Close
+
+End
+
+Public Sub btnCancel_Click()
+
+  Me.Close
+
+End

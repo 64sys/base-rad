@@ -1,0 +1,173 @@
+' Gambas class file
+
+Export
+
+Private Observer As Observer        '' Observador usado antes de salir para advertir que hay cambios sin guardar.
+Private ctn As New Collection       '' Datos necesarios para crear el formulario
+
+Public Sub _new(cn As Collection)
+
+  Run(cn)
+
+End
+
+Private Sub Run(cn As Collection)
+
+  '------------------------------------------------------------------------------
+  Dim obj As Object
+  Dim ictn As New Collection
+  Dim z As Integer
+
+  ctn = cn
+
+  ictn = dsk.GNumix(32)
+  For Each obj In Me.Controls
+    Select Object.Type(obj)
+      Case "ToolButton"
+        If obj.Picture Then
+          If obj.W = obj.H Then
+            z = obj.W
+            If z < 48 And z > 20 Then
+              'Case 35, 32, 28
+              If ictn.Exist(obj.Tag) Then
+                If Exist(ictn[obj.Tag]) Then
+                  If Stat(ictn[obj.Tag]).Type = gb.File Or Stat(ictn[obj.Tag]).Type = gb.Link Then
+                    obj.Picture = Image.Load(ictn[obj.Tag]).Stretch(20, 20).Picture
+                  Endif
+                Endif
+              Endif
+            Endif
+          Endif
+        Endif
+    End Select
+  Next
+
+  Observer = New Observer(Me) As "Observer"
+
+End
+
+Public Sub Form_Open()
+
+End
+
+Public Sub Form_Resize()
+
+  Dim img As Image
+  Dim w As Integer
+  Dim h As Float
+
+  If ctn.Exist("Template") Then
+    If Exist(ctn["Template"]) Then
+      img = Image.Load(ctn["Template"])
+      If img.w >= img.h Then
+        w = pnlPage.W
+        h = pnlPage.W * (img.h / img.w)
+      Else
+        h = pnlPage.h
+        w = pnlPage.h * (img.w / img.h)
+      Endif
+
+      picTemplate.Picture = img.Stretch(w, h).Picture
+    Endif
+  Endif
+
+End
+
+Public Sub apptools_Click()
+
+  Dim obj As Object
+  Dim cto As New Collection
+  Dim tdir As String
+  Dim stx As New String[]
+  Dim lnk As String
+
+  obj = Last
+
+  Select obj.Tag
+
+    Case "refresh"
+
+    Case "directory"
+      tdir = File.Dir(ctn["Template"])
+
+      If Exist(tdir) Then
+        Desktop.Open(tdir)
+      Endif
+
+    Case "svg"
+      If Exist(ctn["Template"]) Then
+        Desktop.Open(ctn["Template"])
+      Endif
+
+    Case "print"
+
+    Case "edit"
+      ' Editing the data for the current template
+
+    Case "pdf"
+      If Exist(ctn["Template"]) Then
+        If Exist(ctn["svg"]) = False Then
+          Shell "cp -f '" & ctn["Template"] & "' '" & ctn["svg"] & "'" Wait
+        Else
+          If tobOverwrite.Value = True Then
+            Shell "rm '" & ctn["svg"] & "'" Wait
+            'Wait 0.1
+            Shell "cp -f '" & ctn["Template"] & "' '" & ctn["svg"] & "'" Wait
+          Endif
+        Endif
+        xmg.EditXml3(ctn["svg"], ctn["Data"], False)
+        Wait 0.1
+
+        If Exist(ctn["svg"]) Then
+          cto = bat.SVG2PDF(ctn["svg"], ctn["pdf"])
+          If cto.Exist("pdf") Then
+            Desktop.Open(ctn["pdf"])
+          Endif
+        Endif
+      Endif
+
+      ''
+    Case "tag"
+      stx = ArrangeSVG(ctn["Template"])
+      If stx.Count > 0 Then
+        lnk = File.Dir(ctn["pdf"]) &/ File.BaseName(ctn["pdf"]) & ".csv"
+        File.Save(lnk, stx.Join("\n"))
+        Wait 0.1
+        If Exist(lnk) Then
+          Shell "gedit " & lnk
+        Endif
+      Endif
+
+  End Select
+
+End
+
+'' Esta lista los textos del svg y su id siempre que el id contengan las
+'' casdenas que se pasan como parámetro.
+
+Public Sub ArrangeSVG(sPath As String) As String[]
+
+  Dim document As New XmlDocument
+  Dim element As New XmlElement
+  Dim node As XmlNode
+  Dim stxTags As New String[]
+
+  stxTags.Clear
+
+  If Exist(sPath) Then
+    document.Open(sPath)
+    ' Text
+    For Each element In document.GetElementsByTagName("text", gb.IgnoreCase)
+      For Each node In element.Attributes
+        Select node.Name
+          Case "id"
+            stxTags.Add(node.Value & "\t" & element.Value)
+            'node.Value = strTag
+        End Select
+      Next
+      'Endif
+    Next
+  Endif
+  Return stxTags
+
+End

@@ -1,0 +1,191 @@
+' Gambas class file
+
+'
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+Export
+
+Private oco As New Collection
+Private obj As Object               ''Textbox in the other form, the initial form
+'Private co As Object                ''Current object, TextBox for search
+Private CurrentText As String
+Private con As Connection
+Private frm As Object
+Private xflag As Boolean
+
+Public Sub _new()
+
+End
+
+Public Sub Run(ByRef ctn As Collection, ob As Object) As Boolean
+
+  Dim w As Window
+
+  oco = ctn
+  obj = ob
+  con = oco["connection"]
+  ListView1.Clear
+  TextBox1.Text = ob.Text
+
+  Me.Stacking = Window.Above
+  Me.Move(oco["\tx"], oco["\ty"])
+  Me.Show
+  'ListView1.SetFocus
+  TextBox1.SetFocus
+
+  For Each w In Windows
+    If w.Tag = oco["wtag"] Then
+      frm = w
+    Endif
+  Next
+  frm.xloaded = False
+  xflag = True
+
+End
+
+Public Sub ListView1_Select()
+
+  CurrentText = ListView1.Current.Text
+  xflag = False
+  obj.Text = CurrentText
+  obj.Enabled = True
+  frm.currJob = ""
+  xflag = True
+  frm.xloaded = True
+  Wait 0.1
+  'Me.Hide
+  Me.Close
+
+End
+
+'Public Sub ListView1_Click()
+'
+'   Dim w As Window
+'   Dim frm As Object
+' For Each w In Windows
+'     If w.Tag = oco["wtag"] Then
+'       frm = w
+'     Endif
+'   Next
+
+'frm.xloaded = True
+'
+'   'FEdit.xloaded = True
+'Me.Close()
+'
+
+'End
+
+Public Sub TextBox1_Change()
+
+  'Dim vrt As Variant
+  Dim i As Integer
+  Dim o As Object
+  Dim lsx As String[]
+  Dim x As String
+
+  If xflag = True Then
+    TextBox1.Tag = obj.Tag
+    o = TextBox1
+    lsx = xList(o)
+    ListView1.Clear
+    If lsx.Count > 0 Then
+      Me.H = lsx.Count * 35 + 35
+      Select Object.Type(obj)
+        Case "TextBox"
+          If InStr(o.Tag, ".") > 0 Then
+            For Each x In lsx
+              ListView1.Add(CStr(i), x)
+              Inc i
+            Next
+          Endif
+      End Select
+    Else
+      Me.H = 35
+    Endif
+  Endif
+
+End
+
+Private Sub xList(o As Object) As String[]
+
+  Dim strRTab As String
+  Dim strRKey As String
+  Dim strRShw As String
+  Dim strText As String
+  Dim sql As String
+  Dim lsx As New String[]
+  Dim lnx As New String[]
+  Dim ftx As New String[]
+  'Dim sqlv As String
+  'Dim refv As Result
+  'Dim i As Integer
+  'Dim o As Object
+  Dim ftr As String
+  Dim ref As Result
+
+  'o = obj
+
+  ftx = vag.SQLtr("es")
+  strText = o.Text
+
+  ftr = String.LCase(String.RemoveDiacritics(o.Text))
+
+  strRTab = Split(o.Tag, ".")[1]
+  strRKey = Split(o.Tag, ".")[2]
+  strRShw = Split(o.Tag, ".")[3]
+
+  sql = "select " & strRShw & " from " & strRTab & " order by " & strRShw & " asc"
+  Print sql
+  ref = con.Exec(sql)
+
+  ''Intermediate step to save the word problem with accents
+  lsx.Clear
+  lnx.Clear
+  While ref.Available
+    If ftr = "" Then
+      lsx.Add(ref[strRShw])
+    Else
+      If InStr(String.RemoveDiacritics(String.LCase(ref[strRShw])), ftr) > 0 Then
+        lsx.Add(ref[strRShw])
+      Else
+        lnx.Add(ref[strRShw])
+      Endif
+    Endif
+    ref.MoveNext
+  Wend
+
+  'lsx.Insert(lnx)
+
+  Return lsx
+
+End
+
+Public Sub btnCancel_Click()
+
+  frm.xloaded = True
+  obj.Enabled = True
+  frm.currJob = ""
+  Wait 0.01
+  Me.Close
+
+End

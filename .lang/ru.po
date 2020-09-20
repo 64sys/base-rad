@@ -1,0 +1,875 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: base-rad 3.15.0\n"
+"POT-Creation-Date: 2020-08-02 21:31 UTC\n"
+"PO-Revision-Date: 2020-08-02 17:01 UTC\n"
+"Last-Translator: bmk <bmk@gaucho>\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .project:1
+msgid "RADG"
+msgstr "Кай"
+
+#: .project:2
+msgid "Rapid Application Development for Gambas"
+msgstr "Быстрая разработка приложений для Gambas"
+
+#: APPMain.class:124
+msgid "Presupuestos"
+msgstr "Presupuestos"
+
+#: APPMain.class:174
+msgid "This table does not have a single value field"
+msgstr "Эта таблица не имеет одно поле значения"
+
+#: APPMain.class:181
+msgid "This table has no primary key"
+msgstr "Эта таблица не имеет первичного ключа"
+
+#: APPMain.class:285
+msgid "Table does not have a unique value field"
+msgstr "Таблица не имеет поля уникального значения"
+
+#: APPMain.class:288
+msgid "The table has no index"
+msgstr "Таблица не имеет индекса"
+
+#: APPMain.class:291
+msgid "Table does not have a primary key field"
+msgstr "Таблица не имеет поля первичного ключа"
+
+#: APPMain.class:357 xmg.module:1020
+msgid "Import"
+msgstr "Импортировать"
+
+#: APPMain.class:383
+msgid "Rename files"
+msgstr "Переименовать файлы"
+
+#: APPMain.form:30
+msgid "File"
+msgstr "файл"
+
+#: APPMain.form:34
+msgid "Edit"
+msgstr "редактировать"
+
+#: APPMain.form:38
+msgid "Edition"
+msgstr "Издание"
+
+#: APPMain.form:45
+msgid "Tools"
+msgstr "инструменты"
+
+#: APPMain.form:49
+msgid "Data import"
+msgstr "Импорт данных"
+
+#: APPMain.form:61 FConfig.form:29
+msgid "Preferences"
+msgstr "предпочтения"
+
+#: APPMain.form:68
+msgid "Help"
+msgstr "Помогите"
+
+#: APPMain.form:76 FAbout.class:195
+msgid "About"
+msgstr "Около"
+
+#: FAbout.class:136
+msgid "Source code"
+msgstr "Исходный код"
+
+#: FAbout.class:145
+msgid "Contact"
+msgstr "контакт"
+
+#: FAbout.class:163
+msgid "License"
+msgstr "Лицензия"
+
+#: FAbout.class:173
+msgid "The icon does not exist"
+msgstr "Значок не существует"
+
+#: FAbout.class:215
+msgid "Hello developers of"
+msgstr "Привет разработчики"
+
+#: FConfig.class:88
+msgid "Configuration file does not exist"
+msgstr "Файл конфигурации не существует"
+
+#: FConfig.class:442
+msgid "Changes were saved"
+msgstr "Изменения были сохранены"
+
+#: FConfig.class:462
+msgid "New copy created"
+msgstr "Новая копия создана"
+
+#: FConfig.class:475
+msgid "Preferences copy successfully archived"
+msgstr "Копирование настроек успешно заархивировано"
+
+#: FConfig.class:484
+msgid "Preferences restored"
+msgstr "Настройки восстановлены"
+
+#: FConfig.form:33
+msgid "New preferences"
+msgstr "Новые предпочтения"
+
+#: FConfig.form:40
+msgid "Apply preferences changes"
+msgstr "Применить изменения настроек"
+
+#: FConfig.form:47
+msgid "Restore preferences"
+msgstr "Восстановить настройки"
+
+#: FConfig.form:54
+msgid "Archive preferences"
+msgstr "Настройки архива"
+
+#: FConfig.form:60
+msgid "Open log file"
+msgstr "Открыть файл журнала"
+
+#: FConfig.form:67 FTLink.form:101
+msgid "Quit"
+msgstr "Уволиться"
+
+#: FConfig.form:114
+msgid "Open configuration directory"
+msgstr "Открыть каталог конфигурации"
+
+#: FConfig.form:147
+msgid "Directories"
+msgstr "Справочники"
+
+#: FCustom.form:65 FEdit.form:73
+msgid "Save and exit"
+msgstr "Сохранить и выйти"
+
+#: FCustom.form:73 FEdit.form:81
+msgid "Exit without saving"
+msgstr "Выход без сохранения"
+
+#: FCustom.form:86 FEdit.form:94
+msgid "Add register"
+msgstr "Добавить регистр"
+
+#: FCustom.form:94 FEdit.form:102
+msgid "Delete register"
+msgstr "Удалить регистр"
+
+#: FCustom.form:102 FEdit.form:110
+msgid "Export data"
+msgstr "Экспорт данных"
+
+#: FCustom.form:110 FEdit.form:118
+msgid "Show filters"
+msgstr "Показать фильтры"
+
+#: FCustom.form:118 FEdit.form:126
+msgid "Edit table and field titles"
+msgstr "Редактировать заголовки таблиц и полей"
+
+#: FCustom.form:126 FEdit.form:134
+msgid "Print"
+msgstr "Распечатать"
+
+#: FCustom.form:266 FEdit.form:310
+msgid "aliments"
+msgstr "алиментов"
+
+#: FEdit.class:277 FExch.class:280 FOptions.form:64
+msgid "Cancel"
+msgstr "Отмена"
+
+#: FEdit.class:277
+msgid "Do you want to save them?"
+msgstr "Вы хотите сохранить их?"
+
+#: FEdit.class:277
+msgid "Save"
+msgstr "Сохранить"
+
+#: FEdit.class:277
+msgid "There are changes that were not saved in the database"
+msgstr "Есть изменения, которые не были сохранены в базе данных"
+
+#: FEdit.class:331
+msgid "Add"
+msgstr "Добавить"
+
+#: FEdit.class:331
+msgid "Do you want to add them?"
+msgstr "Вы хотите добавить их?"
+
+#: FEdit.class:331
+msgid "The following values do not exist in the reference tables"
+msgstr "Следующие значения не существуют в справочных таблицах"
+
+#: FEdit.class:345
+msgid "No data was saved in the database"
+msgstr "Данные не были сохранены в базе данных"
+
+#: FEdit.class:605
+msgid "Open link in browser"
+msgstr "Открыть ссылку в браузере"
+
+#: FEdit.class:647
+msgid "Error, table not found"
+msgstr "Ошибка, таблица не найдена"
+
+#: FEdit.class:1235
+msgid "Primary key field"
+msgstr "Поле первичного ключа"
+
+#: FEdit.class:1235
+msgid "Tipo"
+msgstr "Tipo"
+
+#: FEdit.class:1279
+msgid "Records could not be deleted"
+msgstr "Записи не могут быть удалены"
+
+#: FEdit.class:1293
+msgid "Tab separated text"
+msgstr "Текст с разделителями табуляции"
+
+#: FEdit.class:1309
+msgid "You must select a table before importing data"
+msgstr "Вы должны выбрать таблицу перед импортом данных"
+
+#: FEdit.class:1632
+msgid "You must save the record first"
+msgstr "Вы должны сначала сохранить запись"
+
+#: FEdit.class:1662
+msgid "Do you want to replace it?"
+msgstr "Вы хотите заменить это?"
+
+#: FEdit.class:1662
+msgid "Replaze"
+msgstr "Replaze"
+
+#: FEdit.class:1662
+msgid "The file already exists"
+msgstr "Файл уже существует"
+
+#: FExch.class:280
+msgid "Choose a list separator character"
+msgstr "Выберите символ разделителя списка"
+
+#: FExch.form:35
+msgid "Open data file"
+msgstr "Открыть файл данных"
+
+#: FExch.form:41
+msgid "Skip index"
+msgstr "Пропустить индекс"
+
+#: FExch.form:49
+msgid "Import data"
+msgstr "Импорт данных"
+
+#: FOptions.form:56
+msgid "OK"
+msgstr "хорошо"
+
+#: FRen.form:25
+msgid "Mark all files"
+msgstr "Отметить все файлы"
+
+#: FRen.form:33
+msgid "Unmark all files"
+msgstr "Снять все файлы"
+
+#: FRen.form:41
+msgid "Rename selected files"
+msgstr "Переименовать выбранные файлы"
+
+#: FRen.form:42
+msgid "Rename"
+msgstr "Rename"
+
+#: FRen.form:49
+msgid "Restore moved files"
+msgstr "Восстановить перемещенные файлы"
+
+#: FRen.form:50
+msgid "Restore"
+msgstr "Восстановить"
+
+#: FTLink.form:30
+msgid "Refresh page"
+msgstr "Обновить страницу"
+
+#: FTLink.form:38
+msgid "Create a PDF file"
+msgstr "Создать файл PDF"
+
+#: FTLink.form:46
+msgid "Open the template"
+msgstr "Откройте шаблон"
+
+#: FTLink.form:62
+msgid "Print page"
+msgstr "Распечатать страницу"
+
+#: FTLink.form:70
+msgid "Open directory"
+msgstr "Открыть каталог"
+
+#: FTLink.form:78
+msgid "Overwrite reports"
+msgstr "Перезаписывать отчеты"
+
+#: FTLink.form:87
+msgid "Edit data"
+msgstr "Изменить данные"
+
+#: Starter.module:82
+msgid "The database exists"
+msgstr "База данных существует"
+
+#: Starter.module:87
+msgid "Database is inconsistent"
+msgstr "База данных несовместима"
+
+#: Starter.module:98
+msgid "The database not exists"
+msgstr "База данных не существует"
+
+#: Starter.module:177
+msgid "Materials"
+msgstr "материалы"
+
+#: Starter.module:179
+msgid "Item"
+msgstr "Пункт"
+
+#: Starter.module:180
+msgid "Budgets"
+msgstr "Бюджеты"
+
+#: Starter.module:181
+msgid "Material"
+msgstr "материал"
+
+#: Starter.module:182 dbs.module:1749
+msgid "Quantity"
+msgstr "Количество"
+
+#: Starter.module:186
+msgid "Budget"
+msgstr "бюджет"
+
+#: Starter.module:187 dbs.module:1760
+msgid "Client"
+msgstr "клиент"
+
+#: Starter.module:188 dbs.module:1753
+msgid "Address"
+msgstr "Адрес"
+
+#: Starter.module:189 dbs.module:1742 epb.module:623
+msgid "Date"
+msgstr "Дата"
+
+#: Starter.module:190
+msgid "Status"
+msgstr "Положение дел"
+
+#: Starter.module:191
+msgid "Contractors"
+msgstr "Подрядчики"
+
+#: Starter.module:192
+msgid "VAT"
+msgstr "НДС"
+
+#: Starter.module:193
+msgid "Notes"
+msgstr "Ноты"
+
+#: Starter.module:195
+msgid "States"
+msgstr "состояния"
+
+#: Starter.module:199
+msgid "Clients"
+msgstr "клиенты"
+
+#: Starter.module:202 dbs.module:1747
+msgid "Phone"
+msgstr "Телефон"
+
+#: Starter.module:208
+msgid "Movile"
+msgstr "Movile"
+
+#: Starter.module:209
+msgid "Fax"
+msgstr "факс"
+
+#: Starter.module:210
+msgid "Web"
+msgstr "Web"
+
+#: Starter.module:212
+msgid "Supplies types"
+msgstr "Типы поставок"
+
+#: Starter.module:214 dbs.module:1755
+msgid "Type"
+msgstr "Тип"
+
+#: Starter.module:216
+msgid "Supplies"
+msgstr "предметы снабжения"
+
+#: Starter.module:222
+msgid "Unit"
+msgstr "Ед. изм"
+
+#: Starter.module:223 dbs.module:1750
+msgid "Price"
+msgstr "Цена"
+
+#: Starter.module:224
+msgid "Image"
+msgstr "Образ"
+
+#: Starter.module:226
+msgid "Units"
+msgstr "Единицы"
+
+#: Starter.module:230
+msgid "Vendors"
+msgstr "Вендоры"
+
+#: Starter.module:232 dbs.module:1754
+msgid "Vendor"
+msgstr "продавец"
+
+#: Starter.module:235 dbs.module:1745
+msgid "Email"
+msgstr "Эл. адрес"
+
+#: Starter.module:245
+msgid "Offer"
+msgstr "Предложение"
+
+#: Starter.module:262
+msgid "Vendor phone"
+msgstr "Телефон поставщика"
+
+#: Starter.module:264
+msgid "Client phone"
+msgstr "Клиентский телефон"
+
+#: bat.module:1851 dbs.module:1406
+msgid "Extracting data from"
+msgstr "Извлечение данных из"
+
+#: bat.module:1851 dbs.module:1406
+msgid "System"
+msgstr "система"
+
+#: bat.module:1858 dbs.module:1413
+msgid "Formatting data from"
+msgstr "Форматирование данных из"
+
+#: bat.module:1866 dbs.module:1421
+msgid "Database completed"
+msgstr "База данных завершена"
+
+#: dbs.module:1500
+msgid "Table and view field titles"
+msgstr "Заголовки таблиц и полей просмотра"
+
+#: dbs.module:1502
+msgid "View titles"
+msgstr "Посмотреть заголовки"
+
+#: dbs.module:1582
+msgid "View fields titles"
+msgstr "Просмотр полей заголовков"
+
+#: dbs.module:1743
+msgid "Index"
+msgstr "Индекс"
+
+#: dbs.module:1744
+msgid "Name"
+msgstr "название"
+
+#: dbs.module:1746
+msgid "Cell phone"
+msgstr "Сотовый телефон"
+
+#: dbs.module:1751
+msgid "Mark"
+msgstr "отметка"
+
+#: dbs.module:1752 epb.module:621
+msgid "Description"
+msgstr "Описание"
+
+#: dbs.module:1756
+msgid "Code"
+msgstr "Код"
+
+#: dbs.module:1757
+msgid "City"
+msgstr "город"
+
+#: dbs.module:1758
+msgid "Symbol"
+msgstr "Условное обозначение"
+
+#: dbs.module:1759
+msgid "Job"
+msgstr "работа"
+
+#: dbs.module:1761
+msgid "Color"
+msgstr "цвет"
+
+#: dsk.module:82
+msgid "Select file"
+msgstr "Выбрать файл"
+
+#: dsk.module:92
+msgid "Filter"
+msgstr "Фильтр"
+
+#: dsk.module:114
+msgid "Select dir"
+msgstr "Выберите каталог"
+
+#: dsk.module:169
+msgid "Hi"
+msgstr "Здравствуй"
+
+#: epb.module:444
+msgid "Cubierta"
+msgstr "Cubierta"
+
+#: epb.module:510
+msgid "Acknowledgment"
+msgstr "Подтверждение"
+
+#: epb.module:605
+msgid "Title"
+msgstr "заглавие"
+
+#: epb.module:605
+msgid "Title of the work"
+msgstr "Название работы"
+
+#: epb.module:607
+msgid "Subtitle"
+msgstr "подзаголовок"
+
+#: epb.module:607
+msgid "Subtitle of the work"
+msgstr "Подзаголовок работы"
+
+#: epb.module:609
+msgid "Language"
+msgstr "язык"
+
+#: epb.module:609
+msgid "Language in which the work is written"
+msgstr "Язык, на котором написана работа"
+
+#: epb.module:611
+msgid "Identifier"
+msgstr "Идентификатор"
+
+#: epb.module:611
+msgid "Unique identifier, URI or ISBN can be good options"
+msgstr "Хороший вариант - уникальный идентификатор, URI или ISBN."
+
+#: epb.module:614
+msgid "Primary author"
+msgstr "Основной автор"
+
+#: epb.module:614
+msgid "The main author of the work"
+msgstr "Основной автор работы"
+
+#: epb.module:615
+msgid "Contributor"
+msgstr "участник"
+
+#: epb.module:615
+msgid "This identifies other people who had a lesser role, such as writing the prelude or illustrating where images play a minor role in the post. This entry can also include an attribute that defines the role. Please note that Book producer (bkp) would be a good role for the person who created the ePub from another source"
+msgstr "Это идентифицирует других людей, у которых была меньшая роль, такая как написаниепрелюдия или иллюстрирование, где изображения играют второстепенную роль в посте. этоЗапись также может включать атрибут, который определяет роль. Обратите внимание, чтоПроизводитель книг (BKP) будет хорошей ролью для человека, который создал ePubиз другого источника"
+
+#: epb.module:617
+msgid "A person, organization or service that edited the book"
+msgstr "Человек, организация или служба, которая редактировала книгу"
+
+#: epb.module:617
+msgid "Publisher"
+msgstr "издатель"
+
+#: epb.module:619
+msgid "Subject"
+msgstr "Тема"
+
+#: epb.module:619
+msgid "The subject does not have a standard form"
+msgstr "Предмет не имеет стандартной формы"
+
+#: epb.module:621
+msgid "This field typically contains the description used to describe the content of the book on a retail site or press release"
+msgstr "Это поле обычно содержит описание, используемое для описания содержимогокниги на розничном сайте или пресс-релиз"
+
+#: epb.module:623
+msgid "Publication date"
+msgstr "Дата публикации"
+
+#: epb.module:625
+msgid "Gender, category"
+msgstr "Пол, категория"
+
+#: epb.module:625
+msgid "General categories, functions, genres"
+msgstr "Общие категории, функции, жанры"
+
+#: epb.module:627
+msgid "Format"
+msgstr "Формат"
+
+#: epb.module:629
+msgid "Derivation of"
+msgstr "Вывод"
+
+#: epb.module:629
+msgid "Previous source from which the publication is derived"
+msgstr "Предыдущий источник, из которого получена публикация"
+
+#: epb.module:631
+msgid "Auxiliary source and its relation to the publication"
+msgstr "Вспомогательный источник и его отношение к публикации"
+
+#: epb.module:631
+msgid "Auxiliary sources"
+msgstr "Вспомогательные источники"
+
+#: epb.module:633
+msgid "Scope"
+msgstr "Объем"
+
+#: epb.module:633
+msgid "The length or scope of the content of the publication"
+msgstr "Длина или объем содержания публикации"
+
+#: epb.module:635
+msgid "Rights"
+msgstr "права"
+
+#: sog.module:620
+msgid "Unknown"
+msgstr "неизвестный"
+
+#: uty.module:576
+msgid "Author"
+msgstr "автор"
+
+#: uty.module:577
+msgid "Provider"
+msgstr "поставщик"
+
+#: uty.module:578
+msgid "Version"
+msgstr "Версия"
+
+#: uty.module:579
+msgid "Document date"
+msgstr "Дата документа"
+
+#: uty.module:580
+msgid "Components"
+msgstr "Составные части"
+
+#: uty.module:582
+msgid "It consists of "
+msgstr "Это состоит из"
+
+#: uty.module:582
+msgid "modules"
+msgstr "модули"
+
+#: uty.module:582
+msgid "mthods"
+msgstr "mthods"
+
+#: vag.module:442
+msgid "Spaces at the beginning and at the end"
+msgstr "Пробелы в начале и в конце"
+
+#: vag.module:444
+msgid "Space at the beginning"
+msgstr "Пространство в начале"
+
+#: vag.module:448
+msgid "Space at the end"
+msgstr "Пространство в конце"
+
+#: vag.module:453
+msgid "Repeated"
+msgstr "повторный"
+
+#: vag.module:480
+msgid "Excluded"
+msgstr "не входит"
+
+#: vag.module:484
+msgid "More than one capital letter"
+msgstr "Более одной заглавной буквы"
+
+#: xmg.module:613
+msgid "Program"
+msgstr "программа"
+
+#: xmg.module:617
+msgid "Application diretory"
+msgstr "Руководство по применению"
+
+#: xmg.module:627
+msgid "Desktop"
+msgstr "рабочий стол"
+
+#: xmg.module:631
+msgid "Default text editor"
+msgstr "Текстовый редактор по умолчанию"
+
+#: xmg.module:641
+msgid "Editor theme"
+msgstr "Тема редактора"
+
+#: xmg.module:651
+msgid "Application icons "
+msgstr "Иконки приложений"
+
+#: xmg.module:658
+msgid "Scan"
+msgstr "сканирование"
+
+#: xmg.module:662
+msgid "Gambaas projects directory"
+msgstr "Каталог проектов Gambaas"
+
+#: xmg.module:672
+msgid "Documents directory"
+msgstr "Каталог документов"
+
+#: xmg.module:682
+msgid "Music directory"
+msgstr "Музыкальный каталог"
+
+#: xmg.module:692
+msgid "Photographs directory"
+msgstr "Каталог фотографий"
+
+#: xmg.module:702
+msgid "Videos directory"
+msgstr "Каталог видео"
+
+#: xmg.module:709
+msgid "Output"
+msgstr "Вывод"
+
+#: xmg.module:713
+msgid "Overwrite output files"
+msgstr "Перезаписать выходные файлы"
+
+#: xmg.module:723
+msgid "Output directory one"
+msgstr "Выходной каталог один"
+
+#: xmg.module:733
+msgid "Output directory two"
+msgstr "Выходной каталог два"
+
+#: xmg.module:743
+msgid "Output directory three"
+msgstr "Выходной каталог три"
+
+#: xmg.module:753
+msgid "Output directory four"
+msgstr "Выходной каталог четыре"
+
+#: xmg.module:763
+msgid "Output directory five"
+msgstr "Выходной каталог пять"
+
+#: xmg.module:770
+msgid "Database"
+msgstr "База данных"
+
+#: xmg.module:774
+msgid "Database engine"
+msgstr "Движок базы данных"
+
+#: xmg.module:784
+msgid "Query"
+msgstr "запрос"
+
+#: xmg.module:794
+msgid "File directory"
+msgstr "Файловый каталог"
+
+#: xmg.module:804
+msgid "Database file"
+msgstr "Файл базы данных"
+
+#: xmg.module:814
+msgid "Server"
+msgstr "сервер"
+
+#: xmg.module:834
+msgid "Port"
+msgstr "порт"
+
+#: xmg.module:844
+msgid "User"
+msgstr "пользователь"
+
+#: xmg.module:854
+msgid "Password"
+msgstr "пароль"
+
+#: xmg.module:914
+msgid "Current table"
+msgstr "Текущая таблица"
+
+#: xmg.module:920
+msgid "Customization"
+msgstr "настройка"
+
+#: xmg.module:924
+msgid "Variable"
+msgstr "переменная"
+
+#: xmg.module:1024
+msgid "Column separator"
+msgstr "Разделитель столбцов"
+
+#: xmg.module:1034
+msgid "Extension"
+msgstr "расширение"

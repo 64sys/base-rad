@@ -1,0 +1,371 @@
+' Gambas module file
+
+'''Sets everything that is necessary for the program to work properly. In other words, it makes sure that the databases, directories, files, etc. exist.
+
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+' Variables to transfer
+Private con As New Connection       '' Connection to the database
+Private adi As String               '' Program Directory
+Private apc As String               '' Program configuration file
+Private dbc As String               '' Database configuration file
+Private etx As String               '' Default plain text editor
+Private lgf As String               '' Incident log file
+Private dbn As String               '' Database name
+Private sql As String               '' SQL statement of database creation varies according to the type of database.
+Private lgg As Logger               '' Application event log.
+
+' Single-use variables
+Private ldd As Boolean              '' Flag completion indicator.
+
+'' For compatibility with applications that are not graphical, this method exists, since it allows to operate both with a form and without it.
+
+Public Sub Run()
+
+  Dim tbl As Table
+  Dim sFile As String
+  Dim cex As New Collection         '' Collection with variables to go to the next module or form
+  Dim rpl As New Collection         '' List of table and field names and their titles to replace names by titles in the xml when it is created
+  Dim thx As New String[]           '' Internal editor topic list
+  Dim i As Integer
+  ' Dim cPr As Collection
+  ' Dim cMod As Collection
+  ' Dim cls As Collection
+  ' Dim met As Collection
+  ' Dim s As String
+  ' Dim sNames As String[]
+  ' Dim xNames As String[]
+  ' Dim sName As String
+  ' Dim bSpec As Boolean
+  ' Dim prinf As Collection
+  ' Dim p As Variant
+  ' Dim pr As String
+
+  '' Verify that the program directory exists in Home
+  'adi = User.Home &/ "." & Application.Name
+  adi = User.Home &/ "." & String.LCase(vag.NoSymbols(Application.Name))
+  apc = adi &/ "cfg.xml"
+  dbc = adi &/ "dbs.xml"
+  lgf = adi &/ Format(Now(), "yyyy") & ".log"
+
+  If Exist(adi) = False Then
+    Shell "mkdir -p " & adi Wait
+  Endif
+
+  '' Booting the loging system
+  If Exist(lgf) = False Then
+    Shell "touch " & lgf Wait
+  Endif
+  lgg = New Logger(Logger.Info, Logger.DefaultFormat, lgf)
+  lgg.Begin
+
+  '' Checking the default plain text editor on the system
+  If sog.MimeDefaultApp("text/plain").Count > 0 Then
+    etx = sog.MimeDefaultApp("text/plain")[0]
+  Else
+    etx = ""
+  Endif
+
+  '' Verify that the database exists
+  ' In this part, if it is necessary to create the base, the actions will be different according to the type of base
+  ' 1 - Base type. In this program sqlite3 is defined but it could be any other
+  con.Type = "sqlite3"
+
+  Select con.Type
+    Case "sqlite3"
+      con.Host = adi
+      dbn = "app.sqlite"
+      sql = File.Load("./sqlite.sql")
+    Case "mysql"
+      con.Host = "server"
+      con.Port = 1234
+      con.User = "user"          ' Here you have to put a user with DB creation permissions the first time the program is opened
+      con.Password = "password"  ' The access key to the database.
+      dbn = "app"
+      sql = File.Load("./mysql.sql")
+    Case "postgresql"
+      con.Host = "server"
+      con.Port = 1234
+      con.User = "user"          ' Here you have to put a user with DB creation permissions the first time the program is opened
+      con.Password = "password"  ' The access key to the database.
+      dbn = "app"
+      sql = File.Load("./pgsql.sql")
+    Case "odbc"
+
+  End Select
+  '2 Now we ask the connection if the database exists, for this we must open it
+  con.Open
+  If con.Opened Then
+    If con.Databases.Exist(dbn) Then
+      Print ("The database exists") & " " & dbn
+      con.Close
+      con.Name = dbn
+      con.Open
+      If con.Tables.Count = 2 Then
+        Print ("Database is inconsistent") & " " & dbn
+        'Creating the tables
+        Try con.Exec("BEGIN TRANSACTION;\n" & sql & "\nROLLBACK;")
+        If Not Error Then
+          con.Exec(sql)
+          Print Replace(Error.Text, "\n", " ")
+        Endif
+        con.Close
+        con.Open
+      Endif
+    Else
+      Print ("The database not exists") & " " & dbn
+      con.Databases.Add(dbn)
+      con.Close
+      con.Name = dbn
+      con.Open
+      '' Creating the database and tables
+      Try con.Exec("BEGIN TRANSACTION;\n" & sql & "\nROLLBACK;")
+      If Not Error Then
+        con.Exec(sql)
+        Print Replace(Error.Text, "\n", " ")
+      Endif
+      con.Close
+      con.Open
+    Endif
+
+  Endif
+
+  'Check if the views are created, since when using foreign keys the views are necessary to correctly see the data in tables
+  For Each tbl In con.Tables
+    If tbl.System = False Then
+      dbs.CheckViews(con, tbl.Name)
+    Endif
+  Next
+
+  'Create the XML file with the information from the database
+  If Exist(dbc) = False Then
+    rpl = Replacements()
+    sFile = dbs.DBConf(con, dbc, rpl)
+    Print "log" & sFile
+  Endif
+
+  'Internal editor theme
+  If Exist(adi &/ "editor") = False Then
+    Shell "mkdir " & adi &/ "editor" Wait
+  Endif
+
+  thx.Clear
+  thx = fil.ScanFiles("./editor/", ["theme"])
+
+  If thx.Count > 0 Then
+    For i = 0 To thx.Max
+      If Exist(thx[i]) Then
+        If Exist(adi &/ "editor" &/ File.Name(thx[i])) = False Then
+          Copy thx[i] To adi &/ "editor" &/ File.Name(thx[i])
+        Endif
+      Endif
+    Next
+  Endif
+
+  'Copying the script to create EPUB files
+
+  If Exist(adi &/ "mbook.sh") = False Then
+    Try Copy "mbook.sh" To adi &/ "mbook.sh"
+    Wait 0.01
+  Endif
+
+  'Loaded form indication flag
+  ldd = True
+
+  'Open the main program form
+  cex.Add(con, "Connex")           'Connection to the database
+  cex.Add(adi, "AppDir")           'Program Directory
+  cex.Add(apc, "AppCfg")           'Program configuration file
+  cex.Add(dbc, "DbsCfg")           'Database configuration file
+  cex.Add(etx, "AppEdi")           'Default plain text editor
+  cex.Add(lgg, "AppLog")           'Application event log.
+
+  ' cPr = cdg.ProjInfo("./.project")
+  ' 'stxDoc = uty.DokuProj(Application.Path)
+  ' xNames = cdg.SpecialSubs()
+  ' prinf = cdg.ProjInfo("./.project")
+  ' If prinf.Count > 0 Then
+  '   For Each p In prinf
+  '     pr &= prinf.Key & "\n"
+  '   Next
+  '
+  ' Endif
+  '
+  ' cMod = cdg.ProjData(Application.Path)
+  ' For Each cls In cMod
+  '   Select cls["Type"]
+  '     Case "module"
+  '       's &= "#" & File.BaseName(cMod.Key) & "\n"
+  '       If cls.Exist("Description") Then
+  '         s &= "# Module " & cls["Name"] & "\n"
+  '         s &= cls["Description"] & "\n"
+  '         s &= "  \n"
+  '       Else
+  '         s &= "# Module " & cls["Name"] & "\n"
+  '         s &= "  \n"
+  '       Endif
+  '
+  '       If cls.Exist("Methods") Then
+  '         i = 1
+  '         For Each met In cls["Methods"]
+  '           bSpec = False
+  '           If met["Scope"] = "Public" Then
+  '             For Each sName In xNames
+  '               If InStr(Lower(met["Name"]), Lower(sName)) > 0 Then
+  '                 bSpec = True
+  '                 Break
+  '               Endif
+  '             Next
+  '
+  '             If bSpec = False Then
+  '               If met.Exist("Description") Then
+  '                 s &= " - **" & met["Name"] & "** " & met["Description"] & "\n"
+  '                 s &= "  \n"
+  '               Else
+  '                 s &= " - **" & met["Name"] & "** \n"
+  '                 s &= " \n"
+  '               Endif
+  '             Endif
+  '           Endif
+  '         Next
+  '       Endif
+  '   End Select
+  ' Next
+  '
+  '
+  '
+  ' File.Save(User.Home &/ "ptag.txt", pr)
+  ' File.Save(User.Home &/ "auto.md", s)
+  ' Shell "retext " & User.Home &/ "auto.md"
+  ' 'Desktop.Open(User.Home &/ "auto.md")
+
+  APPMain.Run(cex)
+
+End
+
+'' Create a collection with all the text strings that can be displayed differently depending on the environment. For example, in a grid view you can show more friendly or aesthetic field titles than the real names of the fields or also define in a single place the verification formats for each field or finally also define other names for the fields in the reports.
+
+Private Function Replacements() As Collection
+
+  Dim rn As New Collection
+  Dim rf As New Collection          '' Formatas for database storage
+  Dim rg As New Collection          '' Fields groups
+  Dim rr As New Collection          '' Formatas for reports
+  Dim rp As New Collection          '' Replacements list
+
+  rn.Add(("Materials"), "boms")
+  rn.Add("id", "boms.midx")
+  rn.Add(("Item"), "boms.mname")
+  rn.Add(("Budgets"), "boms.mbud")
+  rn.Add(("Material"), "boms.msupp")
+  rn.Add(("Quantity"), "boms.mqty")
+
+  rn.Add(("Budgets"), "budgets")
+  rn.Add("id", "budgets.bidx")
+  rn.Add(("Budget"), "budgets.bname")
+  rn.Add(("Client"), "budgets.bclient")
+  rn.Add(("Address"), "budgets.baddress")
+  rn.Add(("Date"), "budgets.bdate")
+  rn.Add(("Status"), "budgets.bstatus")
+  rn.Add(("Contractors"), "budgets.bcontra")
+  rn.Add(("VAT"), "budgets.bvat")
+  rn.Add(("Notes"), "budgets.bremark")
+
+  rn.Add(("States"), "status")
+  rn.Add("id", "status.aidx")
+  rn.Add(("Status"), "status.astatus")
+
+  rn.Add(("Clients"), "clients")
+  rn.Add("id", "clients.cidx")
+  rn.Add(("Client"), "clients.cname")
+  rn.Add(("Phone"), "clients.cphone")
+
+  rn.Add(("Contractors"), "contractors")
+  rn.Add("id", "contractors.ridx")
+  rn.Add(("Client"), "contractors.rname")
+  rn.Add(("Phone"), "contractors.rphone")
+  rn.Add(("Movile"), "contractors.rmovile")
+  rn.Add(("Fax"), "contractors.rfax")
+  rn.Add(("Web"), "contractors.rweb")
+
+  rn.Add(("Supplies types"), "suppcls")
+  rn.Add("id", "suppcls.tidx")
+  rn.Add(("Type"), "suppcls.tname")
+
+  rn.Add(("Supplies"), "supplies")
+  rn.Add("id", "supplies.sidx")
+
+  rn.Add(("Item"), "supplies.sname")
+
+  rn.Add(("Type"), "supplies.sclass")
+  rn.Add(("Unit"), "supplies.sunit")
+  rn.Add(("Price"), "supplies.samount")
+  rn.Add(("Image"), "supplies.spict")
+
+  rn.Add(("Units"), "uoms")
+  rn.Add("id", "uoms.uidx")
+  rn.Add(("Units"), "uoms.uname")
+
+  rn.Add(("Vendors"), "vendors")
+  rn.Add("id", "vendors.vidx")
+  rn.Add(("Vendor"), "vendors.vname")
+  rn.Add(("Address"), "vendors.vaddress")
+  rn.Add(("Phone"), "vendors.vphone")
+  rn.Add(("Email"), "vendors.vemail")
+  rn.Add(("Web"), "vendors.vurl")
+
+  'Formats of the data to write to the database (Datanbase)
+  rf.Add("C[sname]", "supplies.sname")
+  rf.Add("supplies/|LNS[sname]|.jpeg", "supplies.spict")
+  rf.Add("H[4]", "boms.mname")
+
+  rf.Add("YMD[]", "budgets.bname")
+  rf.Add("YMDHNS[]", "budgets.bdate")
+  rf.Add(("Offer"), "budgets.bstatus")
+
+  'Data formats in reports (Reports)
+  rr.Add("MOVILE[]", "budgets.contractorsrmovile")
+  rr.Add("PHONE[]", "budgets.contractorsrphone")
+  rr.Add("WEB[]", "budgets.contractorsrurl")
+  rr.Add("FAX[]", "budgets.contractorsrfax")
+  rr.Add("MONEY[€]", "budgets.bvat")
+  rr.Add("MONEY[€]", "budgets.bamount")
+  rr.Add("MONEY[€]", "budgets.bvatamount")
+  rr.Add("MONEY[€]", "budgets.btamount")
+  rr.Add("MONEY[€]", "budgets.bcamount")
+
+  'Groups
+  rg.Add("Image", "supplies.spict")
+  rg.Add("Email", "vendors.vemail")
+  rg.Add("Web", "vendors.vurl")
+  rg.Add(("Vendor phone"), "vendors.vphone")
+  rg.Add(("Address"), "vendors.vaddress")
+  rg.Add(("Client phone"), "clients.cphone")
+  rg.Add(("Address"), "budgets.baddress")
+
+  rp.Add(rn, "Title")
+  rp.Add(rf, "Format")
+  rp.Add(rg, "Group")
+  rp.Add(rr, "Report")
+
+  Return rp
+
+End

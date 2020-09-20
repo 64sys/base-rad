@@ -1,0 +1,216 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,100,70)
+  Expand = True
+  Icon = Picture["icon:/22/save"]
+  Resizable = False
+  Border = False
+  Arrangement = Arrange.Vertical
+  { pnlHidden Panel
+    MoveScaled(94,1,5,5)
+    Visible = False
+  }
+  { pnlTools Panel
+    MoveScaled(1,1,92,5)
+    Background = Color.Background
+    AutoResize = True
+    Spacing = True
+    Padding = 4
+    { tobSave ToolButton menudata
+      Name = "tobSave"
+      MoveScaled(1,0,5,5)
+      Tag = "save"
+      ToolTip = ("Save and exit")
+      Picture = Picture["icon:/22/save"]
+    }
+    { tobExit ToolButton menudata
+      Name = "tobExit"
+      MoveScaled(6,0,5,5)
+      Tag = "close"
+      ToolTip = ("Exit without saving")
+      Picture = Picture["icon:/22/close"]
+    }
+    { Panel1 Panel
+      MoveScaled(12,0,4,5)
+      Expand = True
+    }
+    { tobNew ToolButton menudata
+      Name = "tobNew"
+      MoveScaled(18,0,5,5)
+      Tag = "new"
+      ToolTip = ("Add register")
+      Picture = Picture["icon:/22/add"]
+    }
+    { tobDelete ToolButton menudata
+      Name = "tobDelete"
+      MoveScaled(23,0,5,5)
+      Tag = "erase"
+      ToolTip = ("Delete register")
+      Picture = Picture["icon:/22/delete"]
+    }
+    { tobExport ToolButton menudata
+      Name = "tobExport"
+      MoveScaled(28,0,5,5)
+      Tag = "export"
+      ToolTip = ("Export data")
+      Picture = Picture["icon:/22/download"]
+    }
+    { tobFilterShow ToolButton menudata
+      Name = "tobFilterShow"
+      MoveScaled(39,0,5,5)
+      Tag = "filter"
+      ToolTip = ("Show filters")
+      Picture = Picture["icon:/22/filter"]
+      Toggle = True
+    }
+    { tobEditTitles ToggleButton
+      MoveScaled(48,0,5,5)
+      Tag = "pen"
+      ToolTip = ("Edit table and field titles")
+      Picture = Picture["icon:/22/pen"]
+    }
+    { tobPrint ToolButton menuapp
+      Name = "tobPrint"
+      MoveScaled(53,0,5,5)
+      Tag = "print"
+      ToolTip = ("Print")
+      Picture = Picture["icon:/22/print"]
+    }
+    { Panel5 Panel
+      MoveScaled(59,0,4,5)
+      Expand = True
+    }
+  }
+  { Separator2 Separator
+    MoveScaled(1,8,98,0)
+  }
+  { pnlList Panel
+    MoveScaled(1,7,98,40)
+    Expand = True
+    Arrangement = Arrange.Vertical
+    { pnlFilter Panel
+      MoveScaled(1,2,95,5)
+      Visible = False
+      Arrangement = Arrange.Horizontal
+      { Panel6 Panel
+        MoveScaled(0,0,1,5)
+      }
+      { lxaFiterField TextLabel
+        MoveScaled(2,0,9,5)
+        Alignment = Align.Normal
+      }
+      { tobNegation ToolButton applyfilter
+        Name = "tobNegation"
+        MoveScaled(15,0,5,5)
+        #Translate = False
+        Text = "Not"
+        Toggle = True
+      }
+      { pnlCondition Panel
+        MoveScaled(21,0,20,5)
+        { tobLike ToolButton applyfilter
+          Name = "tobLike"
+          MoveScaled(0,0,5,5)
+          #Translate = False
+          Tag = "like"
+          Text = "Like"
+          Radio = True
+          Toggle = True
+        }
+        { tobEqual ToolButton applyfilter
+          Name = "tobEqual"
+          MoveScaled(6,0,6,5)
+          #Translate = False
+          Tag = "equal"
+          Text = "Equal"
+          Radio = True
+          Toggle = True
+        }
+        { tobNull ToolButton applyfilter
+          Name = "tobNull"
+          MoveScaled(12,0,6,5)
+          #Translate = False
+          Tag = "null"
+          Text = "Null"
+          Radio = True
+          Toggle = True
+        }
+      }
+      { txoFilter TextBox
+        MoveScaled(45,0,16,5)
+        Expand = True
+        Alignment = Align.Center
+      }
+      { tobSaveFilter2 ToolButton applyfilter
+        Name = "tobSaveFilter2"
+        MoveScaled(74,0,5,5)
+        Tag = "clear"
+        Picture = Picture["icon:/22/clear"]
+      }
+      { tobCancel ToolButton applyfilter
+        Name = "tobCancel"
+        MoveScaled(82,0,5,5)
+        Tag = "close"
+        Picture = Picture["icon:/22/close"]
+      }
+      { tobSaveFilter ToolButton applyfilter
+        Name = "tobSaveFilter"
+        MoveScaled(89,0,5,5)
+        Tag = "save"
+        Picture = Picture["icon:/22/save"]
+      }
+    }
+    { pnlMilestone Panel
+      MoveScaled(1,9,95,3)
+      Arrangement = Arrange.Horizontal
+    }
+    { GridView1 GridView
+      MoveScaled(1,14,95,13)
+      Expand = True
+      Border = False
+      Mode = Select.Single
+      Padding = 0
+      Header = GridView.Horizontal
+    }
+  }
+  { pnlReg Panel
+    MoveScaled(1,51,98,9)
+    Expand = True
+    Arrangement = Arrange.Vertical
+  }
+  { Separator1 Separator
+    MoveScaled(1,62,98,0)
+  }
+  { Panel4 Panel
+    MoveScaled(1,64,98,5)
+    Arrangement = Arrange.Horizontal
+    { pnlInfo Panel
+      MoveScaled(0,0,27,5)
+      Background = Color.Background
+      Expand = True
+      Arrangement = Arrange.Horizontal
+      { ToolButton1 ToolButton
+        MoveScaled(0,0,5,5)
+        Enabled = False
+        Tag = "database"
+        Picture = Picture["icon:/22/database"]
+      }
+      { TextLabel2 TextLabel
+        MoveScaled(6,0,18,5)
+        Text = ("aliments")
+        Alignment = Align.Normal
+      }
+    }
+    { txlPrimary TextLabel
+      MoveScaled(85,0,5,5)
+      Font = Font["Bold,+1"]
+      Alignment = Align.Normal
+    }
+    { tobPrimary ToolButton
+      MoveScaled(92,0,5,5)
+      Enabled = False
+      Tag = "new"
+    }
+  }
+}

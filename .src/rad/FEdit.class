@@ -1,0 +1,1841 @@
+' Gambas class file
+
+'
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+Export
+
+Private Observer As Observer        '' Observador usado antes de salir para advertir que hay cambios sin guardar.
+'------------------------------------------------------------------------------
+' Variables que se pasaron desde el módulo de inicio
+Private con As New Connection       '' Conexión a la base de datos
+Private adi As String               '' Directorio del programa
+Private dbc As String               '' Archivo de configuracion de la base de datos
+Private apc As String               '' Archivo de configuracion del programa
+Private etx As String               '' Editor de texto plano por ddefecto
+Private lgg As Logger               '' Registro de eventos de la aplicación.
+'------------------------------------------------------------------------------ cex.Add(lgg, "AppLog")           ' Registro de eventos de la aplicación.
+Private tab As String               '' Tabla editada
+Private iky As String               '' Clave del registro editado
+
+'Private ftr As String               '' Filter for search in ComboBoxes
+Private ifn As New Collection       '' Información de situación, base de datos, tabla, campo etc.
+
+Public intKey As Integer            '' Clave del registro editado, si es una inserción es -1.
+Public intRKey As Integer
+Public ctnDat As New Collection     '' Lista de campos con valores modificados
+Public ctnAlt As New Collection     '' Lista de campos con valores Alterados por el formato o algoritmos de cálculo.
+Public ctnRef As New Collection     '' Lista de referencias
+Public xloaded As Boolean
+Private edmod As String             '' Modo de edición del formulario. single: un solo registro (textbox) , list: varios registros (tableview)
+
+'Private ref As Result
+'Private lsx As New String[]         ''Lista de frases coincidentes con el texto del control
+'Private lnx As New String[]         ''Lista de frases NO coincidentes con el texto del control
+Private LastObject As Object
+
+'' Variables para TableView1
+Private scrReg As ScrollView
+'Private objCurr As Object           '' Control actual que tiene datos foraneos
+
+Private stxFld As New String[]      '' Lista de campos del resultado actual.
+Private stxFti As New String[]      '' Lista de titulos de los campos del resultado actual.
+Private stxUni As New String[]      '' Lista de campos unicos de la tabla actual.
+Private stxOrder As New String[]    '' Lista de orden
+Private stxFilter As New String[]   '' Lista de filtros
+Private sqlShow As String           '' Consulta a la base de datos
+Private resShow As Result           '' Resultado de la consulta a la base de datos
+Private ctnGrp As New Collection
+Private gridok As Boolean           '' Testigo de carga del gridview
+
+Private txo As TextBox            '' TextBox para normal grilla
+Private txo1 As TextBox            '' TextBox para filtro
+Private vao As ValueBox           '' ValueBox para grilla
+Private cmo As ComboBox           '' ComboBox para grilla
+Private bto As ToolButton         '' ComboBox para grilla
+Private picAsc As Picture
+Private picDsc As Picture
+Private cex As New Collection
+'Private lis As FList                ''Auxiliar form for select options for a control text value
+Private cn As New Collection        ''Current options list for the selected control
+Public lflag As Boolean            ''Bandera de lista aeropuertos
+Public currJob As String           ''Current field on working
+
+Public Sub _new(cin As Collection)
+
+  cex = cin.Copy()
+  Run(cex)
+
+End
+
+Private Sub Run(cin As Collection)
+  '------------------------------------------------------------------------------
+
+  Dim obj As Object
+  Dim ictn As New Collection
+  Dim z As Integer
+  Dim iSet As String
+
+  Observer = New Observer(Me) As "Observer"
+
+  con = cex["Connex"]           ' Conexión a la base de datos
+  adi = cex["AppDir"]           ' Directorio del programa
+  apc = cex["AppCfg"]           ' Archivo de configuracion del programa
+  dbc = cex["DbsCfg"]           ' Archivo de configuracion de la base de datos
+  etx = cex["AppEdi"]           ' Editor de texto plano por defecto
+  lgg = cex["AppLog"]           ' Registro de eventos de la aplicación.
+  tab = cex["CTable"]           ' Tabla actual
+  iky = cex["RegKey"]           ' Clave del registro editado (-1 registro nuevo).
+
+  iSet = xmg.GetVar("Theme.Icons", apc)
+  ictn = dsk.GNumix(iSet & "/")
+
+  For Each obj In Me.Controls
+    Select Object.Type(obj)
+      Case "ToolButton"
+        If obj.Picture Then
+          If obj.W = obj.H Then
+            z = obj.W
+            If ictn.Exist(obj.Tag) Then
+              If Exist(ictn[obj.Tag]) Then
+                If Stat(ictn[obj.Tag]).Type = gb.File Or Stat(ictn[obj.Tag]).Type = gb.Link Then
+                  obj.Picture = Image.Load(ictn[obj.Tag]).Stretch(20, 20).Picture
+                  Print "> Control con icono: " & obj.Tag
+                Endif
+              Endif
+            Endif
+          Endif
+        Endif
+    End Select
+  Next
+  '------------------------------------------------------------------------------
+
+  Select iky
+    Case 0
+      intKey = -1
+      edmod = "list"
+
+    Case Else
+      intKey = iky
+      edmod = "single"
+
+  End Select
+
+  If cin.Exist("FMode") Then
+    edmod = cin["FMode"]
+  Endif
+
+  txo = New TextBox(pnlHidden) As "Txo"
+  txo1 = New TextBox(pnlHidden) As "Txo1"
+  bto = New ToolButton(pnlHidden) As "Bto"
+  vao = New ValueBox(pnlHidden) As "Vao"
+  cmo = New ComboBox(pnlHidden) As "Cmo"
+
+  picAsc = Picture["icon:/16/up"]
+  picDsc = Picture["icon:/16/down"]
+
+  ActionMode(edmod, cex.Copy())
+
+  LoadGrid(tab)
+
+  'HSplit1.Layout = [1]
+  VSplit1.Layout = [1, 0, 1]
+  'lis = New FList
+  'lis.Tag = "aux"
+
+  Me.Menus.Hide
+  Me.Show()
+
+  gridok = True
+
+End
+
+Private Sub ActionMode(smd As String, cnm As Collection)
+
+  Dim r As Integer
+
+  Select smd
+    Case "single"
+
+      pnlList.Visible = False
+      GridView1.Visible = False
+      HSplit1.Visible = True
+      pnlSub.Visible = False
+      pnlSub.Children.Clear
+
+      tobSave.Enabled = True
+      tobExit.Enabled = True
+      tobNew.Enabled = False
+      tobDelete.Enabled = False
+      tobExport.Enabled = False
+      tobEditTitles.Enabled = False
+
+      xloaded = False
+      pnlReg1.Children.Clear
+      pnlSub.Children.Clear
+
+      scrReg = New ScrollView(pnlReg1) As "scrReg"
+      With scrReg
+        .Expand = True
+        .ScrollBar = Scroll.Both
+        .ScrollBar = Scroll.None
+        .Arrangement = Arrange.Vertical
+        .Border = False
+      End With
+
+      ctnDat = FillCollection(dbc, intKey)
+      If cnm.Count > 0 Then
+        If cnm.Exist("FFld") Then
+          ctnDat.Add(cnm["FFtr"], cnm["FFld"])
+        Endif
+      Endif
+
+      If ctnDat.count > 0 Then
+        MControls(scrReg, ctnDat)
+      Endif
+
+    Case "list"
+      xloaded = False
+      gridok = False
+
+      pnlList.Visible = True
+      GridView1.Visible = True
+      HSplit1.Visible = False
+      pnlSub.Visible = False
+      pnlSub.Children.Clear
+
+      tobSave.Enabled = False
+      tobExit.Enabled = False
+      tobNew.Enabled = True
+      tobDelete.Enabled = True
+      tobExport.Enabled = True
+      tobEditTitles.Enabled = True
+
+      If intKey > 0 Then
+        Wait 0.01
+        For r = 0 To GridView1.Rows.Count - 1
+          If GridView1[r, 0].Text = CStr(intKey) Then
+            Print CStr(intKey) & " Fila: " & CStr(r)
+            GridView1.Select(r, 1)
+            Break
+          Endif
+        Next
+      Endif
+
+    Case "sub"
+      xloaded = False
+      gridok = False
+
+      pnlList.Visible = True
+      HSplit1.Visible = False
+      pnlSub.Visible = False
+      pnlSub.Children.Clear
+
+      tobSave.Enabled = False
+      tobExit.Enabled = False
+      tobNew.Enabled = True
+      tobDelete.Enabled = True
+      tobExport.Enabled = True
+      tobEditTitles.Visible = False
+      Panel4.Visible = False
+
+  End Select
+
+End
+
+Public Sub Observer_Close() '' Utilización de un observador para guardar los cambios antesde cerar el formulario si es que los hay.
+
+  Dim ctn As New Collection
+  Dim v As Variant
+  Dim BlackCat As Boolean
+
+  BlackCat = False
+
+  ctn = Save2Collection()
+
+  If ctn.Count = ctnDat.Count Then
+    For Each v In ctn
+      If v <> ctnDat[ctn.Key] Then
+        BlackCat = True
+        Break
+      Endif
+    Next
+  Endif
+
+  If BlackCat = False Then
+    Me.Close
+  Else
+    If Message.Warning(("There are changes that were not saved in the database") & gb.NewLine & ("Do you want to save them?"), ("Save"), ("Cancel")) = 1 Then
+      Save2Database()
+      Me.Close
+    Else
+      Me.Close
+    Endif
+
+  Endif
+
+End
+
+Public Sub Save2Database()
+
+  Dim ctn As New Collection
+  Dim war As New Collection
+  Dim f As Variant
+  Dim obj As Object
+  Dim tbl As Table
+  Dim w As String
+  Dim v As Variant
+
+  tbl = con.Tables[tab]
+
+  ctn = Save2Collection()
+
+  For Each obj In Me.Controls
+    Select Object.Type(obj)
+      Case "ToggleButton"
+        If obj.Enabled = True Then
+          If tbl.Fields.Exist(obj.Tag) Then
+            war.Add(obj.Value, obj.Tag)
+          Endif
+        Endif
+    End Select
+  Next
+
+  For Each f In war
+    If f = False Then
+      w &= " - " & ctn[war.Key] & "\n"
+    Endif
+  Next
+
+  If w = "" Then
+    intKey = dbs.RecordEdit(con, tab, dbc, ctn)
+    'Igualando el testigo para que al salir no pregunte
+    If ctn.Count = ctnDat.Count Then
+      For Each v In ctn
+        If v <> ctnDat[ctn.Key] Then
+          ctnDat[ctn.Key] = v
+        Endif
+      Next
+    Endif
+
+  Else
+    Select Message.Question(("The following values do not exist in the reference tables") & gb.NewLine & w & ("Do you want to add them?"), ("Add"), ("Cancel"))
+      Case 1
+        intKey = dbs.RecordEdit(con, tab, dbc, ctn)
+
+        'Igualando el testigo para que al salir no pregunte
+        If ctn.Count = ctnDat.Count Then
+          For Each v In ctn
+            If v <> ctnDat[ctn.Key] Then
+              ctnDat[ctn.Key] = v
+            Endif
+          Next
+        Endif
+
+      Case 2
+        Message.Info(("No data was saved in the database"))
+    End Select
+
+  Endif
+
+End
+
+Public Sub Save2Collection() As Collection '' Rellena la coleccion de datos del formulario.
+
+  Dim obj As Object
+  Dim fld As String
+  Dim ctn As New Collection
+  Dim tbl As Table
+  Dim k As Integer
+
+  tbl = con.Tables[tab]
+
+  For Each obj In Me.Controls
+    Select Object.Type(obj)
+      Case "TextBox", "ComboBox", "ValueBox", "TextLabel"
+        Print Object.Type(obj) & ":" & obj.Tag & ":" & obj.Name
+        If InStr(obj.Tag, ".") > 0 Then
+          fld = Split(obj.Tag, ".")[0]
+        Else
+          fld = obj.Tag
+        Endif
+
+        If tbl.Fields.Exist(fld) Then
+          Select Object.Type(obj)
+            Case "ValueBox"
+              ctn.Add(obj.Value, fld)
+            Case "TextLabel"
+              If obj.Text = "" Then
+                k = -1
+              Else
+                If IsNumber(obj.Text) Then
+                  k = CInt(obj.Text)
+                Else
+                  k = -1
+                Endif
+              Endif
+              ctn.Add(k, fld)
+            Case Else
+              ctn.Add(obj.Text, fld)
+          End Select
+        Endif
+    End Select
+  Next
+
+  Return ctn
+
+End
+
+'' This subroutine creates the necessary controls to display the data of the
+'' current table and edit them. Also, if other tables have a foreign key
+'' the index field of the current table, the records of those
+'' tables that match this foreign key to be able to modify add
+'' or remove items from them.
+
+Public Sub MControls(ob As Object, Dat As Collection) '' Dat is a list field:value type
+
+  Dim tbl As Table
+  Dim var As Variant
+  Dim fq As Integer                 '' Number of controls to create
+  Dim fin As New Collection
+  Dim n As Integer
+  Dim q As Panel
+  Dim s As ScrollView
+  Dim t As TextBox
+  Dim l As Label
+  Dim x As Panel
+  Dim b As ToggleButton
+  Dim sTit As String
+  Dim ctn As New Collection
+  Dim v As ValueBox
+  Dim wmax As Integer
+  Dim ctrl As Control
+  Dim obj As Object
+  Dim ftbl As Table                 '' Others tables
+  Dim ffld As Field                 '' Fields in other tables
+  Dim fkn As New Collection         '' Collection of data from each field necessary to make decisions
+  Dim ttn As New Collection         '' Temporary collection to "ask" the XML
+
+  Dim csql As New Collection        '' SQL to display data from the tables associated with the current one
+  Dim fd As Field
+  Dim fdx As New String[]
+  Dim fsql As String
+  Dim idx As Index
+  Dim fidx As Index
+  Dim tsub As Collection
+  Dim fmt As String
+  Dim ftx As New String[]
+  Dim frg As String
+  Dim rf As Variant
+  Dim swtag As String
+  Dim Ez As FEdit                   '' Record editing form.
+  Dim info As Variant
+  Dim wks As Workspace
+  'Dim sptr As Separator
+  Dim pnl As Panel
+
+  tbl = con.Tables[tab]
+  csql.Clear
+
+  ''List of fields in the current table
+  fdx.Clear
+  For Each fd In tbl.Fields
+    fdx.Add(fd.Name)
+  Next
+
+  ''Which tables point to the current table?
+  For Each ftbl In con.Tables
+    If ftbl.System = False Then
+      If ftbl.Name <> tab Then
+        Print ftbl.Name
+        For Each ffld In ftbl.Fields
+          fkn.Clear
+          ttn.Add("Table", "dad.node")
+          ttn.Add("Name", "dad.att")
+          ttn.Add(ftbl.Name, "dad.val")
+          ttn.Add("Field", "son.node")
+          ttn.Add("Name", "son.att")
+          ttn.Add(ffld.Name, "son.val")
+          fkn = xmg.QueryXML(dbc, ttn)
+          ttn.Clear
+          Select fkn["ForeignTable"]
+            Case tab
+              If fdx.Exist(fkn["ForeignKey"]) Then
+                Print " !!!! Bingo ¡¡¡¡¡ " & ftbl.Name & ":" & ffld.Name
+                If tbl.Indexes.Count > 0 Then
+                  For Each idx In tbl.Indexes
+                    If idx.Fields[0] = fkn["ForeignShow"] Then
+                      fsql = "SELECT * FROM " & "view_" & fkn["Table"]
+                      fsql &= " WHERE " & fkn["Name"] & "='" & Dat[fkn["ForeignShow"]] & "'"
+
+                      fkn.Add(fkn["Name"], "FFld")
+                      fkn.Add(Dat[fkn["ForeignShow"]], "FFtr")
+
+                      If ftbl.Indexes.Count > 0 Then
+                        For Each fidx In ftbl.Indexes
+                          If fidx.Fields[0] = fkn["ForeignShow"] Then
+                            fsql &= " ORDER BY " & fkn["ForeignShow"] & " ASC"
+                            Break
+                          Endif
+                        Next
+
+                        ''Adding the bill of materials to the form
+                        fkn.Add(fsql, "Query")
+
+                        csql.Add(fkn.Copy(), fkn["ForeignTable"])
+
+                      Endif
+                    Endif
+                  Next
+                Endif
+              Endif
+          End Select
+        Next
+      Endif
+    Endif
+  Next
+
+  ''Checking if the primary key field exists (for which an editable control will not be created)
+  fq = Dat.Count - tbl.PrimaryKey.Count
+
+  If tbl.PrimaryKey.Count > 0 Then
+    txlPrimary.Text = Dat[tbl.PrimaryKey[0]]
+    txlPrimary.W = dsk.TextWidth(Dat[tbl.PrimaryKey[0]] & "1", txlPrimary.Font.Name, txlPrimary.Font.Size)
+    tobPrimary.Picture = Image.Load("./icons/key.svg").Stretch(32, 32).Picture
+  Endif
+
+  s = ob
+
+  For Each var In Dat
+    fin.Clear
+    ctn.Add("Table", "dad.node")
+    ctn.Add("Name", "dad.att")
+    ctn.Add(tab, "dad.val")
+    ctn.Add("Field", "son.node")
+    ctn.Add("Name", "son.att")
+    ctn.Add(Dat.Key, "son.val")
+    fin = xmg.QueryXML(dbc, ctn)
+
+    If tbl.PrimaryKey.Exist(Dat.Key) = False Then
+      q = New Panel(s) As "blk"
+      With q
+        .H = 40
+        .W = 320
+        .Tag = Dat.Key
+        .Name = "p" & Dat.Key
+        '.Spacing = True
+        .Padding = 4
+        .Margin = True
+        .Arrangement = Arrange.Horizontal
+      End With
+
+      ' sptr = New Separator(s) As "ctr"
+      ' With sptr
+      '   .H = 1
+      ' End With
+
+      x = New Panel(q) As "spa"
+      With x
+        .H = 35
+        .w = 8
+      End With
+      l = New Label(q)
+      Select n
+        Case 0
+          n = 1
+        Case 1
+          n = 0
+      End Select
+
+      With l
+        .Tag = Dat.Key
+        .Name = "l" & Dat.Key
+        .Alignment = Align.Justify
+        sTit = fin["Title"] & ": "
+        .W = dsk.TextWidth(sTit, l.Font.Name, l.Font.Size) + dsk.TextWidth("x", l.Font.Name, l.Font.Size)
+        If wmax < .W Then
+          wmax = .W
+        Endif
+        .Text = sTit
+      End With
+
+      ' sptr = New Separator(q) As "ctr"
+      ' With sptr
+      '   .W = 1
+      ' End With
+
+      pnl = New Panel(q) As "ctr"
+      With pnl
+        .W = 7
+        .H = 35
+        .Border = False
+        .Expand = False
+      End With
+
+      Select fin["Type"]
+        Case "String"
+          If var = Null Then
+            var = ""
+          Endif
+          t = New TextBox(q) As "ctr"
+          With t
+            .Tag = Dat.Key
+            .Text = CStr(var)
+            .Expand = True
+            .Tooltip = fin["Tooltip"]
+            '.Border = False
+            '.Background = Color.Background
+            .Alignment = Align.Justify
+          End With
+
+          Select fin["Group"]
+            Case "Link"
+              b = New ToggleButton(q) As "add"
+              With b
+                .Tag = Dat.Key & "." & fin["Group"]
+                .Picture = Picture["icon:/16/internet"]
+                .Enabled = True
+                .Expand = False
+                .Tooltip = ("Open link in browser")
+                '.Border = False
+                .Background = Color.Background
+                .Alignment = Align.Justify
+                .W = 32
+                .H = 32
+              End With
+          End Select
+
+        Case "Integer"
+          Select fin["ForeignTable"]
+            Case "", "#"
+              If var = Null Then
+                var = 0
+              Endif
+              v = New ValueBox(q) As "ctr"
+              With v
+                .Tag = Dat.Key
+                .Value = var
+                .Expand = True
+                .Tooltip = fin["Tooltip"]
+                '.Border = False
+                .Background = Color.Background
+                .Alignment = Align.Justify
+              End With
+
+            Case Else
+
+              If con.Tables.Exist(fin["ForeignTable"]) Then
+                t = New TextBox(q) As "ctr"
+                'tl = New TextList(q) As "txl"
+                With t 'tl
+                  .Tag = Dat.Key & "." & fin["ForeignTable"] & "." & fin["ForeignKey"] & "." & fin["ForeignShow"]
+                  .Text = CStr(var)
+                  .Expand = True
+                  .Tooltip = fin["Tooltip"]
+                  .Border = False
+                  .Background = Color.Background
+                  .Alignment = Align.Justify
+                End With
+
+              Else
+                Print ("Error, table not found") & " " & fin["ForeignTable"]
+              Endif
+
+          End Select
+        Case "Float"
+          If var = Null Then
+            var = 0
+          Endif
+          v = New ValueBox(q) As "ctr"
+          With v
+            .Tag = Dat.Key
+            .Value = var
+            .Expand = True
+            .Tooltip = fin["Tooltip"]
+            '.Border = False
+            .Background = Color.Background
+            .Alignment = Align.Justify
+          End With
+
+      End Select
+
+    Else
+      txlPrimary.Text = var
+      txlPrimary.Tag = Dat.Key
+    Endif
+
+  Next
+
+  pnlSub.Visible = False
+  pnlSub.Children.Clear
+
+  If csql.Count > 0 Then
+    pnlSub.Visible = True
+    wks = New Workspace(pnlSub) As "wks"
+    With wks
+      .Expand = True
+      '.Border = False
+    End With
+
+    For Each tsub In csql
+      swtag = "Table/" & tsub["Table"]
+      If wks.Count = 0 Or ExistWin(swtag, wks) = False Then
+        cex.Add(tsub["Table"], "CTable")
+        cex.Add(0, "RegKey")
+        cex.Add("sub", "FMode")
+        cex.Add(tsub["Query"], "Query")
+        cex.Add(tsub["FFld"], "FFld")
+        cex.Add(tsub["FFtr"], "FFtr")
+        Ez = New FEdit(cex)
+        info = xmg.GetVar(swtag & "/Title", dbc)
+        Ez.Title = info
+        Ez.Tag = swtag
+        Ez.Icon = Picture["icon:/16/table"]
+        wks.Add(Ez)
+
+      Endif
+    Next
+  Else
+    pnlSub.Visible = False
+    pnlSub.Children.Clear
+  Endif
+
+  For Each ctrl In Me.Controls
+    If tbl.Fields.Exist(ctrl.Tag)
+      Select Object.Type(ctrl)
+        Case "Label"
+          ctrl.W = wmax
+        Case "TextBox", "ValueBox"
+          'Consultando
+          obj = ctrl
+          fin.Clear
+          ctn.Add("Table", "dad.node")
+          ctn.Add("Name", "dad.att")
+          ctn.Add(tab, "dad.val")
+          ctn.Add("Field", "son.node")
+          ctn.Add("Name", "son.att")
+          ctn.Add(ctrl.Tag, "son.val")
+          fin = xmg.QueryXML(dbc, ctn)
+          ftx.Clear
+          Select fin["Format"]
+            Case "", "#"
+              ctnAlt.Add(ctnDat[ctrl.Tag], ctrl.Tag)
+
+            Case Else
+              If InStr(fin["Format"], "|") > 0 Then
+                ftx = Split(fin["Format"], "|")
+              Else
+                ftx.Add(fin["Format"])
+              Endif
+
+              fmt = ""
+              For Each frg In ftx
+                If InStr(frg, "[") > 0 Then
+                  For Each rf In ctnDat
+                    If InStr(frg, ctnDat.Key) > 0 Then
+                      frg = Replace(frg, ctnDat.Key, rf)
+                    Endif
+                  Next
+                Endif
+                fmt &= vag.Formula(frg)
+              Next
+              ctnAlt.Add(fmt, ctrl.Tag)
+          End Select
+
+          If ctnDat[obj.Tag] = "" Then
+            obj.Text = ctnAlt[obj.Tag]
+            obj.Foreground = Color.LightForeground
+          Endif
+
+        Case Else
+          Print Object.Type(ctrl)
+          ctnAlt.Add(ctnDat[ctrl.Tag], ctrl.Tag)
+
+      End Select
+
+    Endif
+  Next
+
+  xloaded = True
+
+End
+
+Public Function ExistWin(wtag As String, ws As Workspace) As Boolean
+
+  Dim wExist As Boolean
+  Dim w As Window
+
+  wExist = False
+
+  For Each w In ws.Windows
+    If w.Tag = wtag Then
+      wExist = True
+      Break
+    Endif
+  Next
+
+  Return wExist
+
+End
+
+' Public Sub ctr_Change()
+'
+'   Dim obj As Object
+'   Dim fld As String
+'
+'   If loaded = True Then
+'     obj = Last
+'     LastObject = obj
+'     Select Object.Type(obj)
+'         'skip
+'       Case "TextBox"
+'         If InStr(obj.Tag, ".") > 0 Then
+'           fld = Split(obj.Tag, ".")[0]
+'           If ctnAlt.Exist(fld) Then
+'             Print ctnDat[fld]
+'             ctnAlt[fld] = obj.Text
+'           Endif
+'         Else
+'           fld = obj.Tag
+'           If ctnAlt.Exist(fld) Then
+'             ctnAlt[fld] = obj.Text
+'           Endif
+'         Endif
+'       Case Else
+'     End Select
+'   Endif
+'
+' End
+
+' Public Sub ctr_Change()
+'
+'   Dim obj As Object
+'
+'   If loaded = True Then
+'     obj = Last
+'     LastObject = obj
+'     Select Object.Type(obj)
+'       Case "TextBox"
+'         If InStr(obj.Tag, ".") > 0 Then
+'           LoadAux(obj)
+'         Endif
+'     End Select
+'   Endif
+'
+' End
+
+Public Sub ctr_MouseDown()
+
+  Dim obj As Object
+  Dim fExist As Boolean
+  Dim w As Window
+
+  If currJob = "" Then
+    obj = Last
+    fExist = False
+    Select Object.Type(obj)
+      Case "TextBox"
+        If InStr(obj.Tag, ".") > 0 Then
+          For Each w In Windows
+            If w.Tag = "aux" Then
+              fExist = True
+              Break
+            Endif
+          Next
+          If fExist = False Then
+            obj.Enabled = False
+            LastObject = obj
+            currJob = obj.Tag
+            LoadAux(obj)
+          Endif
+        Endif
+    End Select
+  Endif
+
+End
+
+Public Sub LoadAux(obj As Object)
+
+  Dim lis As FList
+
+  If xloaded = True Then
+    Select Object.Type(obj)
+      Case "TextBox"
+        If InStr(obj.Tag, ".") > 0 Then
+          cn.clear
+          cn.Add(con, "connection")
+          lis = New FList
+          lis.Tag = "aux\t" & obj.Tag
+          cn["\tx"] = obj.ScreenX - 7
+          cn["\ty"] = obj.parent.ScreenY
+          cn["wtag"] = Me.Tag
+          lis.Run(cn, obj)
+        Endif
+    End Select
+  Endif
+
+End
+
+Private Sub LoadGrid(tb As String) '' Cargando el gridview
+
+  Dim fld As Field
+  Dim int As Integer
+  Dim ctn As New Collection
+  Dim ctnFld As New Collection
+  Dim tbl As Table
+  Dim stxOrderSql As New String[]
+  Dim strOrder As String
+
+  tobDelete.Enabled = False
+
+  stxFld.Clear
+  stxOrder.Clear
+  stxOrderSql.Clear
+  stxFilter.Clear
+
+  tbl = con.Tables[tb]
+
+  GridView1.Columns.Count = tbl.Fields.Count
+  GridView1.Rows.Height = 32
+
+  int = 0
+
+  ctnGrp.Clear
+
+  For Each fld In tbl.Fields
+    stxFld.Add(fld.Name)
+
+    ctn.Clear
+    ctn.Add("Table", "dad.node")
+    ctn.Add("Name", "dad.att")
+    ctn.Add(tab, "dad.val")
+    ctn.Add("Field", "son.node")
+    ctn.Add("Name", "son.att")
+    ctn.Add(fld.Name, "son.val")
+
+    ctnFld.Clear
+    ctnFld = xmg.QueryXML(dbc, ctn)
+    If ctnFld["Unique"] = "yes" Then
+      stxUni.Add(fld.Name)
+    Endif
+
+    stxFti.Add(ctnFld["Title"])
+
+    'Campos especiales
+    Select ctnFld["Group"]
+      Case "", "#"
+        'skip
+      Case Else
+        If ctnGrp.Exist(fld.Name) = False Then
+          ctnGrp.Add(ctnFld["Group"], fld.Name)
+        Endif
+    End Select
+
+    Select ctnFld["Filter"]
+      Case "", "#"
+
+      Case Else
+        stxFilter.Add(fld.Name & " " & ctnFld["Filter"])
+
+    End Select
+
+    Select ctnFld["OrderType"]
+      Case "", "#"
+
+      Case Else
+        stxOrder.Add(ctnFld["Position"] & ":" & fld.Name & " " & ctnFld["Order"])
+    End Select
+
+    Print ctnFld["Title"]
+    Select ctnFld["Title"]
+      Case "", "#"
+        GridView1.Columns[int].Title = fld.Name
+      Case Else
+        GridView1.Columns[int].Title = ctnFld["Title"]
+    End Select
+
+    Select ctnFld["Width"]
+      Case "", "#", "0"
+        GridView1.Columns[int].Width = 0
+      Case Else
+        If IsNumber(ctnFld["Width"]) Then
+          GridView1.Columns[int].Width = CInt(ctnFld["Width"])
+        Else
+          GridView1.Columns[int].Width = 75
+        Endif
+
+    End Select
+
+    Inc int
+
+  Next
+
+  sqlShow = "select * from view_" & tb
+  If cex.exist("FFld") Then
+    Select edmod
+      Case "sub"
+        sqlShow = cex["Query"]
+    End Select
+
+  Endif
+
+  Select stxFilter.Count
+    Case 0
+      sqlShow &= ""
+    Case 1
+      If InStr(String.LCase(sqlShow), "where") > 0 Then
+        sqlShow &= " And " & stxFilter[0]
+      Else
+        sqlShow &= " where " & stxFilter[0]
+      Endif
+
+    Case Else
+      If InStr(String.LCase(sqlShow), "where") > 0 Then
+        sqlShow &= " And " & stxFilter.Join(" And ")
+      Else
+        sqlShow &= " where " & stxFilter.Join(" And ")
+      Endif
+
+  End Select
+
+  Select stxOrder.Count
+    Case 0
+      sqlShow &= ""
+    Case 1
+      sqlShow &= " Order by " & Split(stxOrder[0], ":")[1]
+    Case Else
+      stxOrder.Sort
+      For Each strOrder In stxOrder
+        stxOrderSql.Add(Split(strOrder, ":")[1])
+      Next
+      sqlShow &= " Order by " & stxOrderSql.Join(", ")
+
+  End Select
+
+  Print sqlShow
+
+  resShow = con.Exec(sqlShow)
+
+  GridView1.Clear
+  GridView1.Rows.Count = 0
+  GridView1.Rows.Count = resShow.Count
+
+  ifn.Clear
+  ifn.Add(con.Name, "Database")
+  ifn.Add(tab, "Table")
+  ifn.Add("#", "Name")
+  ifn.Add("#", "Title")
+  ifn.Add("#", "Type")
+  ifn.Add("#", "PrimaryKey")
+  ifn.Add("#", "Nullable")
+  ifn.Add("#", "Unique")
+  ifn.Add("#", "ForeignTable")
+  ifn.Add("#", "ForeignKey")
+  ifn.Add("#", "ForeignShow")
+  If resShow.Count > 0 Then
+    ifn["QReg"] = CStr(resShow.Count)
+  Else
+    ifn.Add("0", "QReg")
+  Endif
+
+  ShowInfo(ifn)
+
+End
+
+'' Subroutine that analyzes the number of records of the result and if they are more than
+'' a limit quantity, a side panel will be displayed with a list to select.
+
+' Private Sub SideGrid(obj As Object)
+'
+'   Dim strRTab As String
+'   Dim strRKey As String
+'   Dim strRShw As String
+'   Dim strText As String
+'   Dim sql As String
+'   Dim ftx As New String[]
+'   Dim sqlv As String
+'   Dim refv As Result
+'   Dim i As Integer
+'   'Dim lst As ListBox
+'
+'   objCurr = obj
+'
+'   Print obj.Tag
+'   ftx = vag.SQLtr("es")
+'   strText = obj.Text
+'
+'   ftr = String.LCase(String.RemoveDiacritics(obj.Text))
+'
+'   'pnlAux.Children.Clear
+'   ListBox1.Clear
+'   'lst = New ListBox(pnlAux) As "lst"
+'
+'   ' With lst
+'   '   .Expand = True
+'   '   .Background = Color.ButtonBackground
+'   '   .Border = False
+'   ' End With
+'
+'   'With grwAux
+'   '  .Expand = True
+'   '  .Grid = True
+'   '  .Mode = Select.Single
+'   '.Background = Color.ButtonBackground
+'   '  .Border = False
+'   'End With
+'
+'   obj.Background = Color.ButtonBackground
+'
+'   'grwAux.Clear
+'   'grwAux.Rows.Count = 0
+'
+'   strRTab = Split(obj.Tag, ".")[1]
+'   strRKey = Split(obj.Tag, ".")[2]
+'   strRShw = Split(obj.Tag, ".")[3]
+'
+'   sql = "select " & strRShw & " from " & strRTab & " order by " & strRShw & " asc"
+'   Print sql
+'   ref = con.Exec(sql)
+'
+'   ''Intermediate step to save the word problem with accents
+'   lsx.Clear
+'   lnx.Clear
+'   While ref.Available
+'     If ftr = "" Then
+'       lsx.Add(ref[strRShw])
+'     Else
+'       If InStr(String.RemoveDiacritics(String.LCase(ref[strRShw])), ftr) > 0 Then
+'         lsx.Add(ref[strRShw])
+'       Else
+'         lnx.Add(ref[strRShw])
+'       Endif
+'     Endif
+'     ref.MoveNext
+'   Wend
+'
+'   lsx.Insert(lnx)
+'
+'   '-----------------------------------------------------------------
+'   'Select lsx.Count
+'   '  Case 0
+'   'grwAux.Rows.Count = 0
+'   '  Case Else
+'
+'   '    grwAux.Columns.Count = 1
+'   '    grwAux.Rows.Count = 0
+'   '    grwAux.Rows.Count = lsx.Count + lnx.Count
+'
+'   For i = 0 To lsx.Max
+'     'grwAux[i, 0].Text = lsx[i]
+'     ListBox1.Add(lsx[i])
+'   Next
+'
+'   '    grwAux.Refresh
+'   'End Select
+'
+'   '' Checking the existence of the record in the reference table
+'   sqlv = "select " & strRShw & " from " & strRTab & " where " & strRShw & "='" & obj.Text & "'"
+'   refv = con.Exec(sqlv)
+'   Select refv.Count
+'     Case 0
+'       obj.Font.Bold = True
+'       obj.Font.Italic = True
+'
+'     Case 1
+'       obj.Font.Bold = False
+'       obj.Font.Italic = False
+'
+'   End Select
+'
+' End
+
+' Private Sub xList(obj As Object) As String[]
+'
+'   Dim strRTab As String
+'   Dim strRKey As String
+'   Dim strRShw As String
+'   Dim strText As String
+'   Dim sql As String
+'   Dim ftx As New String[]
+'   Dim sqlv As String
+'   Dim refv As Result
+'   Dim i As Integer
+'
+'   objCurr = obj
+'
+'   ftx = vag.SQLtr("es")
+'   strText = obj.Text
+'
+'   ftr = String.LCase(String.RemoveDiacritics(obj.Text))
+'
+'   strRTab = Split(obj.Tag, ".")[1]
+'   strRKey = Split(obj.Tag, ".")[2]
+'   strRShw = Split(obj.Tag, ".")[3]
+'
+'   sql = "select " & strRShw & " from " & strRTab & " order by " & strRShw & " asc"
+'   Print sql
+'   ref = con.Exec(sql)
+'
+'   ''Intermediate step to save the word problem with accents
+'   lsx.Clear
+'   lnx.Clear
+'   While ref.Available
+'     If ftr = "" Then
+'       lsx.Add(ref[strRShw])
+'     Else
+'       If InStr(String.RemoveDiacritics(String.LCase(ref[strRShw])), ftr) > 0 Then
+'         lsx.Add(ref[strRShw])
+'       Else
+'         lnx.Add(ref[strRShw])
+'       Endif
+'     Endif
+'     ref.MoveNext
+'   Wend
+'
+'   lsx.Insert(lnx)
+'
+'   Return lsx
+'
+' End
+
+' Public Sub AuxList_Select()
+'
+'   'objCurr.Text = .Current.Text
+'   objCurr.Background = Color.Background
+'   pnlAux.Visible = False
+'
+' End
+
+' Public Sub ListBox1_Select()
+'
+'   objCurr.Text = ListBox1.Current.Text
+'   objCurr.Background = Color.Background
+'   pnlAux.Visible = False
+'
+' End
+
+' Public Sub grwAux_Select()
+'
+'   objCurr.Text = grwAux.Current.Text
+'   objCurr.Background = Color.Background
+'   pnlAux.Visible = False
+'
+' End
+
+'' Fill the field collections: data so that later the controls can be created. It is necessary that the view of the table to be edited exists.
+
+Public Function FillCollection(dfg As String, Optional int As Integer) As Collection
+
+  Dim ctn As New Collection         ''Collection for XML query
+  Dim ctnFld As New Collection      ''Parameter list of a field
+  Dim tbl As Table
+  Dim fld As Object
+  Dim strView As String
+  Dim var As Variant
+  Dim sql As String
+  Dim res As Result
+  Dim FKey As String
+  Dim ctnData As New Collection
+
+  tbl = con.Tables[tab]
+  strView = "view_" & tab
+
+  For Each fld In tbl.Fields
+    If tbl.PrimaryKey.Count > 0 Then
+      If tbl.PrimaryKey[0] = fld.Name Then
+        FKey = fld.Name
+      Endif
+    Endif
+  Next
+
+  Select int
+    Case -1, Null
+
+    Case Else
+      sql = "select * from " & strView & " where " & FKey & "='" & CStr(intKey) & "'"
+      res = con.Exec(sql)
+  End Select
+
+  For Each fld In tbl.Fields
+
+    ctn.Clear
+    ctn.Add("Table", "dad.node")
+    ctn.Add("Name", "dad.att")
+    ctn.Add(tab, "dad.val")
+    ctn.Add("Field", "son.node")
+    ctn.Add("Name", "son.att")
+    ctn.Add(fld.Name, "son.val")
+
+    ctnFld.Clear
+    ctnFld = xmg.QueryXML(dfg, ctn)
+
+    Select intKey
+      Case -1, Null
+        var = Null
+        ctnData.Add(var, fld.Name)
+
+      Case Else
+
+        If res.Available Then
+          var = res[fld.Name]
+          ctnData.Add(var, fld.Name)
+        Endif
+    End Select
+  Next
+
+  Return ctnData
+
+End
+
+Private Sub ShowInfo(ifc As Collection)
+
+  Dim b As ToolButton
+  Dim t As TextLabel
+  Dim val As String
+  Dim s As String
+  Dim pic As Picture
+
+  pnlInfo.Children.Clear
+  pnlInfo.Arrangement = Arrange.Horizontal
+
+  For Each val In ifc
+    s = ""
+    If val = "" Or val = "#" Then
+      Print "x"
+    Else
+      Select ifc.Key
+        Case "Database"
+          s = ifc["Database"]
+          pic = Picture["icon:/16/database"]
+        Case "Table"
+          s = ifc["Table"] & " [" & ifc["QReg"] & "]"
+          pic = Picture["icon:/16/table"]
+        Case "Name"
+          pic = Picture["icon:/16/align-width"]
+          s = ifc["Name"] & " (" & ifc["Type"] & ")"
+
+        Case "ForeignTable"
+          pic = Picture["icon:/16/link"]
+          s = ifc["ForeignTable"] & " / " & ifc["ForeignKey"] & " : " & ifc["ForeignShow"]
+      End Select
+
+      If s <> "" Then
+        b = New ToolButton(pnlInfo) As "b"
+        With b
+          .Name = ifn.Key
+          .Enabled = False
+          .Picture = pic
+          .H = 28
+          .W = 28
+        End With
+
+        t = New TextLabel(pnlInfo)
+        With t
+          .Name = ifn.Key
+          .Text = s
+          .Alignment = Align.Normal
+          .H = 35
+          .W = dsk.TextWidth(s, t.Font.Name, t.Font.Size) + dsk.TextWidth("x", t.Font.Name, t.Font.Size)
+          .Enabled = False
+        End With
+      Endif
+
+    Endif
+  Next
+
+  tobPrimary.Tooltip = ("Primary key field") & ": " & ifc["Name"] & "\n" & ("Tipo") & ": " & ifc["Type"]
+
+  pnlInfo.Refresh
+
+End
+
+Public Sub menudata_Click()
+
+  Dim obj As Object
+
+  Dim ctnEx As New Collection
+  Dim strFile As String
+  Dim strExport As String
+  Dim irx As New Integer[]
+  Dim xTmp As String
+  Dim svg As String
+  Dim xpdf As String
+  Dim ctmp As New Collection
+  Dim vr As Variant
+  Dim cto As New Collection
+
+  Dim subsql As String
+  Dim subres As Result
+  Dim ix As Integer
+  Dim rfd As ResultField
+  Dim fsql As String
+  Dim fres As Result
+  Dim FVal As String
+
+  obj = Last
+
+  Select obj.Tag
+    Case "new"
+      intKey = -1
+      ActionMode("single", cex.Copy())
+      If GridView1.Rows.Count > 0 Then
+        LoadGrid(tab)
+      Endif
+
+    Case "erase"
+      If intKey > 0 Then
+        Print "del from " & tab & ": " & intKey
+        irx = dbs.RecordDelete(con, tab, [intKey])
+        If irx.Count > 0 Then
+          Print ("Records could not be deleted") & " " & irx.Join(",")
+        Else
+          LoadGrid(tab)
+        Endif
+      Endif
+
+    Case "export"
+      If sqlShow <> "" Then
+        ctnEx.Add(sqlShow, "Query")
+        ctnEx.Add("\t", "Separator")
+        If Exist(User.Home &/ tab & ".csv") = False Then
+          Shell "touch " & User.Home &/ tab & ".csv" Wait
+        Endif
+
+        Dialog.Filter = ["*.csv", ("Tab separated text")]
+        Dialog.Path = User.Home &/ tab & ".csv"
+
+        If Dialog.SaveFile() Then Return
+
+        strFile = Dialog.Path
+        If strFile <> "" Then
+          ctnEx.Add(strFile, "File")
+          strExport = dbs.DataExport(con, ctnEx)
+          Wait 0.01
+          If strExport <> "" Then
+            If Exist(strExport) Then
+              Shell "gedit " & strExport
+            Endif
+          Endif
+        Else
+          Message.Info(("You must select a table before importing data"))
+        Endif
+      Catch
+        Message.Info(Error.Text)
+      Endif
+
+    Case "print"
+      Print "Print report from " & tab
+      xTmp = adi &/ "svg/" & tab & ".svg"
+      svg = "/tmp/" & tab & ".svg"
+      xpdf = adi &/ "rpt/" & ctnDat["bname"] & ".pdf"
+
+      ctmp.Clear
+
+      fsql = "SELECT * FROM view_" & tab
+      fsql &= " WHERE " & stxUni[0] & "='" & cex["FFtr"] & "'"
+      fres = con.Exec(fsql)
+      While fres.Available
+        For Each rfd In fres.Fields
+          FVal = CStr(fres[rfd.Name])
+          Select TypeOf(fres[rfd.Name])
+            Case gb.String
+              FVal = fres[rfd.Name]
+            Case gb.Float
+              If InStr(rfd.Name, "price") > 0 Then
+                FVal = Format(FVal, "$#.##")
+              Else
+                FVal = Format(FVal, "#.##")
+              Endif
+            Case Else
+              Print TypeOf(fres[rfd.Name]) & " [" & fres[rfd.Name] & "]"
+              FVal = fres[rfd.Name]
+          End Select
+          ctmp.Add(FVal, rfd.Name)
+        Next
+        fres.MoveNext
+      Wend
+
+      For Each vr In ctnDat
+        ctmp.Add(vr, ctnDat.Key)
+      Next
+
+      ''If the table is related to another table, the information is added
+      If cex.Exist("FFld") Then
+        Print cex["FFld"] & ":" & cex["FFtr"]
+        subsql = "SELECT * FROM qty_" & cex["CTable"]
+        subsql &= " WHERE " & cex["FFld"] & "='" & cex["FFtr"] & "'"
+        subres = con.Exec(subsql)
+        While subres.Available
+          For Each rfd In subres.Fields
+            ctmp.Add(CStr(ix), "id." & CStr(ix))
+            ctmp.Add(subres[rfd.Name], rfd.Name & "." & CStr(ix))
+          Next
+          Inc ix
+          subres.MoveNext
+        Wend
+
+      Endif
+
+      If Exist(adi &/ "rpt") = False Then
+        Shell "mkdir -p '" & adi &/ "rpt'" Wait
+      Endif
+
+      If Exist(svg) Then
+        Shell "rm '" & svg & "'" Wait
+        Shell "cp -f '" & xTmp & "' '" & svg & "'" Wait
+      Else
+        Shell "cp -f '" & xTmp & "' '" & svg & "'" Wait
+      Endif
+
+      xmg.EditXml3(svg, ctmp, True)
+
+      Wait 0.1
+
+      If Exist(svg) Then
+        cto = bat.SVG2PDF(svg, xpdf)
+        If cto.Exist("pdf") Then
+          Desktop.Open(cto["pdf"])
+        Endif
+      Endif
+
+    Case "save"
+      Save2Database()
+      resShow = con.Exec(sqlShow)
+      LoadGrid(tab)
+      ActionMode("list", cex.Copy())
+
+    Case "close"
+      ActionMode("list", cex.Copy())
+
+  End Select
+
+End
+
+Public Sub GridView1_ColumnClick(Column As Integer)
+
+  Dim ctn As New Collection
+  Dim ctnFld As New Collection
+  Dim tmpFilt As String
+  Dim fdname As String
+
+  fdname = stxFld[Column]
+
+  Separator3.Visible = True
+
+  pnlFilter.Visible = True
+  lxaFiterField.W = dsk.TextWidth(fdname & "X", lxaFiterField.Font.Name, lxaFiterField.Font.Size)
+
+  lxaFiterField.Text = fdname     '' Campo
+  lxaFiterField.Refresh
+
+  ''Loading the filter data to see it
+  ctn.Clear
+  ctn.Add("Table", "dad.node")
+  ctn.Add("Name", "dad.att")
+  ctn.Add(tab, "dad.val")
+  ctn.Add("Field", "son.node")
+  ctn.Add("Name", "son.att")
+  ctn.Add(fdname, "son.val")
+
+  ctnFld.Clear
+  ctnFld = xmg.QueryXML(dbc, ctn)
+
+  If InStr(ctnFld["Filter"], "Not ") > 0 Then
+    tobNegation.Value = True
+  Endif
+
+  If InStr(String.LCase(ctnFld["Filter"]), "like ") > 0 Then
+    tobLike.Value = True
+    tmpFilt = Replace(ctnFld["Filter"], "'%", "\t")
+    tmpFilt = Replace(tmpFilt, "%'", "\t")
+    txoFilter.Text = Split(tmpFilt, "\t")[1]
+  Endif
+
+End
+
+Public Sub GridView1_Data(Row As Integer, Column As Integer)
+
+  Dim fpic As Variant
+  Dim fgrp As String
+  Dim pic As Picture
+  Dim xFld As String
+  Dim ipic As String
+
+  For Each fgrp In stxFld
+    If ctnGrp.Exist(fgrp) Then
+      If ctnGrp[fgrp] = "Image" Then
+        fpic = ctnGrp.Key
+      Endif
+    Endif
+  Next
+
+  If resShow.Available Then
+    resShow.MoveTo(Row)
+    xFld = stxFld[Column]
+
+    GridView1[Row, Column].Text = resShow[xFld]
+    If stxUni.Count > 0 Then
+      If xFld = stxUni[0] Then
+        If fpic <> "" Then
+          ipic = adi &/ resShow[fpic]
+          If Exist(ipic) Then
+            If Stat(ipic).Type = gb.File Then
+              pic = Image.Load(ipic).Stretch(GridView1.Rows.Height, GridView1.Rows.Height).Picture
+              GridView1[Row, Column].Picture = pic
+            Endif
+          Endif
+        Endif
+      Endif
+    Endif
+
+    If (Row Mod 2) = 0 Then
+      GridView1[Row, Column].Background = Color.TextBackground
+    Else
+      GridView1[Row, Column].Background = Color.Background
+    Endif
+
+  Endif
+  GridView1.Refresh
+
+End
+
+Public Sub GridView1_ColumnResize(Column As Integer)
+
+  Dim ctn As New Collection
+
+  If gridok = True Then
+    ctn.Clear
+    ctn.Add("Table", "dad.node")
+    ctn.Add("Name", "dad.att")
+    ctn.Add(tab, "dad.val")
+    ctn.Add("Field", "son.node")
+    ctn.Add("Name", "son.att")
+    ctn.Add(stxFld[Column], "son.val")
+    ctn.Add("Width", "son.cha")
+    ctn.Add(CStr(GridView1.Columns[Column].W), "son.new")
+    xmg.Save2XML(dbc, ctn)
+
+  Endif
+
+End
+
+Public Sub GridView1_DblClick()
+
+  Select GridView1.Row
+    Case -1
+      'skip
+    Case Else
+      intKey = CInt(GridView1[GridView1.Row, 0].Text)
+
+      ActionMode("single", cex.Copy())
+
+  End Select
+
+End
+
+Public Sub GridView1_Select()
+
+  Select GridView1.Row
+    Case -1
+      tobExport.Enabled = False
+      tobDelete.Enabled = False
+    Case Else
+      tobExport.Enabled = True
+      tobDelete.Enabled = True
+      intKey = CInt(GridView1[GridView1.Row, 0].Text)
+
+  End Select
+
+End
+
+Public Sub applyfilter_Click()
+
+  Dim obj As Object
+  Dim sFilter As String
+  Dim b As ToolButton
+  Dim ctn As New Collection
+
+  obj = Last
+  Select obj.Tag
+    Case "close"
+      Separator3.Visible = False
+      pnlFilter.Visible = False
+
+    Case "clear"
+      tobNegation.Value = False
+      tobLike.Value = False
+      tobEqual.Value = False
+      tobNull.Value = False
+      txoFilter.Text = ""
+
+    Case "save"
+      Separator3.Visible = False
+      sFilter = ""
+      Print tab &/ lxaFiterField.Text
+      If tobNegation.Value = True Then
+        sFilter &= "Not "
+      Endif
+      For Each b In pnlCondition.Children
+        If b.Value = True Then
+          Select b.Tag
+            Case "like"
+              sFilter &= "Like" & " '%" & txoFilter.Text & "%'"
+            Case "equal"
+              sFilter &= "='" & txoFilter.Text & "'"
+            Case "null"
+              sFilter &= "Null"
+          End Select
+        Endif
+      Next
+
+      Print "Filter: " & sFilter
+
+      ctn.Clear
+      ctn.Add("Table", "dad.node")
+      ctn.Add("Name", "dad.att")
+      ctn.Add(tab, "dad.val")
+
+      ctn.Add("Field", "son.node")
+      ctn.Add("Name", "son.att")
+      ctn.Add(lxaFiterField.Text, "son.val")
+
+      ctn.Add("Filter", "son.cha")
+      ctn.Add(sFilter, "son.new")
+      xmg.Save2XML(dbc, ctn)
+
+      ctn["son.cha"] = "OrderType"
+      ctn["son.new"] = "Asc"
+      xmg.Save2XML(dbc, ctn)
+
+      ctn["son.cha"] = "OrderPosition"
+      ctn["son.new"] = "1"
+      xmg.Save2XML(dbc, ctn)
+
+      pnlFilter.Visible = False
+      LoadGrid(tab)
+
+  End Select
+
+End
+
+Public Sub pnlReg1_Drop()
+
+  Dim strUrl As String
+  Dim fpic As String
+  Dim bolDownload As Boolean
+  Dim bolRefresh As Boolean
+  Dim prsDownload As Process
+  Dim box As Control
+  Dim tbl As Table
+  Dim fld As Field
+  Dim ttn As New Collection
+  Dim fkn As New Collection
+
+  Print Drag.Paste("text/uri-list")
+
+  strUrl = uty.ArrangePath((Drag.Paste("text/uri-list")))
+
+  Print strUrl
+  Print intKey
+
+  Select intKey
+    Case -1
+      Message.Warning(("You must save the record first"))
+
+    Case Else
+      For Each box In Me.Controls
+        If box.Tag <> "" Then
+          Print box.Name
+        Endif
+      Next
+
+      tbl = con.Tables[tab]
+
+      For Each fld In tbl.Fields
+        fkn.Clear
+        ttn.Add("Table", "dad.node")
+        ttn.Add("Name", "dad.att")
+        ttn.Add(tab, "dad.val")
+        ttn.Add("Field", "son.node")
+        ttn.Add("Name", "son.att")
+        ttn.Add(fld.Name, "son.val")
+        fkn = xmg.QueryXML(dbc, ttn)
+        ttn.Clear
+        Select fkn["Group"]
+          Case "Image"
+            fpic = adi &/ "/" & ctnAlt[fld.Name]
+            Break
+        End Select
+      Next
+
+      If Exist(fpic) = True Then
+        Select Message.Question(("The file already exists") & gb.NewLine &
+              ("Do you want to replace it?"), ("Replaze"), ("Cancel"))
+          Case 1
+            bolDownload = True
+            bolRefresh = True
+          Case 2
+            bolDownload = False
+        End Select
+      Else
+        bolDownload = True
+        bolRefresh = True
+      Endif
+
+      Select InStr(strUrl, "http")
+
+        Case 0
+
+          strUrl = vag.ConvertPath(strUrl)
+          strUrl = Replace(strUrl, "file://", "")
+
+          Select String.LCase(File.Ext(strUrl))
+            Case "jpeg", "jpg"
+
+              If Exist(File.Dir(fpic)) = False Then
+                Shell "mkdir '" & File.Dir(fpic) & "'" Wait
+              Endif
+
+              Shell "cp '" & strUrl & "' '" & fpic & "'" Wait
+            Case "png"
+          End Select
+
+          Wait 0.2
+
+        Case Else
+          If Exist("/tmp/cover.jpg") Then
+            Shell "rm /tmp/cover.jpg"
+          Endif
+          prsDownload = Shell "wget " & strUrl & " --output-document=" & "/tmp/cover.jpg"
+
+          While prsDownload.State = prsDownload.Running
+            Wait 0.1
+          Wend
+
+          Shell "mv --parents '/tmp/cover.jpg' '" & fpic & "'"
+          Wait 0.2
+
+      End Select
+
+  End Select
+
+End

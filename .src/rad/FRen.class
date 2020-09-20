@@ -1,0 +1,316 @@
+' Gambas class file
+
+'
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+Export
+
+Private Observer As Observer        '' Observer used before leaving to warn of unsaved changes.
+
+Private adi As String               '' Program Directory
+Private dbc As String               '' Database configuration file
+Private apc As String               '' Program configuration file
+Private etx As String               '' Default plain text editor
+Private lgg As Logger               '' Application event log.
+
+Public Sub _new(c As Collection)
+
+  Run(c)
+
+End
+
+Public Sub Run(c As Collection) As Integer
+
+  Dim f As Variant
+  Dim p As Panel
+  Dim i As Integer
+  Dim t As ToolButton
+  Dim o As Panel
+  Dim la As TextLabel
+  Dim lb As TextLabel
+
+  Dim H, W, D As Integer
+  Dim img As Image
+  Dim s As Separator
+  Dim mim As String
+  Dim grp As String
+  Dim cls As String
+  Dim def As String
+  Dim alt As String
+
+  '------------------------------------------------------------------------------
+  Dim obj As Object
+  Dim ictn As New Collection
+  Dim z As Integer
+  Dim iSet As String
+
+  '' Estableciendo la conexion a la base de datos
+  adi = c["AppDir"]           '' Program Directory
+  apc = c["AppCfg"]           '' Program configuration file
+  dbc = c["DbsCfg"]           '' Database configuration file
+  etx = c["AppEdi"]           '' Default plain text editor
+  lgg = c["AppLog"]           '' Application event log.
+
+  iSet = xmg.GetVar("Theme.Icons", apc)
+  ictn = dsk.GNumix(iSet & "/")
+
+  For Each obj In Me.Controls
+    Select Object.Type(obj)
+      Case "ToolButton"
+        If obj.Picture Then
+          If obj.W = obj.H Then
+            z = obj.W
+            Select z
+              Case 35, 32, 28
+                If ictn.Exist(obj.Tag) Then
+                  If Exist(ictn[obj.Tag]) Then
+                    If Stat(ictn[obj.Tag]).Type = gb.File Or Stat(ictn[obj.Tag]).Type = gb.Link Then
+                      obj.Picture = Image.Load(ictn[obj.Tag]).Stretch(20, 20).Picture
+                      Print "> Control con icono: " & obj.Tag
+                    Endif
+                  Endif
+                Endif
+            End Select
+          Endif
+        Endif
+    End Select
+  Next
+  '------------------------------------------------------------------------------
+
+  ''Formatting the buttons
+  btnCheckall.W = dsk.TextWidth(btnCheckall.Text, btnCheckall.Font.Name, btnCheckall.Font.Size) + 14
+  btnUncheckall.W = dsk.TextWidth(btnUncheckall.Text, btnUncheckall.Font.Name, btnUncheckall.Font.Size) + 14
+  btnRename.W = dsk.TextWidth(btnRename.Text, btnRename.Font.Name, btnRename.Font.Size) + 14
+  btnReverse.W = dsk.TextWidth(btnReverse.Text, btnReverse.Font.Name, btnReverse.Font.Size) + 14
+
+  If c.Count > 0 Then
+    For Each f In c
+
+      p = New Panel(ScrollView1)
+      With p
+        .Name = "p" & CStr(i)
+        .Expand = False
+        .H = 64
+        .Arrangement = Arrange.Horizontal
+      End With
+
+      t = New ToolButton(p)
+      With t
+        .Name = "t" & CStr(i)
+        .Tag = [f, c.Key]
+        .H = 64
+        .W = 64
+        .Toggle = True
+        If Stat(f).Type = gb.File Then
+          mim = DesktopMime.FromFile(f).Type
+          If InStr(mim, "/") > 0 Then
+            grp = Split(mim, "/")[0]
+            cls = Split(mim, "/")[1]
+            Select grp
+              Case "image"
+                img = Image.Load(f)
+                D = t.W - 4
+                If img Then
+                  If img.H > img.W Then
+                    H = D
+                    W = D * (img.W / img.H)
+                  Else
+                    If img.H < img.W Then
+                      H = D * (img.H / img.W)
+                      W = D
+                    Else
+                      H = D
+                      W = D
+                    Endif
+                  Endif
+                  .Picture = img.Stretch(W, H).Picture
+                Endif
+              Case Else
+                Print mim
+                D = t.W - 4
+                def = "./icons/vertex/" & grp & "-" & cls & ".svg"
+                alt = "./icons/alt/" & grp & "-" & cls & ".svg"
+                If Exist(def) Then
+                  img = Image.Load(def)
+                Else
+                  If Exist(alt) Then
+                    img = Image.Load(alt)
+                  Else
+                    img = DesktopMime.FromFile(f).GetIcon(64)
+                  Endif
+                Endif
+                .Picture = img.Stretch(D, D).Picture
+            End Select
+          Endif
+        Endif
+      End With
+
+      s = New Separator(p)
+      With s
+        .Name = "s1" & CStr(i)
+        .w = 1
+      End With
+
+      o = New Panel(p)
+      With o
+        .Name = "o" & CStr(i)
+        .Expand = True
+        .Arrangement = Arrange.Vertical
+      End With
+
+      la = New TextLabel(o)
+      With la
+        .Name = "la" & CStr(i)
+        .Text = c.Key 'f
+        .Alignment = Align.Normal
+        .Expand = True
+      End With
+
+      lb = New TextLabel(o)
+      With lb
+        .Name = "lb" & CStr(i)
+        .Text = f
+        .Alignment = Align.Normal
+        .Expand = True
+      End With
+
+      s = New Separator(ScrollView1)
+      With s
+        .Name = "s0" & CStr(i)
+        .h = 1
+      End With
+
+      Inc i
+    Next
+  Endif
+
+  Observer = New Observer(Me) As "Observer"
+
+  Me.Menus.Hide
+  Me.Show()
+
+  Colors()
+
+End
+
+''Color the textlabel according to whether the text corresponds to an existing file or not
+
+Public Sub Colors()
+
+  Dim c As Object
+  Dim q As Container
+  Dim p2 As Panel
+  Dim l As Object
+
+  q = Me.Children[1]
+
+  For Each c In q.Children
+    Select Object.Type(c)
+      Case "Panel"
+        p2 = c.Children[2]
+        For Each l In p2.Children
+          Select Object.Type(l)
+            Case "TextLabel"
+              If Exist(l.Text) Then
+                l.Foreground = Color.Foreground
+              Else
+                l.Foreground = Color.Red
+              Endif
+          End Select
+        Next
+    End Select
+  Next
+
+End
+
+''Rename files by working with each pair of names, the existing one and the new one
+
+Public Sub Frename()
+
+End
+
+Public Sub actions_Click()
+
+  Dim obj As Object
+  Dim q As Object
+  Dim c As Object
+  Dim t As ToolButton
+
+  obj = Last
+
+  Select obj.Tag
+
+    Case "checkall"
+      q = Me.Children[1]
+      For Each c In q.Children
+        Select Object.Type(c)
+          Case "Panel"
+            t = c.Children[0]
+            t.Value = True
+        End Select
+      Next
+    Case "uncheckall"
+      q = Me.Children[1]
+      For Each c In q.Children
+        Select Object.Type(c)
+          Case "Panel"
+            t = c.Children[0]
+            t.Value = False
+        End Select
+      Next
+    Case "rename"
+      q = Me.Children[1]
+      For Each c In q.Children
+        Select Object.Type(c)
+          Case "Panel"
+            t = c.Children[0]
+            If t.Value = True Then
+              ' Moviendo los archivos
+              If Exist(t.Tag[1]) = False Then
+                Shell "mkdir --parents " & File.Dir(t.Tag[1]) Wait
+              Endif
+              Shell "mv -f '" & t.Tag[0] & "' '" & t.Tag[1] & "'" Wait
+            Endif
+        End Select
+      Next
+      Colors()
+    Case "reverse"
+      q = Me.Children[1]
+      For Each c In q.Children
+        Select Object.Type(c)
+          Case "Panel"
+            t = c.Children[0]
+            If t.Value = True Then
+              ' Moviendo los archivos
+              If Exist(t.Tag[0]) = False Then
+                Shell "mkdir --parents " & File.Dir(t.Tag[0]) Wait
+              Endif
+              If Exist(t.Tag[1]) Then
+                Shell "mv -f '" & t.Tag[1] & "' '" & t.Tag[0] & "'" Wait
+              Endif
+            Endif
+        End Select
+      Next
+      Colors()
+  End Select
+
+End

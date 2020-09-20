@@ -1,0 +1,106 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,114.25,85.75)
+  Icon = Picture["logo.svg"]
+  Arrangement = Arrange.Horizontal
+  { grpFile Menu
+    Text = ("File")
+  }
+  { grpEdit Menu
+    Text = ("Edit")
+    { mnuEdit Menu menuapp
+      Name = "mnuEdit"
+      Text = ("Edition")
+      Picture = Picture["icon:/22/edit"]
+      Tag = "edit"
+    }
+  }
+  { grpTools Menu
+    Text = ("Tools")
+    { mnuImport Menu menuapp
+      Name = "mnuImport"
+      Text = ("Data import")
+      Picture = Picture["icon:/22/upload"]
+      Enabled = False
+      Tag = "import"
+    }
+    { mnuTesting Menu
+      Text = ("Document a gambas prooject")
+      Picture = Picture["icon:/32/bookmark"]
+      Tag = "document"
+    }
+  }
+  { grpHelp Menu
+    #Translate = False
+    Text = "?"
+    { mnuConfig Menu menuapp
+      Name = "mnuConfig"
+      Text = ("Preferences")
+      Picture = Picture["icon:/32/options"]
+      Tag = "options"
+    }
+    { mnuHelp Menu menuapp
+      Name = "mnuHelp"
+      Text = ("Help")
+      Picture = Picture["icon:/22/help"]
+      Tag = "help"
+      Shortcut = "F1"
+    }
+    { nmuAbout Menu menuapp
+      Name = "nmuAbout"
+      Text = ("About")
+      Picture = Picture["icon:/22/info"]
+      Tag = "info"
+    }
+  }
+  { pnlIcons Panel
+    MoveScaled(1,13,3.875,54)
+    Arrangement = Arrange.Vertical
+  }
+  { Separator1 Separator
+    MoveScaled(7,6,0,13)
+  }
+  { HSplit1 HSplit
+    MoveScaled(9,8,91,54)
+    Expand = True
+    { Panel3 Panel
+      MoveScaled(4,12,35,40)
+      Expand = True
+      Arrangement = Arrange.Vertical
+      { Panel1 Panel
+        MoveScaled(2,2,31,4)
+        Arrangement = Arrange.Horizontal
+        Margin = True
+        Padding = 1
+        { txoSearch TextBox
+          MoveScaled(0,0,11,4)
+          Expand = True
+          Alignment = Align.Center
+        }
+      }
+      { Separator3 Separator
+        MoveScaled(2,7,19,0)
+        Visible = False
+      }
+      { TreeView1 TreeView
+        MoveScaled(2,9,20,17)
+        Background = Color.Background
+        Drop = True
+        Expand = True
+        Editable = True
+        Border = False
+      }
+    }
+    { Separator2 Separator
+      MoveScaled(44,17,0,9)
+      Visible = False
+    }
+    { Workspace1 Workspace
+      MoveScaled(46,12,42,40)
+      Background = Color.Transparent
+      Expand = True
+      Border = False
+    }
+  }
+}

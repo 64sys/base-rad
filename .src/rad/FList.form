@@ -1,0 +1,37 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,36,27)
+  Resizable = False
+  Border = False
+  Stacking = Window.Above
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  { Panel1 Panel
+    MoveScaled(1,1,34,25)
+    Expand = True
+    Arrangement = Arrange.Vertical
+    Spacing = True
+    Margin = True
+    Padding = 4
+    Border = Border.Plain
+    { Panel2 Panel
+      MoveScaled(2,1,29,4)
+      Arrangement = Arrange.Horizontal
+      { TextBox1 TextBox
+        MoveScaled(0,0,15,4)
+        Expand = True
+      }
+      { btnCancel Button
+        MoveScaled(18,0,11,4)
+        Text = ("Cancel")
+      }
+    }
+    { ListView1 ListView
+      MoveScaled(2,6,25,17)
+      Background = Color.ButtonBackground
+      Expand = True
+      Border = False
+    }
+  }
+}

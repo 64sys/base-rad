@@ -1,0 +1,475 @@
+' Gambas class file
+
+'
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+Export
+
+Private Observer As Observer        '' Observer used before leaving to warn of unsaved changes.
+'------------------------------------------------------------------------------
+''Variables that were passed from the start module
+Private con As New Connection       '' Connection to the database
+Private adi As String               '' Program Directory
+Private dbc As String               '' Database configuration file
+Private apc As String               '' Program configuration file
+Private etx As String               '' Default plain text editor
+Private lgg As Logger               '' Application event log.
+'------------------------------------------------------------------------------
+Private tab As String             '' Current table on which the import is working
+
+Private sqlShow As String         '' Query the database
+Private resShow As Result         '' Result of the query to the database
+Private stxFld As New String[]    '' Field list of the current result.
+Private stxFti As New String[]    '' List of titles of the fields of the current result.
+Private stxFiles As New String[]  '' File list.
+Private stxLines As New String[]  '' List of rows (records) of the data file to import.
+Private stxImp As New String[]    '' Field list of the data file to import.
+Private stxFormat As New String[] '' Field list of the data file to import.
+Private sep As String             '' List separator character, default is tab
+
+Private strFUni As String         '' Unique field name for the current table
+Private intUni As Integer         '' Column number for the unique field
+Private strFPky As String         '' Field name of the primary key
+Private intPky As Integer         '' Column number for the primary key field
+Private sqlMark As String         '' Query the database to mark the coincidences and the differences
+Private resMark As Result         '' Result of the query
+
+Private picEdi As Picture
+Private picDel As Picture
+Private picAdd As Picture
+Private picMod As Picture
+
+Public Sub _new(cin As Collection)
+
+  Run(cin)
+
+End
+
+Public Sub Run(cin As Collection) As Integer
+
+  '------------------------------------------------------------------------------
+  Dim obj As Object
+  Dim ictn As New Collection
+  Dim iSet As String
+
+  Observer = New Observer(Me) As "Observer"
+
+  '' Setting the global variables
+  con = cin["Connex"]           '' Connection to the database
+  adi = cin["AppDir"]           '' Program Directory
+  apc = cin["AppCfg"]           '' Program configuration file
+  dbc = cin["DbsCfg"]           '' Database configuration file
+  etx = cin["AppEdi"]           '' Default plain text editor
+  lgg = cin["AppLog"]           '' Application event log.
+
+  tab = cin["CTable"]           '' Application event log.
+
+  iSet = xmg.GetVar("Theme.Icons", apc)
+  ictn = dsk.GNumix(iSet & "/")
+
+  For Each obj In Me.Controls
+    Select Object.Type(obj)
+      Case "ToolButton"
+        If obj.Picture Then
+          If ictn.Exist(obj.Tag) Then
+            If Exist(ictn[obj.Tag]) Then
+              If Stat(ictn[obj.Tag]).Type = gb.File Or Stat(ictn[obj.Tag]).Type = gb.Link Then
+                obj.Picture = Image.Load(ictn[obj.Tag]).Stretch(20, 20).Picture
+              Endif
+            Endif
+          Endif
+        Endif
+    End Select
+  Next
+  '------------------------------------------------------------------------------
+
+  sep = "\t"
+
+  Me.Menus.Hide
+  LoadImportGrid()
+
+  picEdi = Picture["icon:/16/edit"]
+  picDel = Picture["icon:/16/erase"]
+  picAdd = Picture["icon:/16/add"]
+  picMod = Picture["icon:/16/development"]
+  Me.Show()
+
+End
+
+Public Sub LoadImportGrid()
+
+  Dim fld As Field
+  Dim int As Integer
+  Dim ctn As New Collection
+  Dim ctnFld As New Collection
+  Dim tbl As Table
+
+  GridViewExisting.Header = GridView.Horizontal
+
+  GridViewImport.ScrollBar = Scroll.Both
+  GridViewExisting.ScrollBar = Scroll.Both
+
+  ''Getting the list of fields
+  stxFld.Clear
+  stxFti.Clear
+
+  tbl = con.Tables[tab]
+
+  GridViewExisting.Columns.Count = tbl.Fields.Count
+  GridViewImport.Columns.Count = tbl.Fields.Count
+
+  int = 0
+  strFUni = ""
+
+  For Each fld In tbl.Fields
+    stxFld.Add(fld.Name)
+
+    ctn.Clear
+    ctn.Add("Table", "dad.node")
+    ctn.Add("Name", "dad.att")
+    ctn.Add(tab, "dad.val")
+    ctn.Add("Field", "son.node")
+    ctn.Add("Name", "son.att")
+    ctn.Add(fld.Name, "son.val")
+
+    ctnFld.Clear
+    ctnFld = xmg.QueryXML(dbc, ctn)
+
+    Select ctnFld["Unique"]
+      Case "yes"
+        strFUni = ctnFld["Name"]
+    End Select
+
+    Select ctnFld["PrimaryKey"]
+      Case "yes"
+        strFPky = ctnFld["Name"]
+
+    End Select
+
+    stxFti.Add(ctnFld["Title"])
+
+    Select ctnFld["Title"]
+      Case ""
+        GridViewExisting.Columns[int].Title = fld.Name
+      Case Else
+        GridViewExisting.Columns[int].Title = ctnFld["Title"]
+    End Select
+
+    GridViewExisting.Columns[int].W = CInt(ctnFld["Width"])
+    GridViewImport.Columns[int].W = GridViewExisting.Columns[int].W
+
+    Inc int
+
+  Next
+
+  sqlShow = "select * from view_" & tab & " limit 10"
+
+  Print sqlShow
+  resShow = con.Exec(sqlShow)
+
+  ' Obligo a lanzar el evento _Data
+  GridViewExisting.Clear
+  GridViewExisting.Rows.Count = 0
+  GridViewExisting.Rows.Count = resShow.Count
+
+End
+
+Public Sub GridViewExisting_Data(Row As Integer, Column As Integer)
+
+  If resShow.Available Then
+    resShow.MoveTo(Row)
+    GridViewExisting[Row, Column].Text = resShow[stxFld[Column]]
+  Endif
+  GridViewExisting.Refresh
+
+End
+
+Public Sub menimport_Click()
+
+  Dim obj As Object
+  Dim stxHead As New String[]
+  Dim stxDat As New String[]
+  Dim stxAct As New String[]
+  Dim stxTmp As New String[]
+  Dim stxFmt As New String[]
+  Dim intCol As Integer
+  Dim intLine As Integer
+  Dim strField As String
+  Dim icel As Integer
+  Dim ireg As Integer
+  Dim ctnIns As New Collection  '' List of fields and data to insert in the base.
+  Dim ctnSkp As New Collection  '' List of fields and data to insert in the base without the index field.
+  Dim tbl As Table
+  Dim col As New Collection
+  Dim ch1 As String
+  Dim val As String
+  Dim ctr As Integer
+  Dim ch2 As String
+  Dim j As Integer
+  Dim var As Variant
+  Dim stxLbl As New String[]
+  Dim t As Integer
+  Dim pval As Float
+
+  obj = Last
+
+  Select obj.Tag
+
+    Case "open"
+      stxFiles.Clear
+      stxLines.Clear
+      stxDat.Clear
+      stxImp.Clear
+      tboImport.Enabled = False
+
+      tbl = con.Tables[tab]
+
+      stxFiles = Dsk.FileChooser(, ["csv"])
+      If stxFiles.Count > 0 Then
+        If Exist(stxFiles[0]) Then
+          stxLines = fil.FileLoad(stxFiles[0])
+        Endif
+        ' Obtención del caracter separador.
+        col = vag.ChkSeparator(stxFiles[0])
+
+        Select col.Count
+          Case 0
+            Message.Error("The file is not valid, because it does not have a list separator character")
+
+          Case 1
+            For Each val In col
+
+              sep = col.Key
+              Break
+            Next
+
+          Case 2
+
+            For Each val In col
+              Select ctr
+                Case 0
+                  ch1 = col.Key
+                Case 1
+                  ch2 = col.Key
+
+                Case Else
+                  Break
+              End Select
+              Inc ctr
+            Next
+
+            j = Message.Question(("Choose a list separator character"), ch1, ch2, ("Cancel"))
+
+            Select j
+              Case 1
+                sep = ch1
+              Case 2
+                sep = ch2
+            End Select
+          Case Else
+
+        End Select
+
+        If stxLines.count > 0 Then
+          stxHead = Split(stxLines[0], sep)
+        Endif
+
+        ''There is only one indispensable field, which is the single value field. if it is not present in the CSV the import is interrupted
+        intUni = stxHead.Find(strFUni) ''This integer will be the one indicated by column n that is the unique field
+        intPky = stxHead.Find(strFPky)
+
+        If sep <> "" Then
+          If intUni > -1 Then
+            For intLine = 1 To stxLines.Max
+              stxDat.Clear
+              stxDat = Split(stxLines[intLine], sep)
+              stxTmp.Clear
+              stxFmt.Clear
+              ''Well now we have to see if the record exists in the DB
+              sqlMark = "select * from view_" & tab & " where " & strFUni & "='" & stxDat[intUni] & "'"
+              resMark = con.Exec(sqlMark)
+
+              For Each strField In stxFld
+                intCol = stxHead.Find(strField)
+                If intCol > -1 Then
+                  'El CSV contiene el campo
+                  stxTmp.Add(stxDat[intCol])
+                  Select resMark.Available
+                    Case True
+                      If resMark.Count = 1 Then
+                        If CStr(resMark[strField]) = stxDat[intCol] Then
+                          stxFmt.Add("E") ''Existing
+                        Else
+                          stxFmt.Add("M") ''Change
+                        Endif
+                      Else
+                        stxFmt.Add("N")     ''New
+                      Endif
+                    Case False
+                      stxFmt.Add("N")         ''New
+                  End Select
+                Else
+                  ''The CSV does not contain the field
+                  stxTmp.Add("")
+                  stxFmt.Add("x")                 ''The field does not exist
+                Endif
+              Next
+              ''Adding the data to the array that will be used to load the gridview
+              stxImp.Add(stxTmp.Join(sep))
+              stxFormat.Add(stxFmt.Join(sep))
+
+            Next
+            tboImport.Enabled = True
+          Endif
+
+          If stxImp.Count > 0 Then
+            GridViewImport.Columns.Count = GridViewExisting.Columns.Count
+
+            GridViewImport.Rows.Count = 0
+            GridViewImport.Rows.Count = stxImp.Count
+          Endif
+
+        Else
+          tboImport.Enabled = False
+
+        Endif
+      Endif
+
+    Case "import"
+
+      If stxImp.Count > 0 Then
+        For ireg = 0 To stxImp.Max
+
+          stxDat.Clear
+          stxDat = Split(stxImp[ireg], sep)
+          stxAct.Clear
+          stxAct = Split(stxFormat[ireg], sep)
+
+          ctnIns.Clear
+          ctnSkp.Clear
+
+          For icel = 0 To stxDat.Max
+
+            If icel <> intPky Then
+              ctnSkp.Add(stxDat[icel], stxFld[icel])
+            Else
+              ctnSkp.Add("0", stxFld[icel])
+            Endif
+
+            Select stxAct[icel]
+              Case "E"
+                ''It is only added if it is the unique field
+                Select icel
+                  Case intUni
+                    ctnIns.Add(stxDat[icel], stxFld[icel])
+                  Case intPky
+                    ctnIns.Add(stxDat[icel], stxFld[icel])
+                End Select
+
+              Case "M"
+                ctnIns.Add(stxDat[icel], stxFld[icel])
+
+              Case "N"
+                ctnIns.Add(stxDat[icel], stxFld[icel])
+            End Select
+          Next
+          stxLbl.Clear
+          For Each var In ctnIns
+            stxLbl.Add(ctnIns.Key & ":" & var)
+          Next
+
+          Select CheckBox1.Value
+            Case -1
+              dbs.RecordEdit(con, tab, dbc, ctnSkp)
+            Case 0
+              dbs.RecordEdit(con, tab, dbc, ctnIns)
+          End Select
+          If t <> 0 Then
+            If (stxImp.Max - 1) > 0 Then
+              pval = t / (stxImp.Max - 1)
+            Endif
+            ProgressBar1.Value = pval
+            ProgressBar1.Refresh
+          Endif
+
+          Label1.Text = stxLbl.Join(" + ")
+          Label1.Refresh
+          Wait 0.001
+          Inc t
+        Next
+
+        LoadImportGrid()
+
+      Endif
+
+    Case "quit"
+      Me.Close
+
+  End Select
+
+End
+
+Public Sub GridViewImport_Data(Row As Integer, Column As Integer)
+
+  Print CStr(Row) & ":" & CStr(Column)
+  If stxImp.Count > 0 Then
+    GridViewImport[Row, Column].Text = Split(stxImp[Row], sep)[Column]
+    Select Split(stxFormat[Row], sep)[Column]
+
+      Case "M"
+        GridViewImport[Row, Column].Picture = picMod
+        GridViewImport[Row, Column].Font.Bold = True
+      Case "N"
+        GridViewImport[Row, Column].Picture = picAdd
+        GridViewImport[Row, Column].Font.Italic = True
+      Case "X"
+        GridViewImport[Row, Column].Picture = picDel
+        GridViewImport[Row, Column].Background = Color.LightGray
+    End Select
+
+  Endif
+
+  GridViewImport.Refresh
+
+End
+
+Public Sub GridViewExisting_Scroll()
+
+  GridViewImport.ScrollX = GridViewExisting.ScrollX
+
+End
+
+Public Sub GridViewExisting_ColumnResize(Column As Integer)
+
+  GridViewImport.Columns[Column].Width = GridViewExisting.Columns[Column].Width
+
+End
+
+Public Sub GridViewImport_Scroll()
+
+  GridViewExisting.ScrollX = GridViewImport.ScrollX
+
+End
+
+Public Sub GridViewExisting_Click()
+
+End

@@ -1,0 +1,50 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,79,54)
+  Expand = True
+  Arrangement = Arrange.Vertical
+  { Panel2 Panel
+    MoveScaled(-1,1,77,5)
+    Arrangement = Arrange.Horizontal
+    { btnCheckall Button actions
+      Name = "btnCheckall"
+      MoveScaled(1,0,7,5)
+      Tag = "checkall"
+      ToolTip = ("Mark all files")
+      Text = ("Mark all files")
+    }
+    { btnUncheckall Button actions
+      Name = "btnUncheckall"
+      MoveScaled(10,0,8,5)
+      Tag = "uncheckall"
+      ToolTip = ("Unmark all files")
+      Text = ("Unmark all files")
+    }
+    { btnRename Button actions
+      Name = "btnRename"
+      MoveScaled(22,0,12,5)
+      Tag = "rename"
+      ToolTip = ("Rename selected files")
+      Text = ("Rename")
+    }
+    { btnReverse Button actions
+      Name = "btnReverse"
+      MoveScaled(36,0,12,5)
+      Tag = "reverse"
+      ToolTip = ("Restore moved files")
+      Text = ("Restore")
+    }
+    { Spring2 Spring
+      MoveScaled(62,0,4,4)
+    }
+  }
+  { ScrollView1 ScrollView
+    MoveScaled(0,7,77,44)
+    Background = Color.Background
+    Expand = True
+    Arrangement = Arrange.Vertical
+    Border = False
+    ScrollBar = Scroll.Vertical
+  }
+}

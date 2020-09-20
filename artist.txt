@@ -1,0 +1,4 @@
+author#Elegant Themes
+website#http://www.elegantthemes.com/blog/freebie-of-the-week/beautiful-flat-icons-for-free
+iconset#Circle-icons-tools.svg
+licence#GNU General Public License

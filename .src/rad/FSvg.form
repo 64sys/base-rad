@@ -1,0 +1,21 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,64,64)
+  Arrangement = Arrange.Vertical
+  { Button1 Button
+    MoveScaled(30,4,16,4)
+  }
+  { Panel1 Panel
+    MoveScaled(3,14,57,47)
+    Arrangement = Arrange.Horizontal
+    { ListBox1 ListBox
+      MoveScaled(2,8,16,16)
+      Expand = True
+    }
+    { ListBox2 ListBox
+      MoveScaled(19,8,16,16)
+      Expand = True
+    }
+  }
+}

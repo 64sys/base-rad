@@ -1,0 +1,750 @@
+' Gambas module file
+
+''' EPUB files utilities.
+' RADG
+' Rapid Application Development for Gambas
+'
+' Copyright (C) Martín Belmonte
+'
+' This program is free software; you can redistribute it and/or modify
+' it under the terms of the GNU General Public License as published by
+' the Free Software Foundation; either version 2 of the License, or
+' (at your option) any later version.
+'
+' This program is distributed in the hope that it will be useful,
+' but WITHOUT ANY WARRANTY; without even the implied warranty of
+' MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+' GNU General Public License for more details.
+'
+' You should have received a copy of the GNU General Public License
+' along with this program; if not, write to the Free Software
+' Foundation, Inc., 51 Franklin St, Fifth Floor,
+' Boston, MA  02110-1301  USA
+'
+
+Export
+
+'' Creating a basic file and directory structure for packaging an EPUB file. As input parameter requires: <br>
+'' <ul>
+'' <li> drt, Directory </li>
+'' <li> std, Standard version, default EPUB 3.1 </li></ul>
+
+Public Function EpubStructureMaker(drt As String, Optional std As String)
+
+  Dim stn As New Collection         ' Lista de elementos que debe tener la estructura
+  Dim typ As String
+  Dim str As String
+
+  Select std
+    Case "1", "1.0", "EPUB 1.0"
+      stn.Add("version", "EPUB 1.0")
+    Case "", "2", "2.0", "EPUB 2.0"
+      stn.Add("version", "EPUB 2.0")
+    Case "3", "3.0", "EPUB 3.0"
+      stn.Add("version", "EPUB 3.0")
+    Case "3.1", "EPUB 3.1", "3.1"
+      stn.Add("version", "EPUB 3.1")
+    Case Else
+      stn.Add("version", "EPUB 2.0")
+  End Select
+
+  stn.Add("directory", "META-INF")
+  stn.Add("file", "META-INF/container.xml")
+
+  stn.Add("directory", "OEBPS")
+
+  stn.Add("directory", "OEBPS/Images")
+  stn.Add("directory", "OEBPS/Styles")
+
+  stn.Add("file", "OEBPS/Styles/style.css")
+  stn.Add("directory", "OEBPS/Text")
+
+  stn.Add("file", "OEBPS/content.opf")
+  stn.Add("file", "OEBPS/toc.ncx")
+  stn.Add("file", "mimetype")
+
+  If Exist(drt) Then
+    If Stat(drt).Type = gb.Directory Then
+      For Each typ In stn
+        Select typ
+          Case "directory"
+            If Exist(drt &/ stn.Key) = False
+              Shell "mkdir " & drt &/ stn.Key Wait
+            Endif
+        End Select
+      Next
+      ' Then the files
+      For Each typ In stn
+        Select typ
+          Case "file"
+            Select File.Name(stn.Key)
+              Case "container.xml"
+                If Exist(drt &/ stn.Key) = False
+                  str = EpubContentOpfBasic()
+                  File.Save(drt &/ stn.Key, str)
+                Endif
+
+              Case "style.css"
+                If Exist(drt &/ stn.Key) = False
+                  str = EpubStyleCSS()
+                  File.Save(drt &/ stn.Key, str)
+                Endif
+
+              Case "mimetype"
+                File.Save(drt &/ stn.Key, "application/epub+zip")
+            End Select
+
+        End Select
+      Next
+    Endif
+  Endif
+
+End
+
+'' Returns the Xhtml and requires the content html as an input parameter.
+
+Public Function Xhtml(strCont As String) As String
+
+  Dim strOut As String
+
+  strOut = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n"
+  strOut &= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+  strOut &= "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+  strOut &= "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"es\">\n"
+  strOut &= "<head>\n"
+  strOut &= "  <title>Title</title>\n"
+  strOut &= "  <link href=\"../Styles/style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+  strOut &= "</head>\n"
+  strOut &= "<body>\n"
+  strOut &= strCont & "\n"
+  strOut &= "</body>\n"
+  strOut &= "</html>\n"
+
+  Return strOut
+
+End
+
+'' Returns Html5 code and as input parameter requires the content html. Let's say you just add the headers to it.
+
+Public Function Html5(strCont As String) As String
+
+  Dim strOut As String
+
+  strOut &= "<!DOCTYPE html>\n"
+  strOut &= "<html>\n"
+  strOut &= "<head>\n"
+  strOut &= "<meta charset=\"utf-8\" />\n"
+  strOut &= "<link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+  strOut &= "<title></title>\n"
+  strOut &= "</head>\n"
+  strOut &= "<body>\n"
+
+  strOut &= strCont & "\n"
+
+  strOut &= "</body>\n"
+  strOut &= "</html>\n"
+
+  Return strOut
+
+End
+
+'' Create an epub file, which is basically a zip file with specific content and structure. The first parameter is the path of the layout directory and the second is the path of the epub file.
+
+Public Function EpubPackager(sDir As String) As String
+
+  Dim base As String
+
+  Dim com As String
+
+  base = fil.DirParent(sDir) & "/book.epub"
+  If Exist(base) Then
+    Shell "rm " & base Wait
+  Endif
+
+  com = "7z a -tzip '" & base & "' "
+
+  com &= "'" & sDir & "/mimetype' "
+  '  com &= "'" & sDir & "/OEBPS/content.opf' "
+  com &= "'" & sDir & "/META-INF' "
+  com &= "'" & sDir & "/OEBPS'"
+
+  Shell com Wait
+
+  If Exist(base) Then
+    Return base
+  Else
+    Return ""
+  Endif
+
+End
+
+'' Create the content.opf file with some parameters that are optionally passed to it.
+
+Public Function EpubContentOpf(ctnMeta As Collection) As String
+
+  Dim strOut As String
+  Dim orx As New String[]
+  Dim ord As String
+  Dim grp As String
+  Dim c As Collection
+  'Dim c As New String[]
+  Dim s As String
+  Dim str As String
+
+  orx = ["cover", "sinopsis", "index", "title", "quotes", "info", "foreword", "proverbs", "preface", "postcript", "permissions", "dedication", "intro", "section", "thanks", "references", "author", "notes"]
+
+  strOut = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+  strOut &= "<package version=\"3.0\" unique-identifier=\"BookId\" xmlns=\"http://www.idpf.org/2007/opf\">\n"
+  strOut &= "  <metadata xmlns:opf=\"http://www.idpf.org/2007/opf\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n"
+
+  strOut &= "    <dc:identifier opf:scheme=\"UUID\" id=\"BookId\">urn:uuid:" & ctnMeta["identifier"][2] & "</dc:identifier>\n"
+  strOut &= "    <dc:language>" & ctnMeta["language"][2] & "</dc:language>\n"
+  strOut &= "    <dc:title>" & ctnMeta["title"][2] & "</dc:title>\n"
+  strOut &= "    <dc:creator id=\"creator\">" & ctnMeta["creator"][2] & "</dc:creator>\n"
+
+  strOut &= "    <dc:publisher>" & ctnMeta["publisher"][2] & "</dc:publisher>\n"
+  strOut &= "    <dc:date>" & ctnMeta["date"][2] & "</dc:date>\n"
+  'strOut &= "    <dc:identifier id=\"isbn13\">" & ctnMeta["ISBN13"][3] & "</dc:identifier>\n"
+  'strOut &= "    <dc:identifier id=\"isbn10\">" & ctnMeta["ISBN10"][3] & "</dc:identifier>\n"
+  strOut &= "    <dc:subject>" & ctnMeta["subject"][2] & "</dc:subject>"
+  strOut &= "    <dc:contributor opf:role=\"bkp\">" & ctnMeta["contributor"][2] & "</dc:contributor>"
+  strOut &= "    <dc:description>" & ctnMeta["description"][2] & "</dc:description>\n"
+
+  strOut &= "  </metadata>\n"
+  strOut &= "  <manifest>\n"
+  strOut &= "    <item  id=\"ncx\" href=\"toc.ncx\" media-type=\"application/x-dtbncx+xml\"/>\n"
+
+  For Each grp In ["styles", "sections", "images"]
+    If ctnMeta.Exist(grp) Then
+      c = ctnMeta[grp]
+      For Each s In c
+        str = File.Name(c.Key)
+        'str = File.Name(s)
+        Select grp
+          Case "styles"
+            strOut &= "    <item href=\"Styles/" & str & "\" id=\"" & str & "\" media-type=\"text/css\"/>\n"
+          Case "sections"
+            strOut &= "    <item href=\"Text/" & str & "\" id=\"" & str & "\" media-type=\"application/xhtml+xml\"/>\n"
+          Case "images"
+            Select File.Ext(c.Key)
+                'Select File.Ext(s)
+              Case "jpeg", "jpg"
+                strOut &= "    <item href=\"Images/" & str & "\" id=\"" & str & "\" media-type=\"image/jpeg\"/>\n"
+              Case "png"
+                strOut &= "    <item href=\"Images/" & str & "\" id=\"" & str & "\" media-type=\"image/png\"/>\n"
+            End Select
+        End Select
+      Next
+    Endif
+  Next
+
+  strOut &= "  </manifest>\n"
+
+  ' Creating the ordered index
+  If ctnMeta.Exist("sections") Then
+    strOut &= "  <spine toc=\"ncx\">\n"
+    c = ctnMeta["sections"]
+    For Each ord In orx
+      For Each s In c
+        If s = ord Then
+          str = File.Name(c.Key)
+          strOut &= "    <itemref  idref=\"" & str & "\"/>\n"
+        Endif
+      Next
+    Next
+    strOut &= "  </spine>\n"
+  Endif
+
+  strOut &= "  <guide>\n"
+  strOut &= "  </guide>\n"
+  strOut &= "</package>\n"
+
+  Return strOut
+
+End
+
+'' Create the content of the container.xml file.
+
+Public Function EpubContentOpfBasic() As String
+
+  Dim strOut As String
+
+  strOut = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+  strOut &= "<container version=\"1.0\" xmlns=\"urn:oasis:names:tc:opendocument:xmlns:container\">\n"
+  strOut &= "    <rootfiles>\n"
+  strOut &= "        <rootfile full-path=\"OEBPS/content.opf\" media-type=\"application/oebps-package+xml\"/>\n"
+  strOut &= "   </rootfiles>\n"
+  strOut &= "</container>\n"
+
+  Return strOut
+
+End
+
+'' Create a CSS file content.
+
+Public Function EpubStyleCSS() As String
+
+  Dim out As String
+
+  out = "body { margin:1em; padding:0; border:0; }\n"
+  out &= "p { margin:0; text-align:justify; text-indent:1.5em; line-height:1.25em; }\n"
+  out &= "a, .normal { font-style:normal; font-weight:normal; text-decoration:none; }\n"
+  out &= "h1, h2, h3, h4, h5, h6 { margin:25% 0.25em 1em; text-align:center; text-indent:0; page-break-after:avoid; page-break-inside:avoid; adobe-hyphenate:none; hyphenate:none; hyphens:none; -moz-hyphens:none; -webkit-hyphens:none; }\n"
+  out &= "h1 { font-size:1.3em; margin-top:20%;}\n"
+  out &= "h2 { font-size:1.5em; }\n"
+  out &= "h3 { font-size:1.4em; }\n"
+  out &= "h4 { font-size:1.3em; }\n"
+  out &= "h5 { font-size:1.2em; }\n"
+  out &= "h6 { font-size:1.1em; }\n"
+  out &= ".cubierta { margin:0; padding:0; border:0; font-size:0; text-align:center; text-indent:0; page-break-before:always; page-break-after:always; }\n"
+  out &= ".cubierta img { height:100%; max-height:100%; }\n"
+  out &= "/* tipografía */\n"
+  out &= ".sans, .sans p, .sans em, .sans strong, .sans big, .sans small { font-family:sans-serif; }\n"
+  out &= ".serif, .serif p, .serif em, .serif strong, .serif big, .serif small { font-family:serif; }v"
+  out &= "code, kbd, .mono, .mono p, .mono em, .mono strong, .mono big, .mono small { font-family:monospace; }\n"
+  out &= "i, em, cite, dfn, .cursiva { font-style:italic; }\n"
+  out &= "b, strong, .negrita { font-weight:bold; }\n"
+  out &= "ins, .subrayado { text-decoration:underline; }\n"
+  out &= "del, .tachado { text-decoration:line-through; }\n"
+  out &= ".oculto { display:none; visibility:hidden; }\n"
+  out &= "big, .grande { font-size:1.2em; }\n"
+  out &= "small, .versalita { font-size:0.8em; }	/* para texto en mayúsculas, de tamaño similar al de las minúsculas */\n"
+  out &= "/* listas */\n"
+  out &= "li { margin:0; text-align:justify; text-indent:0; line-height:1.3em; margin-bottom:0.5em;}\n"
+  out &= "/* imágenes simples */	/* para láminas verticales (página completa), usar el estilo fijo «cubierta» */\n"
+  out &= ".ilustra { margin:1em 0; text-align:center; text-indent:0; display:block; }\n"
+  out &= ".ilustra img { max-height:100%; max-width:100%; }\n"
+
+  Return out
+
+End
+
+'' Read the container.xml file to create a text array of the data.
+
+Public Function ContainerRead() As String[]
+
+  Dim stxOut As New String[] ' Format list [TAG]\t[VAL]
+
+  Return stxOut
+
+End
+
+'' Create a list of the basic sections of a book.
+
+Public Function BaseSections() As String[]
+
+  Dim stxOut As New String[]
+
+  stxOut.Add("cover")
+  stxOut.Add("synopsis")
+  stxOut.Add("title")
+  stxOut.Add("info")
+  stxOut.Add("presentation")
+  stxOut.Add("dedication")
+  stxOut.Add("thanks")
+  stxOut.Add("epilogue")
+  stxOut.Add("author")
+
+  Return stxOut
+
+End
+
+'' It creates a basic section of a book and as an input parameter requires a text matrix where each item is of the form [Tag]\t[Value], such as author\tJorge Luis Borges.
+
+Public Function EpubSectionMaker(strSec As String, stxItems As String[]) As String
+
+  Dim strOut As String
+  Dim strTag, strVal As String
+  Dim int As Integer
+  Dim strAuthor As String
+  Dim strSubtitle As String
+  Dim strDate As String
+  Dim strBiography As String
+  Dim strEpilogue As String
+  Dim strTanks As String
+  Dim strTitle As String
+  Dim strSynopsis As String
+  Dim strChapter As String
+  Dim strContent As String ' All paragraphs of the chapter in HTML format, h1, h2, h3, h4, h5, h6, p
+
+  For int = 0 To stxItems.Max
+
+    If InStr(stxItems[int], "\t") > 0 Then
+      strTag = Split(stxItems[int], "\t")[0]
+      strVal = Split(stxItems[int], "\t")[1]
+
+      Select strTag
+        Case "creator"
+          strAuthor = Split(stxItems[int], "\t")[1]
+        Case "synopsis"
+          strSynopsis = Split(stxItems[int], "\t")[1]
+        Case "title"
+          strTitle = Split(stxItems[int], "\t")[1]
+        Case "subtitle"
+          strSubtitle = Split(stxItems[int], "\t")[1]
+        Case "date"
+          strDate = Split(stxItems[int], "\t")[1]
+        Case "biography"
+          strBiography = Split(stxItems[int], "\t")[1]
+        Case "epilogue"
+          strEpilogue = Split(stxItems[int], "\t")[1]
+        Case "tanks"
+          strTanks = Split(stxItems[int], "\t")[1]
+        Case "chapter"
+          strChapter = Split(stxItems[int], "\t")[1]
+        Case "content"
+          strContent = Split(stxItems[int], "\t")[1]
+
+      End Select
+
+    Endif
+
+  Next
+
+  strOut = ""
+
+  Select strSec
+
+    Case "chapter"
+      strOut = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n"
+      strOut &= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+      strOut &= "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+      strOut &= "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"es\">\n"
+      strOut &= "<head>\n"
+      strOut &= "  <title>Title</title>\n"
+      strOut &= "  <link href=\"../Styles/style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+      strOut &= "</head>\n"
+      strOut &= "<body>\n"
+      strOut &= "\n"
+      strOut &= "  <h2>" & strChapter & "</h2>\n"
+      strOut &= "\n"
+      strOut &= strContent & "\n"
+      strOut &= "\n"
+      strOut &= "</body>\n"
+      strOut &= "</html>\n"
+
+    Case "cover"
+      strOut = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n"
+      strOut &= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+      strOut &= "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+      strOut &= "\n"
+      strOut &= "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+      strOut &= "<head>\n"
+      strOut &= "  <title></title>\n"
+      strOut &= "  <link href=\"../Styles/style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+      strOut &= "</head>\n"
+      strOut &= "\n"
+      strOut &= "<body class=\"sinmargen\">\n"
+      strOut &= "  <h1 class=\"cubierta\" title=\"" & ("Cubierta") & "\"><img alt=\"\" src=\"../Images/cover.jpg\" /></h1>\n"
+      strOut &= "</body>\n"
+      strOut &= "</html>\n"
+
+    Case "synopsis"
+
+      strOut = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n"
+      strOut &= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+      strOut &= "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+      strOut &= "\n"
+      strOut &= "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+      strOut &= "<head>\n"
+      strOut &= "  <title></title>\n"
+      strOut &= "  <link href=\"../Styles/style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+      strOut &= "</head>\n"
+      strOut &= "\n"
+      strOut &= "<body>\n"
+      strOut &= "  <p>&nbsp;</p>\n"
+      strOut &= "\n"
+      strOut &= "  <div class=\"sinopsis\">\n"
+      strOut &= "    <p>" & strSynopsis & "</p>\n"
+      strOut &= "  </div>\n"
+      strOut &= "</body>\n"
+      strOut &= "</html>\n"
+
+    Case "title"
+      strOut = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n"
+      strOut &= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+      strOut &= "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+      strOut &= "\n"
+      strOut &= "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+      strOut &= "<head>\n"
+      strOut &= "  <title></title>\n"
+      strOut &= "  <link href=\"../Styles/style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+      strOut &= "</head>\n"
+      strOut &= "\n"
+      strOut &= "<body>\n"
+      strOut &= "  <p class=\"tlogo\"><span><img alt=\"\" src=\"../Images/EPL_logo.png\" width=\"100%\" /></span></p>\n"
+      strOut &= "\n"
+      strOut &= "  <p class=\"tautor\"><code class=\"sans\">" & strAuthor & "</code></p>\n"
+      strOut &= "\n"
+      strOut &= "  <h1 class=\"ttitulo\"><strong class=\"sans\">" & strTitle & "</strong></h1>\n"
+      strOut &= "\n"
+      strOut &= "  <p class=\"tsubtitulo\"><strong class=\"sans\">" & strSubtitle & "</strong></p>\n"
+      strOut &= "\n"
+      strOut &= "  <p class=\"trevision\"><strong class=\"sans\">ePUB r1.1</strong></p>\n"
+      strOut &= "\n"
+      strOut &= "  <p class=\"tfirma\"><strong class=\"sans\">betatron</strong> <code class=\"tfecha sans\">" & strDate & "</code></p>\n"
+      strOut &= "</body>\n"
+      strOut &= "</html>\n"
+
+    Case "info"
+    Case "presentation"
+    Case "dedication"
+    Case "thanks"
+      strOut = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n"
+      strOut &= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+      strOut &= "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+      strOut &= "\n"
+      strOut &= "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"es\">\n"
+      strOut &= "<head>\n"
+      strOut &= "  <title>Agradecimientos</title>\n"
+      strOut &= "  <link href=\"../Styles/style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+      strOut &= "</head>\n"
+      strOut &= "\n"
+      strOut &= "<body>\n"
+      strOut &= "<h1>" & ("Acknowledgment") & "</h1>\n"
+      strOut &= "\n"
+      strOut &= "  <p><em>" & strTanks & "</em></p>\n"
+      strOut &= "\n"
+      strOut &= "</body>\n"
+      strOut &= "</html>\n"
+
+    Case "epilogue"
+
+      strOut = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n"
+      strOut &= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+      strOut &= "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+      strOut &= "\n"
+      strOut &= "<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"es\">\n"
+      strOut &= "<head>\n"
+      strOut &= "  <title>Epílogo</title>\n"
+      strOut &= "  <link href=\"../Styles/style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+      strOut &= "</head>\n"
+      strOut &= "\n"
+      strOut &= "<body>\n"
+      strOut &= "  <h1>Epílogo</h1>\n"
+      strOut &= "\n"
+      strOut &= "  <p>" & strEpilogue & "</p>\n"
+      strOut &= "\n"
+      strOut &= "</body>\n"
+      strOut &= "</html>\n"
+
+    Case "author"
+
+      strOut = "<?xml version=\"1.0\" encoding=\"utf-8\" standalone=\"no\"?>\n"
+      strOut &= "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.1//EN\"\n"
+      strOut &= "  \"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd\">\n"
+      strOut &= "\n"
+      strOut &= "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
+      strOut &= "<head>\n"
+      strOut &= "  <title></title>\n"
+      strOut &= "  <link href=\"../Styles/style.css\" rel=\"stylesheet\" type=\"text/css\" />\n"
+      strOut &= "</head>\n"
+      strOut &= "\n"
+      strOut &= "<body>\n"
+      strOut &= "  <h1 class=\"oculto\" title=\"Autor\"></h1>\n"
+      strOut &= "\n"
+      strOut &= "  <p class=\"autorimg\"><img alt=\"\" height=\"100%\" src=\"../Images/autor.jpg\" /></p>\n"
+      strOut &= "\n"
+      strOut &= "  <p class=\"salto25 asangre\">" & strBiography & "</p>\n"
+      strOut &= "\n"
+      strOut &= "</body>\n"
+      strOut &= "</html>\n"
+
+  End Select
+
+  Return strOut
+
+End
+
+Public Function EpubGenres() As String[] '' Crea una lista de generos literarios
+
+  Dim stxOut As New String[]
+
+  stxOut.Add("Fiction:Action")
+  stxOut.Add("Fiction:Children")
+  stxOut.Add("Fiction:Fantasy")
+  stxOut.Add("Fiction:Historical Fiction")
+  stxOut.Add("Fiction:Horror")
+  stxOut.Add("Fiction:Humor")
+  stxOut.Add("Fiction:Mystery and Crime")
+  stxOut.Add("Fiction:Other fiction")
+  stxOut.Add("Fiction:Romance")
+  stxOut.Add("Fiction:Science Fiction")
+  stxOut.Add("Fiction:Short Fiction")
+  stxOut.Add("Fiction:Young Adult")
+  stxOut.Add("Fiction:Westerns")
+  stxOut.Add("Nonfiction:Biography")
+  stxOut.Add("Nonfiction:History")
+  stxOut.Add("Nonfiction:Philosophy")
+  stxOut.Add("Nonfiction:Reference")
+  stxOut.Add("Nonfiction:Spiritual")
+  stxOut.Add("Nonfiction:Other nonfiction")
+  stxOut.Add("Poetry")
+  stxOut.Add("Other:Biographical Fiction")
+  stxOut.Add("Other:Collected Works")
+  stxOut.Add("Other:Graphic")
+
+  Return stxOut
+
+End
+
+''Devuelve una colección con los metadatos de un libro.
+
+Public Function ContentData() As Collection
+
+  Dim ctn As New Collection
+
+  '' Required terms
+  ' Title of the work
+  ctn.Add([("Title"), ("Title of the work"), ""], "title")
+  ' Subtitle of the work
+  ctn.Add([("Subtitle"), ("Subtitle of the work"), ""], "subtitle")
+  ' RFC 3066 Language Identifiers
+  ctn.Add([("Language"), ("Language in which the work is written") & " RFC 3066", ""], "language")
+  ' URI or ISBN would be good choices
+  ctn.Add([("Identifier"), ("Unique identifier, URI or ISBN can be good options"), ""], "identifier")
+
+  '' Optional terms
+  ctn.Add([("Primary author"), ("The main author of the work"), ""], "creator")
+  ctn.Add([("Contributor"), ("This identifies other people who had a lesser role, such as writing the prelude or illustrating where images play a minor role in the post. This entry can also include an attribute that defines the role. Please note that Book producer (bkp) would be a good role for the person who created the ePub from another source"), ""], "contributor")
+  ' Examples of Publisher include a person, an organization, or a service.
+  ctn.Add([("Publisher"), ("A person, organization or service that edited the book"), ""], "publisher")
+  ' No standard form but it could use the Library of Congress Subject Heading System for example.
+  ctn.Add([("Subject"), ("The subject does not have a standard form"), ""], "subject")
+  ' This field typically contains the description that is used to describe the content of the book on a retail site or press release.
+  ctn.Add([("Description"), ("This field typically contains the description used to describe the content of the book on a retail site or press release"), ""], "description")
+  ' ISO 8601 YYYY[-MM[-DD]]
+  ctn.Add([("Date"), ("Publication date") & " ISO 8601 YYYY[-MM[-DD]]", ""], "date")
+  ' general categories, functions, genres
+  ctn.Add([("Gender, category"), ("General categories, functions, genres"), ""], "type")
+  ' Mimetype"
+  ctn.Add([("Format") & " mimetype", ("Format") & " mimetype", ""], "format")
+  ' Information about a previous source from which the publication is derived.
+  ctn.Add([("Derivation of") & "...", ("Previous source from which the publication is derived"), ""], "source")
+  ' Auxiliary source and its relationship with the publication.
+  ctn.Add([("Auxiliary sources"), ("Auxiliary source and its relation to the publication"), ""], "relation")
+  ' The length or scope of the content of the post.
+  ctn.Add([("Scope"), ("The length or scope of the content of the publication"), ""], "coverage")
+  ' copyright, CC creative commons, public domain, etc.
+  ctn.Add([("Rights"), "CC creative commons", ""], "rights")
+
+  Return ctn
+
+End
+
+'' It reads the content.opf file from within the EPUB and returns the XML text.
+
+Public Function EpubContentOpfReadFromZip(strEpub As String) As String
+
+  Dim sxml As String
+
+  If Exist(strEpub) = True Then
+    Shell "unzip -p '" & strEpub & "' OEBPS/content.opf 2>&1" To sxml
+    If InStr(sxml, "caution: filename not matched:  OEBPS/content.opf") > 0 Then
+      Shell "unzip -p '" & strEpub & "' OPS/content.opf 2>&1" To sxml
+    Endif
+  Endif
+
+  Return sxml
+
+End
+
+'' Editing the content.opf file.
+'' For more details on Open Packaging Format (OPF) 2.0.1 v1.0.1
+'' <http://idpf.org/epub/20/spec/OPF_2.0.1_draft.htm>
+
+Public Function EpubContenOpfEdit(strPath As String, ctn As Collection)
+
+  Dim document As New XmlDocument
+  Dim node As XmlNode
+
+  document.Open(strPath)
+
+  For Each node In document.All
+    If InStr(node.Name, "dc:") > 0 Then
+      If ctn.Exist(node.Name) Then
+        node.Value = ctn[node.Name]
+      Endif
+    Endif
+    document.Save(strPath, False)
+  Next
+
+End
+
+'' Editing the content.opf file, add the manifest.
+
+Public Function EpubContenOpfManifiest(xf As String, flx As String[])
+
+  Dim dcx As New XmlDocument
+  Dim nf As String
+  Dim app As New Collection
+  Dim ele As XmlElement
+  Dim nod As XmlNode
+
+  app.Add("application/x-dtbncx+xml", "ncx")
+  app.Add("text/css", "ccs")
+  app.Add("application/xhtml+xml", "xhtml")
+  app.Add("application/xhtml+xml", "html")
+
+  app.Add("image/jpeg", "jpg")
+  app.Add("image/jpeg", "jpeg")
+  app.Add("image/png", "png")
+
+  flx.Sort
+
+  If Exist(xf) Then
+    dcx.Open(xf)
+    For Each ele In dcx.GetElementsByTagName("manifest")
+      ele.ClearChildren
+      For Each nf In flx
+        If app.Exist(File.Ext(nf)) Then
+          ele.NewElement("item", "")
+          nod = ele.LastChildElement
+          nod.NewAttribute("href", File.Name(nf))
+          nod.NewAttribute("id", File.Name(nf))
+          nod.NewAttribute("media-type", app[File.Ext(nf)])
+          'Next
+        Endif
+      Next
+    Next
+  Endif
+
+End
+
+''Returns a collection with the content of a content.opf file. As an input parameter, require the xml text found in said file.
+
+Public Function EpubContentOpfRead(xml As String) As String[]
+
+  Dim document As New XmlDocument
+  Dim stx As New String[]
+  Dim node As XmlNode
+  Dim strTag As String
+  Dim strVal As String
+  Dim atrib As XmlNode
+
+  document.FromString(xml)
+
+  For Each node In document.All
+    Select node.name
+      Case "package", "navPoint", "dc:creator", "dc:identifier"
+        '
+        stx.Add(node.Name & "\t" & node.Value)
+
+        For Each atrib In node.Attributes
+
+          strTag = node.Name & ":" & atrib.Name
+          strVal = atrib.Value
+          stx.Add(strTag & "\t" & strVal)
+
+        Next
+
+      Case "dc:title", "dc:subject", "dc:description", "dc:publisher", "dc:contributor", "dc:date", "dc:type", "dc:format", "dc:source", "dc:language", "dc:relation", "dc:coverage", "dc:rights"
+        strTag = node.name
+        strVal = node.Value
+        stx.Add(strTag & "\t" & strVal)
+    End Select
+  Next
+
+  Return stx
+
+End

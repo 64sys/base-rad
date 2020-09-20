@@ -1,0 +1,231 @@
+* Tue Aug 18 2020 Belmotek <info@belmotek.net> 0.0.123
+- Empaquetado de verificación de la traducción
+
+* Thu Apr 02 2020 Belmotek <info@belmotek.net> 0.0.122
+- Cambio de forma de trabajo para campos de clave foránea. Mejora de parametros XML, otros cambios.
+
+* Sun Jan 12 2020 Belmotek <info@belmotek.net> 0.0.107
+- Correcciones y mejoras en FEdit
+
+* Sun Jan 12 2020 Belmotek <info@belmotek.net> 0.0.105
+- Correcciones en el formulario de ejemplo de uso del componente.
+
+* Thu Jan 09 2020 Belmotek <info@belmotek.net> 0.0.103
+- Cambio de todos los formularios a clases exportadas y desasctivación de las clases intemedias
+
+* Mon Jan 06 2020 Belmotek <info@belmotek.net> 0.0.102
+- Empaquetamiento de rutina
+
+* Sat Jan 04 2020 belmotek <info@belmotek.net> 0.0.101
+- Empaquetamiento de rutina
+
+* Fri Dec 20 2019 belmotek <info@belmotek.net> 0.0.101
+- Cambio de nombre de la clase que llama al formulario para renombrar archivos
+
+* Fri Dec 20 2019 belmotek <info@belmotek.net> 0.0.100
+- Agregado del formulario para renombrar archivos.
+
+* Thu Dec 19 2019 belmotek <info@belmotek.net> 0.0.98
+- Recuento de registros del resultado en FEdit
+
+* Thu Dec 12 2019 belmotek <info@belmotek.net> 0.0.96
+- Modificación del formulario de ejemplo (que es el que se copia para hacer las aplicaciones)
+
+* Wed Dec 11 2019 belmotek <info@belmotek.net> 0.0.94
+- Posibilidad de ver imagenes asociadas a un registro.
+
+* Fri Dec 06 2019 belmotek <info@belmotek.net> 0.0.91
+- Combios menores
+
+* Mon Dec 02 2019 belmotek <info@belmotek.net> 0.0.89
+- Ahora la funcion TextWidth esta en el módulo dsk
+
+* Mon Dec 02 2019 belmotek <info@belmotek.net> 0.0.88
+- Quitando el nombre del proveedor para que el nombre del paquete sea como los componentes nativos de gambas
+
+* Mon Dec 02 2019 belmotek <info@belmotek.net> 0.0.88
+- Quitando el nombre del proveedor para que el nombre del paquete sea como los componentes nativos de gambas
+
+* Mon Dec 02 2019 belmotek <info@belmotek.net> 0.0.88
+- Borrado de los módulos que fueron al componente de funciones gb.rad
+
+* Mon Dec 02 2019 belmotek <info@belmotek.net> 0.0.87
+- Mejora del sistema de edicion de registros
+
+* Tue Nov 26 2019 belmotek <info@belmotek.net> 0.0.86
+- Separación del componente GEF en dos, una de funciones y este de formularios tipicos
+
+* Sun Nov 17 2019 belmotek <info@belmotek.net> 0.0.84
+- Correcciones en la función sog.MimeDefaultApp 2
+
+* Sun Nov 17 2019 belmotek <info@belmotek.net> 0.0.82
+- Correcciones en la función sog.MimeDefaultApp
+
+* Sun Nov 10 2019 belmotek <info@belmotek.net> 0.0.81
+- Añadiendo una exepción en caso que la sentencia SQL de creacion de la base tenga algun error
+
+* Tue Nov 05 2019 belmotek <info@belmotek.net> 0.0.80
+- Correccion de error al insertar nombres nulos cuando estos son vinculos a otra tabla
+
+* Tue Nov 05 2019 belmotek <info@belmotek.net> 0.0.79
+- Permitir saltarse el indice que viene dle CSV al importar datos, esto permite reimportar los datos previamente exportados sin tener que manipular manualmente los indices.
+
+* Tue Nov 05 2019 belmotek <info@belmotek.net> 0.0.78
+- Agregado del formulario de importación
+
+* Sun Nov 03 2019 belmotek <info@belmotek.net> 0.0.75
+- Depurando errores en dbs cuando se crean nuevos registros con valores de entreos null
+
+* Sun Nov 03 2019 belmotek <info@belmotek.net> 0.0.74
+- Depurando algunas funciones de dbs (el módulo de bases de datos)
+
+* Sat Oct 26 2019 belmotek <info@belmotek.net> 0.0.70
+- Agregando a sog la funcion "GetProjectsDir"
+
+* Sat Oct 26 2019 belmotek <info@belmotek.net> 0.0.69
+- Agregando en sog las funciones "GetFarmInfo" y "GetProjectInfo"
+
+* Sat Oct 26 2019 belmotek <info@belmotek.net> 0.0.68
+- Renombre de la clase "file" por "fil"
+
+* Sat Oct 26 2019 belmotek <info@belmotek.net> 0.0.67
+- Ajustes en formulario Edit y Config continuación
+
+* Sat Oct 26 2019 belmotek <info@belmotek.net> 0.0.66
+- Ajustes en formulario Edit y Config continuación
+
+* Fri Oct 25 2019 belmotek <info@belmotek.net> 0.0.65
+- Ajustes en formulario Edit y Config
+
+* Sat Oct 19 2019 belmotek <info@belmotek.net> 0.0.61
+- Correccion de error en dbs.ForeignInfo al obteber datos de claves foráneas.
+
+* Sat Oct 19 2019 belmotek <info@belmotek.net> 0.0.60
+- Poniendo dsk.module como Export
+
+* Sat Oct 19 2019 belmotek <info@belmotek.net> 0.0.59
+- usando Application.Path en FAbout
+
+* Sat Oct 19 2019 belmotek <info@belmotek.net> 0.0.57
+- usando Application.Path en FAbout
+
+* Sat Oct 19 2019 belmotek <info@belmotek.net> 0.0.56
+- Correccion de error en FAbout
+
+* Sat Oct 19 2019 belmotek <info@belmotek.net> 0.0.55
+- 5 - Prueba con el formulario FEdit para editar registros
+
+* Sun Oct 06 2019 belmotek <info@belmotek.net> 0.0.55
+- 4 - Prueba con el formulario FEdit para editar registros
+
+* Sun Oct 06 2019 belmotek <info@belmotek.net> 0.0.54
+- 3 - Prueba con el formulario FEdit para editar registros
+
+* Sat Oct 05 2019 belmotek <info@belmotek.net> 0.0.53
+- 3 - Prueba con el formulario FEdit para editar registros
+
+* Sat Oct 05 2019 belmotek <info@belmotek.net> 0.0.52
+- 2 - prueba con el formulario FEdit para editar registros
+
+* Sat Oct 05 2019 belmotek <info@belmotek.net> 0.0.51
+- Primeras pruebas con el formulario FEdit para editar registros
+
+* Mon Sep 30 2019 belmotek <info@belmotek.net> 0.0.47
+- Reviviendo la funcion GetTables()
+
+* Mon Sep 30 2019 belmotek <info@belmotek.net> 0.0.45
+- Reviviendo la funcion GetTables()
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.44
+- Prueba para la imagen de fondo.
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.43
+- Otra prueba para elegir el icono del programama y no del componente.
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.42
+- Error con sog.ProjInfo que no toma el directorio del programa sino el del componente
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.41
+- Cambio de método en la obtencion de la informacion desde .project
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.39
+- Cambio de método en la obtencion de la informacion desde .project
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.38
+- Corrección de desplazamiento en altura debido al ancho del borde de la ventana
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.37
+- Los formularios ya aparecen centrados respecto al predecesor
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.36
+- Los formularios ya aparecen centrados respecto al predecesor
+
+* Sun Sep 29 2019 belmotek <info@belmotek.net> 0.0.36
+- Los formularios ya aparecen centrados respecto al predecesor
+
+* Thu Sep 26 2019 belmotek <info@belmotek.net> 0.0.34
+- Renombrando la funcion Xml2Collection como XmlConfRead
+
+* Thu Sep 26 2019 belmotek <info@belmotek.net> 0.0.33
+- Correccion de XmlConfMaker para que escriba el valor en los atributos en vez de en el value
+
+* Thu Sep 26 2019 belmotek <info@belmotek.net> 0.0.32
+- Re implementacion de lectura y escritura de archivos xml para configuración
+
+* Thu Sep 26 2019 belmotek <info@belmotek.net> 0.0.28
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Thu Sep 26 2019 belmotek <info@belmotek.net> 0.0.27
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Wed Sep 25 2019 belmotek <info@belmotek.net> 0.0.26
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Wed Sep 25 2019 belmotek <info@belmotek.net> 0.0.25
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Tue Sep 24 2019 belmotek <info@belmotek.net> 0.0.23
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Tue Sep 24 2019 belmotek <info@belmotek.net> 0.0.22
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Tue Sep 24 2019 belmotek <info@belmotek.net> 0.0.21
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Tue Sep 24 2019 belmotek <info@belmotek.net> 0.0.20
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Tue Sep 24 2019 belmotek <info@belmotek.net> 0.0.19
+- correccion de error al cerrar formulario acerca de... usando una clase exportada que llama al formulario
+
+* Tue Sep 24 2019 belmotek <info@belmotek.net> 0.0.19
+- correccion de error al cerrar formulario acerca de...
+
+* Fri Sep 13 2019 belmotek <info@belmotek.net> 0.0.19
+- Cambio de forma de trabajo llamo a clase exportada para crear formulairo
+
+* Thu Sep 12 2019 belmotek <info@belmotek.net> 0.0.18
+- Otra prueba con cfx ahora le cambie el nombre por si es eso
+
+* Thu Sep 12 2019 belmotek <info@belmotek.net> 0.0.17
+- Vuelvo a poner Run()
+
+* Thu Sep 12 2019 belmotek <info@belmotek.net> 0.0.16
+- Run() no funciono, ahora lo cambie por Edit()
+
+* Thu Sep 12 2019 belmotek <info@belmotek.net> 0.0.15
+- Haciendo que Run() retorne valor boleano
+
+* Thu Sep 12 2019 belmotek <info@belmotek.net> 0.0.14
+- Cambiando el método el evento Form_Open por Run()
+
+* Thu Sep 12 2019 belmotek <info@belmotek.net> 0.0.13
+- Agregado de las palabras reservadas _new y Export a los dos formularios.
+
+* Thu Sep 12 2019 belmotek <info@belmotek.net> 0.0.12
+- Agregando los formularios de configuracion cfx y de acerca de... abu
+
+* Wed Sep 11 2019 belmotek <info@belmotek.net> 0.0.10
+- Lanzamiento inicial
+

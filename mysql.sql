@@ -1,0 +1,44 @@
+CREATE TABLE IF NOT EXISTS `vendors` (
+	`vidx`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`vname`	TEXT UNIQUE,
+	`vaddress`	TEXT,
+	`vphone`	TEXT
+);
+CREATE TABLE IF NOT EXISTS `uoms` (
+	`uidx`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`uname`	TEXT UNIQUE
+);
+CREATE TABLE IF NOT EXISTS `suppcls` (
+	`tidx`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`tname`	TEXT UNIQUE
+);
+CREATE TABLE IF NOT EXISTS `sppps` (
+	`sidx`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`sname`	TEXT UNIQUE,
+	`sclass`	INTEGER,
+	`sunit`	INTEGER,
+	`sprice`	REAL,
+	FOREIGN KEY(`sclass`) REFERENCES `suppcls`(`tidx`),
+	FOREIGN KEY(`sunit`) REFERENCES `uoms`(`uidx`)
+);
+CREATE TABLE IF NOT EXISTS `clients` (
+	`cidx`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`cname`	TEXT UNIQUE,
+	`cphone`	TEXT
+);
+CREATE TABLE IF NOT EXISTS `budgets` (
+	`bidx`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`bname`	TEXT UNIQUE,
+	`bclient`	INTEGER,
+	`baddress`	TEXT,
+	FOREIGN KEY(`bclient`) REFERENCES `clients`(`cidx`)
+);
+CREATE TABLE IF NOT EXISTS `boms` (
+	`midx`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`mname`	TEXT UNIQUE,
+	`mbud`	INTEGER,
+	`msupp`	INTEGER,
+	`mqty`	REAL,
+	FOREIGN KEY(`msupp`) REFERENCES `sppps`(`sidx`),
+	FOREIGN KEY(`mbud`) REFERENCES `budgets`(`bidx`)
+);

@@ -1,0 +1,49 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,39,29)
+  Resizable = False
+  Arrangement = Arrange.Vertical
+  Spacing = True
+  Margin = True
+  { pnlBoxes Panel
+    MoveScaled(15,1,22,21)
+    Expand = True
+    Arrangement = Arrange.Vertical
+    Spacing = True
+    { chkOption1 CheckBox
+      MoveScaled(0,0,24,4)
+    }
+    { chkOption2 CheckBox
+      MoveScaled(0,4,24,4)
+    }
+    { chkOption3 CheckBox
+      MoveScaled(0,8,24,4)
+    }
+    { chkOption4 CheckBox
+      MoveScaled(0,12,24,4)
+    }
+  }
+  { HBox1 HBox
+    MoveScaled(1,24,37,4)
+    Spacing = True
+    { Panel1 Panel
+      MoveScaled(0,0,4,4)
+      Expand = True
+    }
+    { btnOK Button
+      MoveScaled(6,0,13,4)
+      Tag = "ok"
+      Text = ("OK")
+      Picture = Picture["icon:/22/ok"]
+      Default = True
+    }
+    { btnCancel Button
+      MoveScaled(21,0,12,4)
+      Tag = "cancel"
+      Text = ("Cancel")
+      Picture = Picture["icon:/22/cancel"]
+      Cancel = True
+    }
+  }
+}

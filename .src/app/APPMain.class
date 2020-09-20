@@ -1,0 +1,615 @@
+' Gambas class file
+
+'''Primary Form
+Public Observer As Observer         ''Observador usaod para avisar si hay cambios sin aplicar
+'------------------------------------------------------------------------------
+' Variables que se pasaron desde el módulo de inicio
+Private cex As New Collection       '' Variables básicas para pasar a los demas formularios
+Private con As New Connection       '' Conexión a la base de datos
+Private adi As String               '' Directorio del programa
+Private dbc As String               '' Archivo de configuracion de la base de datos
+Private apc As String               '' Archivo de configuracion del programa
+Private etx As String               '' Editor de texto plano por ddefecto
+Private lgg As Logger               '' Registro de eventos de la aplicación.
+'------------------------------------------------------------------------------
+
+Private tab As String               '' Nobre de la tabla actual
+Private ikey As Integer             '' Clave del registro actual
+Private Ckey As String              '' Clave actual del treeview
+Private AType As String             '' Tipo de entidad activa
+
+'Variables del formulario
+Private ldd As Boolean              '' Testigo de carga del formulario
+Private rmeta As New Collection     '' Lista de grupos MIME a procesar (audio, image, video, etc.)
+
+Public Sub Run(cin As Collection)
+
+  Dim obj As Object
+  Dim ictn As New Collection
+  Dim mnu As Menu
+  Dim tob As ToolButton
+  Dim i As Integer
+  Dim iSet As String
+
+  '------------------------------------------------------------------------------
+  '' Estableciendo las variables de conexion y otras más
+  cex = cin
+  con = cin["Connex"]           ' Conexión a la base de datos
+  adi = cin["AppDir"]           ' Directorio del programa
+  apc = cin["AppCfg"]           ' Archivo de configuracion del programa
+  dbc = cin["DbsCfg"]           ' Archivo de configuracion de la base de datos
+  etx = cin["AppEdi"]           ' Editor de texto plano por defecto
+  lgg = cin["AppLog"]           ' Registro de eventos de la aplicación.
+  '------------------------------------------------------------------------------
+  iSet = xmg.GetVar("Desktop.Icons", apc)
+  ictn = dsk.GNumix(iSet & "/")
+  '------------------------------------------------------------------------------
+  rmeta.Add(False, "audio")
+  rmeta.Add(False, "image")
+  rmeta.Add(False, "video")
+  rmeta.Add(False, "text")
+  rmeta.Add(False, "application")
+
+  Me.Menus.Hide
+
+  For Each mnu In Me.Menus
+    For Each obj In mnu.Children
+      'Agregando item del menu en el menu alternativo
+      tob = New ToolButton(pnlIcons) As "menuapp"
+      With tob
+        .Name = "tob" & obj.Tag & CStr(i)
+        .Tag = obj.Tag
+        .Tooltip = obj.Text
+        .Enabled = obj.Enabled
+        .W = 35
+        .H = 35
+        ' Aquí se reemplaza el picture en caso que exista en la colección
+        If Exist(ictn[obj.Tag]) Then
+          If Stat(ictn[obj.Tag]).Type = gb.File Or Stat(ictn[obj.Tag]).Type = gb.Link Then
+            tob.Picture = Image.Load(ictn[obj.Tag]).Stretch(20, 20).Picture
+          Else
+            tob.Picture = obj.Picture
+          Endif
+        Else
+          tob.Picture = obj.Picture
+        Endif
+
+      End With
+
+      Inc i
+    Next
+  Next
+
+  Observer = New Observer(TreeView1) As "Observer"
+
+  Me.Show()
+
+End
+
+Public Sub Form_Open()
+
+  Me.X = Me.Window.X - (Me.X / 2)
+  Me.Y = Me.Window.Y - (Me.Y / 2)
+
+  HSplit1.Layout = [1, 0, 3]
+
+  '' Cargar treeview
+  LoadTree(TreeView1, "", 0)
+
+  '' Bandera de indicacion de formulario cargado
+  ldd = True
+
+End
+'' Esta rutina lo que hace es cargar itmes en el treeview y lo hará
+'' para la entidades tablas y plantillas
+
+Public Sub LoadTree(trv As TreeView, Optional ftr As String, Optional nst As Integer)
+
+  Dim tvsql As String
+  Dim res As Result
+  Dim ctn As New Collection
+  Dim tbl As Table
+  Dim strFpk As String
+  Dim fld As Field
+  Dim strShw As String
+  Dim ctnTab As New Collection
+  Dim strTabTitle As Variant
+  Dim strKey As String
+  Dim f As String
+  Dim pic As Picture
+  Dim sTit As String
+
+  trv.Clear
+
+  pic = Image.Load("./logo.svg").Stretch(22, 22).Picture
+  sTit = ("Presupuestos")
+
+  If trv.Exist("app") = False Then
+    trv.Add("app", sTit, pic)
+  Endif
+
+  For Each tbl In con.Tables
+
+    If tbl.System = False Then
+      ctn.Clear
+      ctn.Add("Table", "dad.node")
+      ctn.Add("Name", "att.name")
+      ctn.Add(tbl.Name, "att.value")
+
+      ctnTab.Clear
+      ctnTab = xmg.XMLTagAtt(dbc, ctn)
+
+      strTabTitle = ctnTab["Title"]
+      If strTabTitle = "" Then
+        strTabTitle = tbl.Name
+      Endif
+
+      strKey = "table" & "\t" & tbl.Name
+
+      If ftr = "" Then
+        f = tbl.Name
+      Else
+        f = ftr
+      Endif
+
+      If InStr(String.LCase(strTabTitle & tbl.Name), String.LCase(f)) > 0 Then
+
+        Print strTabTitle & ": " & tbl.Name
+        If trv.Exist(strKey) = False Then
+          trv.Add(strKey, strTabTitle,, "app")
+        Else
+          trv[strKey] = strTabTitle
+        Endif
+
+        For Each fld In tbl.Fields
+          If dbs.FieldInfo(con, tbl.Name, fld.Name)["Unique"] = "yes" Then
+            strShw = fld.Name
+            Break
+          Endif
+        Next
+
+        Select nst
+          Case Null, 0
+
+          Case Else
+
+            Select strShw
+              Case "", "#"
+                lgg(("This table does not have a single value field") & ": " & tbl.Name, Logger.Error)
+              Case Else
+                If tbl Then
+                  If tbl.PrimaryKey.Count > 0 Then
+                    strFpk = tbl.PrimaryKey[0]
+                  Else
+                    strFpk = ""
+                    lgg(("This table has no primary key") & ": " & tbl.Name, Logger.Error)
+                  Endif
+                  tvsql = "select * from view_" & tbl.Name
+                  res = con.Exec(tvsql)
+                  While res.Available
+                    If strFpk <> "" Then
+                      If trv.Exist("data" & "\t" & tbl.Name & "\t" & strFpk & "\t" & res[strFpk] & "\t" & strShw) = False Then
+                        trv.Add("data" & "\t" & tbl.Name & "\t" & strFpk & "\t" & res[strFpk] & "\t" & strShw, res[strShw],, "table" & "\t" & tbl.Name)
+                      Endif
+                    Else
+                      If trv.Exist("data" & "\t" & tbl.Name & "\t#\t#" & "\t" & strShw, res[strShw]) = False Then
+                        trv.Add("data" & "\t" & tbl.Name & "\t#\t#" & "\t" & strShw, res[strShw],, "table" & "\t" & tbl.Name)
+                      Endif
+                    Endif
+                    res.MoveNext
+                  Wend
+                Endif
+            End Select
+        End Select
+
+      Endif
+
+    Endif
+  Next
+
+  trv["app"].Expanded = True
+
+End
+
+Public Sub TreeView1_Select()
+
+  Dim stx As New String[]
+  Dim i As Integer
+  Dim tbl As Table
+  Dim chk As New Collection
+  Dim info As Variant
+  ' para trabajar con workspaces
+  Dim Ez As FEdit                   '' Formulario de edición de registros.
+  '  Dim Cx As FConfig                 '' Edit program configuration
+  '  Dim Ax As FAbout                  '' Formulario que muestra informacin del programa
+  '  Dim Rx As FRen                    '' Formulario de renombrar archivos
+  'Dim Ex As FExch                   '' Formulario de importación de datos
+  Dim wtag As String
+  Dim w As Window
+  Dim bt As Control
+  Dim win As Window
+  Dim x As Integer
+
+  If ldd = True Then
+
+    Print TreeView1.Key
+    Ckey = TreeView1.Key
+    AType = ""
+
+    For Each bt In pnlIcons.Children
+      If bt.Tag = "import" Then
+        bt.Enabled = False
+      Endif
+    Next
+
+    If InStr(TreeView1.Key, "\t") > 0 Then
+      stx = Split(TreeView1.Key, "\t")
+      AType = stx[0]
+
+      Select AType
+        Case "table"
+          If stx.Count > 1 Then
+            tab = stx[1]
+            'Habilitando el boton de importación para la table
+            For Each bt In pnlIcons.Children
+              If bt.Tag = "import" Then
+                bt.Enabled = True
+              Endif
+            Next
+            chk.Clear
+            chk = dbs.CheckTable(con, tab)
+            If con.Tables.Exist(tab) Then
+              tbl = con.Tables[tab]
+            Endif
+            If chk["PrimaryKey"] > 0 Then
+              If chk["Indexes"] > 0 Then
+                If tbl.Fields.Exist(chk["UniqueField"]) Then
+                  '-----------------------------------
+                  wtag = "Table/" & tab
+                  If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
+                    cex.Add(tab, "CTable")
+                    cex.Add(0, "RegKey")
+                    Ez = New FEdit(cex)
+                    info = xmg.GetVar(wtag & "/Title", dbc)
+                    Ez.Title = info
+                    Ez.Tag = wtag
+                    Ez.Name = wtag
+                    Ez.Icon = Picture["icon:/16/table"]
+                    Workspace1.Add(Ez)
+                  Else
+                    For Each w In Workspace1.Windows
+                      If w.Tag = wtag Then
+                        Workspace1.ActiveWindow = w
+                        Break
+                      Endif
+                    Next
+                  Endif
+
+                Else
+                  Message.Warning(("Table does not have a unique value field"))
+                Endif
+              Else
+                Message.Warning(("The table has no index"))
+              Endif
+            Else
+              Message.Warning(("Table does not have a primary key field"))
+            Endif
+          Endif
+
+        Case "data"
+          If stx.Count > 2 Then
+            tab = stx[1]
+            i = CInt(stx[3])
+            ikey = i
+            '-----------------------------------
+            wtag = "Table/" & tab
+            If Workspace1.Count > 0 Then
+              For Each win In Workspace1.Windows
+                If win.Name = wtag Then
+                  Workspace1.Remove(Workspace1.Windows[x])
+                  Break
+                Endif
+                Inc x
+              Next
+            Endif
+
+            If Workspace1.Count = 0 Or ExistWin(wtag) = False Then
+              cex.Add(tab, "CTable")
+              cex.Add(ikey, "RegKey")
+              Ez = New FEdit(cex)
+              info = xmg.GetVar(wtag & "/Title", dbc)
+              Ez.Title = info
+              Ez.Tag = wtag
+              Ez.Icon = Picture["icon:/16/table"]
+              Workspace1.Add(Ez)
+
+            Endif
+          Endif
+      End Select
+    Endif
+  Endif
+
+End
+
+Public Sub menuapp_Click()
+
+  Dim obj As Object
+  Dim s As String
+  Dim ctn As New Collection
+  Dim cfg As Collection
+  Dim f As String
+  Dim cn As New Collection
+
+  ' para trabajar con workspaces
+  'Dim Ez As FEdit                   '' Formulario de edición de registros.
+  Dim Cx As FConfig                 '' Edit program configuration
+  Dim Ax As FAbout                  '' Formulario que muestra informacin del programa
+  Dim Rx As FRen                    '' Formulario de renombrar archivos
+  Dim Ex As FExch                   '' Formulario de importación de datos
+  Dim w As Window                   ''
+  Dim wtag As String
+  Dim tTab As Variant
+
+  Dim cPr As Collection
+  Dim cMod As Collection
+  Dim cls As Collection
+  Dim met As Collection
+  Dim i As Integer
+  Dim sNames As String[]
+  Dim xNames As String[]
+  Dim sName As String
+  Dim bSpec As Boolean
+  Dim p As Variant
+  Dim pr As String
+  Dim compo As Variant
+  Dim xDir As String
+  Dim xOut As String
+
+  obj = Last
+  wtag = obj.Tag
+
+  Select obj.Tag
+
+    Case "import" 'Import data into current table
+      If tab <> "" Then
+        tTab = xmg.GetVar("Table/" & tab & "/Title", dbc)
+        wtag = ("Import") & " " & tTab & " [" & tab & "]"
+        If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
+          cex.Add(tab, "CTable")
+          cex.Add(0, "RegKey")
+          Ex = New FExch(cex)
+          Ex.Title = wtag
+          Ex.Tag = wtag
+          Workspace1.Add(Ex)
+        Else
+          For Each w In Workspace1.Windows
+            If w.Tag = wtag Then
+              Workspace1.ActiveWindow = w
+              Break
+            Endif
+          Next
+        Endif
+      Endif
+
+    Case "tool"
+      If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
+        For Each f In Dir(User.Home &/ "temp")
+          If Stat(User.Home &/ "temp" &/ f).Type = gb.File Then
+            cn.Add(User.Home &/ "temp/" & f, User.Home &/ "temp2/" & f)
+          Endif
+        Next
+        Rx = New FRen(cn)
+        Rx.Title = ("Rename files")
+        Rx.Tag = wtag
+        Workspace1.Add(Rx)
+      Endif
+
+      '' Botones tipicos del programa
+    Case "info" ' FAbout.form
+      If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
+        cfg = sog.ProjInfo(Application.Path & "/.project")
+        Ax = New FAbout(cfg)
+        Ax.Tag = wtag
+        Ax.Title = ("About") & " " & Application.Name
+        Workspace1.Add(Ax)
+      Endif
+
+    Case "help"
+      Print "Help"
+
+    Case "quit"
+      Me.Close
+
+    Case "options" ' FConfig.form
+      If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
+        '---------------------------------------------------
+        s = adi &/ "cfg.xml"
+        If Exist(File.Dir(s)) = False Then
+          Mkdir File.Dir(s)
+        Endif
+        If Exist(s) = False Then
+          ctn = xmg.XmlIni()
+          xmg.XmlConfMaker(s, ctn, Application.Name)
+        Endif
+        Cx = New FConfig(cex)
+        Cx.Title = ("Preferences")
+        Cx.Tag = wtag
+        cx.Icon = Picture["icon:/16/options"]
+        Workspace1.Add(Cx)
+        '---------------------------------------------------
+      Else
+        For Each w In Workspace1.Windows
+          If w.Tag = wtag Then
+            Workspace1.ActiveWindow = w
+            Break
+          Endif
+        Next
+      Endif
+    Case "document"
+
+      xNames = cdg.SpecialSubs()
+      xDir = dsk.DirChooser(Application.Path)
+      If xDir = "" Then
+        cMod = cdg.ProjData(Application.Path)
+        cPr = cdg.ProjInfo("./.project")
+      Else
+        If uty.DirGambas(xDir) Then
+          cMod = cdg.ProjData(xDir)
+          cPr = cdg.ProjInfo(xDir &/ ".project")
+        Endif
+      Endif
+
+      s = "![logo](" & cPr["Icon"] & ")\n"
+      s &= "# " & cPr["Title"] & "\n"
+      s &= "## " & cPr["Description"] & "\n"
+      s &= "### v" & cPr["Version"] & "\n"
+      's &= "<" & cPr["Url"] & ">\n"
+      s &= "### Components" & "\n"
+      For Each compo In cPr["Component"]
+        s &= "[" & compo & "](" & "https://gambaswiki.org/wiki/comp/" & compo & ") \n"
+      Next
+
+      For Each cls In cMod
+        Select cls["Type"]
+          Case "module"
+            If cls.Exist("Description") Then
+              s &= "### Module " & cls["Name"] & "\n"
+              s &= cls["Description"] & "\n"
+              s &= "  \n"
+            Else
+              s &= "### Module " & cls["Name"] & "\n"
+              s &= "  \n"
+            Endif
+
+            If cls.Exist("Methods") Then
+              i = 1
+              For Each met In cls["Methods"]
+                bSpec = False
+                If met["Scope"] = "Public" Then
+                  For Each sName In xNames
+                    If InStr(Lower(met["Name"]), Lower(sName)) > 0 Then
+                      bSpec = True
+                      Break
+                    Endif
+                  Next
+
+                  If bSpec = False Then
+                    If met.Exist("Description") Then
+                      s &= " - **" & met["Name"] & "** " & met["Description"] & "\n"
+                      s &= "  \n"
+                    Else
+                      s &= " - **" & met["Name"] & "** \n"
+                      s &= " \n"
+                    Endif
+                  Endif
+                Endif
+              Next
+            Endif
+        End Select
+      Next
+      xOut = User.Home &/ String.Lower(cPr["Title"]) & ".md"
+      File.Save(xOut, s)
+      Shell "retext " & xOut
+  End Select
+
+End
+
+Public Sub txoSearch_Change()
+
+  Dim s As String
+
+  s = txoSearch.Text
+
+  LoadTree(TreeView1, s, 0)
+
+End
+
+Public Function ExistWin(wtag As String, ws As Workspace) As Boolean
+
+  Dim wExist As Boolean
+  Dim w As Window
+
+  wExist = False
+
+  For Each w In ws.Windows
+    If w.Tag = wtag Then
+      wExist = True
+      Break
+    Endif
+  Next
+
+  Return wExist
+
+End
+
+Public Sub mnuTesting_Click()
+
+  Dim obj As Object
+  Dim cPr As Collection
+  Dim cMod As Collection
+  Dim cls As Collection
+  Dim met As Collection
+  Dim s As String
+  Dim i As Integer
+  Dim sNames As String[]
+  Dim xNames As String[]
+  Dim sName As String
+  Dim bSpec As Boolean
+  Dim prinf As Collection
+  Dim p As Variant
+  Dim pr As String
+
+  Select obj.Tag
+    Case "document"
+
+      cPr = cdg.ProjInfo("./.project")
+      xNames = cdg.SpecialSubs()
+      prinf = cdg.ProjInfo("./.project")
+
+      cMod = cdg.ProjData(Application.Path)
+      For Each cls In cMod
+        Select cls["Type"]
+          Case "module"
+            's &= "#" & File.BaseName(cMod.Key) & "\n"
+            If cls.Exist("Description") Then
+              s &= "# Module " & cls["Name"] & "\n"
+              s &= cls["Description"] & "\n"
+              s &= "  \n"
+            Else
+              s &= "# Module " & cls["Name"] & "\n"
+              s &= "  \n"
+            Endif
+
+            If cls.Exist("Methods") Then
+              i = 1
+              For Each met In cls["Methods"]
+                bSpec = False
+                If met["Scope"] = "Public" Then
+                  For Each sName In xNames
+                    If InStr(Lower(met["Name"]), Lower(sName)) > 0 Then
+                      bSpec = True
+                      Break
+                    Endif
+                  Next
+
+                  If bSpec = False Then
+                    If met.Exist("Description") Then
+                      s &= " - **" & met["Name"] & "** " & met["Description"] & "\n"
+                      s &= "  \n"
+                    Else
+                      s &= " - **" & met["Name"] & "** \n"
+                      s &= " \n"
+                    Endif
+                  Endif
+                Endif
+              Next
+            Endif
+        End Select
+      Next
+
+      'File.Save(User.Home &/ "ptag.txt", pr)
+      File.Save(User.Home &/ "auto.md", s)
+      Shell "retext " & User.Home &/ "auto.md"
+  End Select
+
+End
