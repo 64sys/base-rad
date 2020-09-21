@@ -883,6 +883,7 @@ Public Sub LoadAux(obj As Object)
         If InStr(obj.Tag, ".") > 0 Then
           cn.clear
           cn.Add(con, "connection")
+          cn.Add(dbc, "dbconfig")
           lis = New FList
           lis.Tag = "aux\t" & obj.Tag
           cn["\tx"] = obj.ScreenX - 7

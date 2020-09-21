@@ -26,9 +26,10 @@ Export
 
 Private oco As New Collection
 Private obj As Object               ''Textbox in the other form, the initial form
-'Private co As Object                ''Current object, TextBox for search
+'Private co As Object               ''Current object, TextBox for search
 Private CurrentText As String
 Private con As Connection
+Private dbc As String
 Private frm As Object
 Private xflag As Boolean
 
@@ -39,10 +40,12 @@ End
 Public Sub Run(ByRef ctn As Collection, ob As Object) As Boolean
 
   Dim w As Window
+  Dim dbc As String
 
   oco = ctn
   obj = ob
   con = oco["connection"]
+  dbc = oco["dbconfig"]
   ListView1.Clear
   TextBox1.Text = ob.Text
 
@@ -72,32 +75,12 @@ Public Sub ListView1_Select()
   xflag = True
   frm.xloaded = True
   Wait 0.1
-  'Me.Hide
   Me.Close
 
 End
 
-'Public Sub ListView1_Click()
-'
-'   Dim w As Window
-'   Dim frm As Object
-' For Each w In Windows
-'     If w.Tag = oco["wtag"] Then
-'       frm = w
-'     Endif
-'   Next
-
-'frm.xloaded = True
-'
-'   'FEdit.xloaded = True
-'Me.Close()
-'
-
-'End
-
 Public Sub TextBox1_Change()
 
-  'Dim vrt As Variant
   Dim i As Integer
   Dim o As Object
   Dim lsx As String[]
@@ -124,6 +107,12 @@ Public Sub TextBox1_Change()
     Endif
   Endif
 
+  If ListView1.Count = 0 Then
+    btnInsert.Enabled = True
+  Else
+    btnInsert.Enabled = False
+  Endif
+
 End
 
 Private Sub xList(o As Object) As String[]
@@ -136,14 +125,8 @@ Private Sub xList(o As Object) As String[]
   Dim lsx As New String[]
   Dim lnx As New String[]
   Dim ftx As New String[]
-  'Dim sqlv As String
-  'Dim refv As Result
-  'Dim i As Integer
-  'Dim o As Object
   Dim ftr As String
   Dim ref As Result
-
-  'o = obj
 
   ftx = vag.SQLtr("es")
   strText = o.Text
@@ -174,8 +157,6 @@ Private Sub xList(o As Object) As String[]
     ref.MoveNext
   Wend
 
-  'lsx.Insert(lnx)
-
   Return lsx
 
 End
@@ -186,6 +167,62 @@ Public Sub btnCancel_Click()
   obj.Enabled = True
   frm.currJob = ""
   Wait 0.01
+  Me.Close
+
+End
+
+Public Sub btnInsert_Click()
+
+  Dim o As Object
+  Dim strRTab As String
+  Dim strRKey As String
+  Dim strRShw As String
+  Dim cDat As Collection
+  Dim rt As Table
+  Dim fld As Field
+  Dim inf As Collection
+
+  CurrentText = TextBox1.Text
+
+  o = TextBox1
+
+  strRTab = Split(o.Tag, ".")[1]
+  strRKey = Split(o.Tag, ".")[2]
+  strRShw = Split(o.Tag, ".")[3]
+
+  cDat = [strRKey: -1, strRShw: CurrentText]
+
+  rt = con.Tables[strRTab]
+
+  For Each fld In rt.Fields
+    inf = dbs.FieldInfo(con, strRTab, fld.Name)
+
+    If cDat.Exist(fld.Name) = False Then
+      Select fld.Type
+        Case db.Boolean
+          cDat.Add(False, fld.Name)
+        Case db.integer, db.float, db.date, db.serial
+          cDat.Add(Null, fld.Name)
+        Case db.string
+          If inf["Unique"] = "yes" Then
+            cDat.Add(sog.UUIDHandle(6), fld.Name)
+          Else
+            cDat.Add("", fld.Name)
+          Endif
+
+      End Select
+    Endif
+  Next
+
+  dbs.RecordEdit(con, strRTab, dbc, cDat)
+
+  xflag = False
+  obj.Text = CurrentText
+  obj.Enabled = True
+  frm.currJob = ""
+  xflag = True
+  frm.xloaded = True
+  Wait 0.1
   Me.Close
 
 End

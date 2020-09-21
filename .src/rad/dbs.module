@@ -1157,7 +1157,7 @@ Public Sub RecordEdit(con As Connection, tab As String, dbc As String, Dat As Co
         var = vag.Chek4SQL(var)
     End Select
 
-    If fin["Unique"] = "True" Then
+    If fin["Unique"] = "yes" Then
       FVal = var
     Endif
 
