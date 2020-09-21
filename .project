@@ -1,5 +1,5 @@
 # Gambas Project File 3.0
-Title=RADG
+Title=base-rad
 Startup=Main
 Icon=logo.svg
 Version=0.0.123

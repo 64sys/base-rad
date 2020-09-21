@@ -404,7 +404,7 @@ Public Sub menuapp_Click()
         Workspace1.Add(Rx)
       Endif
 
-      '' Botones tipicos del programa
+      '' Typical program buttons
     Case "info" ' FAbout.form
       If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
         cfg = sog.ProjInfo(Application.Path & "/.project")
@@ -415,7 +415,8 @@ Public Sub menuapp_Click()
       Endif
 
     Case "help"
-      Print "Help"
+      'Print "Help"
+      Desktop.Open("./README.pdf")
 
     Case "quit"
       Me.Close

@@ -82,7 +82,7 @@ Public Sub Run(cin As Collection) As Boolean
     ctn.Clear
     ctn = xmg.XmlConfRead(apc, "Variable")
     ConfLoad()
-    cfg = sog.ProjInfo(".project")
+    cfg = cdg.ProjInfo(".project")
 
     Observer = New Observer(Me) As "Observer"
 
