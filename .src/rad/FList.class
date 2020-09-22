@@ -138,7 +138,7 @@ Private Sub xList(o As Object) As String[]
   strRShw = Split(o.Tag, ".")[3]
 
   sql = "select " & strRShw & " from " & strRTab & " order by " & strRShw & " asc"
-  Print sql
+  'Print sql
   ref = con.Exec(sql)
 
   ''Intermediate step to save the word problem with accents
@@ -163,9 +163,14 @@ End
 
 Public Sub btnCancel_Click()
 
-  frm.xloaded = True
-  obj.Enabled = True
-  frm.currJob = ""
+  If frm Not Null Then
+    If frm.Closed = False Then
+      frm.xloaded = True
+      obj.Enabled = True
+      frm.currJob = ""
+    Endif
+  Endif
+
   Wait 0.01
   Me.Close
 

@@ -186,7 +186,7 @@
       MoveScaled(15,0,75,14)
       Expand = True
       { pnlReg1 Panel
-        MoveScaled(1,1,17,12)
+        MoveScaled(2,1,17,12)
         Drop = True
         Expand = True
         Arrangement = Arrange.Vertical
@@ -212,7 +212,6 @@
     }
     { pnlSub Panel
       MoveScaled(15,16,75,14)
-      Background = Color.DarkYellow
       Drop = True
       Expand = True
       Arrangement = Arrange.Vertical

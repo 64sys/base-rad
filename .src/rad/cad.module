@@ -61,7 +61,7 @@ Public Function GauchoSave(sFile As String, cMdl As Collection)
   writer.EndElement
 
   For Each var In cMdl
-    Print cMdl.Key
+    ' Print cMdl.Key
     Select cMdl.Key
         ' Case "File"
         '
@@ -82,7 +82,7 @@ Public Function GauchoSave(sFile As String, cMdl As Collection)
             writer.StartElement("entity")
             For Each v In att
               If stx.Exist(att.Key) Then
-                Print att.Key & ": " & ety.Key
+                ' Print att.Key & ": " & ety.Key
                 Select TypeOf(v)
 
                   Case gb.Null
@@ -316,7 +316,7 @@ Public Function GauchoLoad(sFile As String) As Collection
         ' estos angulos vienen en radianes
         c["start_angle"] = CFloat(ent.Attributes["start_angle"]) 'FloatList(ent.Attributes["a"]) 'EncodePoint(ent.Attributes["a"], "a")
         c["end_angle"] = CFloat(ent.Attributes["end_angle"]) 'FloatList(ent.Attributes["a"]) 'EncodePoint(ent.Attributes["a"], "a")
-        Print "x"
+        ' Print "x"
 
       Case "arc"
         c["p"] = GauchoEncodePoint(ent.Attributes["p"], "p")
@@ -324,7 +324,7 @@ Public Function GauchoLoad(sFile As String) As Collection
         ' estos angulos vienen en GRADOS
         c["start_angle"] = CFloat(ent.Attributes["start_angle"]) 'FloatList(ent.Attributes["a"]) 'EncodePoint(ent.Attributes["a"], "a")
         c["end_angle"] = CFloat(ent.Attributes["end_angle"]) 'FloatList(ent.Attributes["a"]) 'EncodePoint(ent.Attributes["a"], "a")
-        Print c["a"]
+        ' Print c["a"]
 
       Case "text"
         c["p"] = GauchoEncodePoint(ent.Attributes["p"], "p")
@@ -339,7 +339,7 @@ Public Function GauchoLoad(sFile As String) As Collection
         c["scale"] = GauchoFloatList(ent.Attributes["scale"])
         c["block"] = ent.Attributes["block"]
 
-        Print c["a"]
+        ' Print c["a"]
 
     End Select
     If c.Count > 0 Then
@@ -860,7 +860,7 @@ Public Function DWGObjects(s As String) As Collection
           out.Add([tmx.Copy()], tmx["XName"])
         Endif
       Else
-        Print "entity error" & tmx["Object_int"]
+        ' Print "entity error" & tmx["Object_int"]
       Endif
     Next
   Endif
@@ -925,7 +925,7 @@ Public Function DWGDecodeCommon(c As Collection) As Collection
     prp.Add(c["XName"], "Name")
 
     If c["XName"] = "LWPOLYLINE" Then
-      Print "LWPOLYLINE"
+      ' Print "LWPOLYLINE"
     Endif
 
     For Each v In c
@@ -2427,7 +2427,7 @@ Public Function DXFSections(sFile As String) As Collection
       out.Add(File.Name(sFile), "File")
 
       For i = 1 To String.Len(sSub)
-        Print Asc(String.Mid(sSub, i, 1)) & " " & String.Mid(sSub, i, 1)
+        ' Print Asc(String.Mid(sSub, i, 1)) & " " & String.Mid(sSub, i, 1)
       Next
 
       sContent = Replace(sContent, "\r\n", "\n")
@@ -2559,7 +2559,7 @@ Public Function DXFEntities(sCont As String) As Collection
     If InStr(stx[i], "\n100\nAcDbEntity\n") > 0 Then
       'If String2.Count(stx[i], "\n  0\n") > 1 And InStr(stx[i], "  0\nVIEWPORT") = 0 Then
       If InStr(stx[i], "  0\nLWPOLYLINE") > 0 Then
-        Print "x"
+        ' Print "x"
       Endif
       cItem = DXFDecodeItem(stx[i])
       'cItem = DecodeDXFEntity(stx[i])
@@ -2604,7 +2604,7 @@ Private Function GauchoEntitiesSort(c As Collection) As Collection
   For Each eName In stx
     For Each ety In c
       If eName = String.LCase(ety["entity"]) Then
-        Print ety["handle"]
+        ' Print ety["handle"]
         tmp.Add(ety, ety["handle"])
       Endif
     Next
@@ -2644,7 +2644,7 @@ Public Function DXFHeader(sCont As String) As Collection
           Next
 
         Case Else
-          Print "overload"
+          ' Print "overload"
       End Select
     Endif
     Inc i
@@ -3098,7 +3098,7 @@ Private Function DXFDecodeEntity(sItem As String) As Collection
     Else
       If stx[i] <> "" Then
         If codes.Count = 0 Then
-          Print "Error codes"
+          ' Print "Error codes"
         Endif
 
         sTag = Replace(stx[i], " ", "")
@@ -3435,7 +3435,7 @@ Private Function DXFDecodeItem(sItem As String) As Collection
     sVal = stx[1]
     cTmp.Add(sVal, sTag)
     If sVal = "INSERT" Then
-      Print sVal
+      ' Print sVal
     Endif
     codes = DXFEntityCodes(sVal)
     defaults = DXFEntityDefaults(sVal)
@@ -3484,7 +3484,7 @@ Private Function DXFDecodeItem(sItem As String) As Collection
 
         Select sTag
           Case "OLESTARTUP"
-            Print sTag & ": " & vrt
+            ' Print sTag & ": " & vrt
         End Select
     End Select
   Next
@@ -3547,7 +3547,7 @@ Private Function DXFDecodeCoords(sItem As String) As Collection
     sVal = stx[1]
     ' cTmp.Add(sVal, sTag)
     If sVal = "LINE" Then
-      Print sVal
+      ' Print sVal
     Endif
     codes = DXFEntityCodes(sVal)
   Endif

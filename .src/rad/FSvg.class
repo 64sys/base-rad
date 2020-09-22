@@ -71,7 +71,7 @@ Public Sub Run(Optional sPath As String)
         For Each node In element.Attributes
           Select node.Name
             Case "id"
-              Print node.Value & " : " & element.Value
+              ' Print node.Value & " : " & element.Value
               node.Value = strTag
           End Select
         Next

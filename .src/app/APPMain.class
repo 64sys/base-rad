@@ -21,6 +21,8 @@ Private AType As String             '' Tipo de entidad activa
 'Variables del formulario
 Private ldd As Boolean              '' Testigo de carga del formulario
 Private rmeta As New Collection     '' Lista de grupos MIME a procesar (audio, image, video, etc.)
+Private picOpen As Picture
+Private picClosed As Picture
 
 Public Sub Run(cin As Collection)
 
@@ -79,6 +81,9 @@ Public Sub Run(cin As Collection)
       Inc i
     Next
   Next
+
+  picOpen = Picture["icon:/16/edit"]
+  picClosed = Picture["icon:/16/disconnect"]
 
   Observer = New Observer(TreeView1) As "Observer"
 
@@ -220,10 +225,6 @@ Public Sub TreeView1_Select()
   Dim info As Variant
   ' para trabajar con workspaces
   Dim Ez As FEdit                   '' Formulario de edición de registros.
-  '  Dim Cx As FConfig                 '' Edit program configuration
-  '  Dim Ax As FAbout                  '' Formulario que muestra informacin del programa
-  '  Dim Rx As FRen                    '' Formulario de renombrar archivos
-  'Dim Ex As FExch                   '' Formulario de importación de datos
   Dim wtag As String
   Dim w As Window
   Dim bt As Control
@@ -276,10 +277,15 @@ Public Sub TreeView1_Select()
                     Ez.Name = wtag
                     Ez.Icon = Picture["icon:/16/table"]
                     Workspace1.Add(Ez)
+                    TreeView1[Ckey].Picture = picOpen
+
+                    'Ckey = TreeView1.Key
+
                   Else
                     For Each w In Workspace1.Windows
                       If w.Tag = wtag Then
                         Workspace1.ActiveWindow = w
+                        TreeView1[Ckey].Picture = picOpen 'Picture["icon:/16/blue"]
                         Break
                       Endif
                     Next
@@ -607,10 +613,84 @@ Public Sub mnuTesting_Click()
             Endif
         End Select
       Next
-
       'File.Save(User.Home &/ "ptag.txt", pr)
       File.Save(User.Home &/ "auto.md", s)
       Shell "retext " & User.Home &/ "auto.md"
   End Select
+
+End
+
+Public Sub TreeView1_Click()
+
+  Print TreeView1.Current.Key
+
+End
+
+Public Sub TreeView1_DblClick()
+
+  Dim sTag As String
+  Dim sVal As String
+  Dim w As Window
+
+  If InStr(TreeView1.Current.Key, "\t") Then
+    sTag = Split(TreeView1.Current.Key, "\t")[0]
+    sVal = Split(TreeView1.Current.Key, "\t")[1]
+    'If sTag = "table" Then
+    '  TreeView1[TreeView1.Current.Key].Picture = picClosed 'Picture["icon:/16/battery"]
+    'For Each w In Workspace1.Windows
+    '  If w.Tag = sVal Then
+    '    Workspace1.ActiveWindow.Close
+    '    Break
+    '  Endif
+    'Next
+    'Endif
+  Endif
+
+End
+
+Public Sub Workspace1_Close(Window As Window)
+
+  Dim s As String
+
+  s = Workspace1.ActiveWindow.Name
+  s = Replace(s, "/", "\t")
+  s = Replace(s, "Table", "table")
+
+  If TreeView1.Exist(s) Then
+    TreeView1[s].Picture = Null
+  Endif
+
+End
+
+Public Sub Workspace1_CloseAll()
+
+  Dim s As String
+  Dim tvi As String
+
+  For Each tvi In TreeView1.Keys
+    If InStr(tvi, "table\t") > 0 Then
+      TreeView1[tvi].Picture = Null
+    Endif
+  Next
+
+End
+
+Public Sub TreeView1_Rename()
+
+  Dim s As String
+  Dim sName As String
+  Dim sType As String
+
+  s = TreeView1.Key
+  s = Replace(s, "/", "\t")
+  s = Replace(s, "Table", "table")
+  If InStr(s, "\t") > 0 Then
+    sType = Split(s, "\t")[0]
+    sName = Split(s, "\t")[1]
+
+    If sType = "table" Then
+      xmg.SetTableTitle(sName, TreeView1.Current.Text, dbc)
+    Endif
+  Endif
 
 End

@@ -539,6 +539,42 @@ Public Function GetVar(sVar As String, f As String) As Variant
 
 End
 
+'' Set an attribute value for database metadata file.
+
+Public Sub SetTableTitle(sTable As String, sTitle As String, f As String)
+
+  Dim ctn As New Collection
+
+  ctn.Clear
+  ctn.Add("Table", "nod.nam")
+  ctn.Add("Name", "nod.att")
+  ctn.Add(sTable, "nod.val")
+  ctn.Add("Title", "nod.cha")
+  ctn.Add(sTitle, "nod.new")
+  Edit2XML(f, ctn)
+
+End
+
+'' Set an attribute value for database metadata file.
+
+Public Sub SetFieldTitle(sTable As String, sField As String, sTitle As String, f As String)
+
+  Dim ctn As New Collection
+
+  ctn.Clear
+  ctn.Add("Field", "nod.nam")
+  ctn.Add("Table", "nod.att")
+  ctn.Add(sTable, "nod.val")
+  
+  ctn.Add("Name", "nod.att")
+  ctn.Add(sField, "nod.val")
+  
+  ctn.Add("Title", "nod.cha")
+  ctn.Add(sTitle, "nod.new")
+  Edit2XML(f, ctn)
+
+End
+
 '' Write a var value in some file.
 
 Public Sub SetVar(sVar As String, sVal As String, f As String)
@@ -554,6 +590,7 @@ Public Sub SetVar(sVar As String, sVal As String, f As String)
   Edit2XML(f, ctn)
 
 End
+
 
 '' Query an attribute of in an xml file and extract an attribute from it
 

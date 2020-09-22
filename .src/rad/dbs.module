@@ -176,13 +176,13 @@ Public Function DBConf(con As Connection, sXML As String, rp As Collection) As S
           writer.StartElement("Field")
 
           For Each fdata In ctn
-            Print ctn.Key & ": " & fdata
+            ' Print ctn.Key & ": " & fdata
 
             If rp.Exist(ctn.Key) Then
               rt = rp[ctn.Key]
               If rt.Exist(tbl.Name & "." & fld.Name) Then
                 writer.Attribute(ctn.Key, rt[tbl.Name & "." & fld.Name])
-                Print ctn.Key & ":" & rt[tbl.Name & "." & fld.Name]
+                ' Print ctn.Key & ":" & rt[tbl.Name & "." & fld.Name]
               Else
                 writer.Attribute(ctn.Key, fdata)
               Endif
@@ -1207,7 +1207,7 @@ Public Sub RecordEdit(con As Connection, tab As String, dbc As String, Dat As Co
 
   Try res = con.Exec(sql)
   If Error Then
-    Print Error.Text
+    ' Print Error.Text
   Endif
 
   ' Record creation verification

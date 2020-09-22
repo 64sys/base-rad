@@ -116,7 +116,7 @@ Public Function ProjData(strPath As String) As Collection
 
             strMethod = cdg.CodeTag(Replace(stxText[int], "\t", " "))
             strType = Split(strMethod, "\t")[0]
-            Print strType & "\t" & Split(strMethod, "\t")[1]
+            ' Print strType & "\t" & Split(strMethod, "\t")[1]
 
             Select strType
 
@@ -165,7 +165,7 @@ Public Function ProjData(strPath As String) As Collection
                   cMet.Clear
                   metComm = ""
                 Else
-                  Print "Error"
+                  ' Print "Error"
                 Endif
 
               Case "Code"
@@ -1091,7 +1091,7 @@ Public Function GetFarmInfo(strPath As String) As Collection
     stxPro = fil.FileLoad(strFile)
 
     For int = 0 To stxPro.Max
-      Print stxPro[int]
+      ' Print stxPro[int]
       Select InStr(stxPro[int], "=")
         Case 0
           'skip
@@ -1138,7 +1138,7 @@ Public Function GetProjectInfo(strPath As String) As Collection
   If Stat(strPath).Type = gb.File Then
     stxPro = fil.FileLoad(strPath)
     For int = 0 To stxPro.Max
-      Print stxPro[int]
+      ' Print stxPro[int]
       Select InStr(stxPro[int], "=")
         Case 0
           Select String.Mid(stxPro[int], 1, 16)
@@ -1169,14 +1169,14 @@ Public Function GetProjectInfo(strPath As String) As Collection
             st = Split(stxPro[int], "=")[1]
             If st <> "" Then
               For i = 1 To String.Len(st)
-                Print String.Mid(st, i, 1) & " " & Asc(String.Mid(st, i, 1))
+                ' Print String.Mid(st, i, 1) & " " & Asc(String.Mid(st, i, 1))
               Next
             Endif
           Endif
           strVal = vag.Chek4SQL(Split(stxPro[int], "=")[1])
 
           If InStr(strVal, "'") Then
-            Print "Error"
+            ' Print "Error"
           Endif
 
           If ctn.Exist(strTag) Then

@@ -183,7 +183,7 @@ Public Sub LoadImportGrid()
 
   sqlShow = "select * from view_" & tab & " limit 10"
 
-  Print sqlShow
+  'Print sqlShow
   resShow = con.Exec(sqlShow)
 
   ' Obligo a lanzar el evento _Data
@@ -430,7 +430,7 @@ End
 
 Public Sub GridViewImport_Data(Row As Integer, Column As Integer)
 
-  Print CStr(Row) & ":" & CStr(Column)
+  'Print CStr(Row) & ":" & CStr(Column)
   If stxImp.Count > 0 Then
     GridViewImport[Row, Column].Text = Split(stxImp[Row], sep)[Column]
     Select Split(stxFormat[Row], sep)[Column]

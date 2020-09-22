@@ -115,23 +115,23 @@ Public Sub Run()
   con.Open
   If con.Opened Then
     If con.Databases.Exist(dbn) Then
-      Print ("The database exists") & " " & dbn
+      ' Print ("The database exists") & " " & dbn
       con.Close
       con.Name = dbn
       con.Open
       If con.Tables.Count = 2 Then
-        Print ("Database is inconsistent") & " " & dbn
+        ' Print ("Database is inconsistent") & " " & dbn
         'Creating the tables
         Try con.Exec("BEGIN TRANSACTION;\n" & sql & "\nROLLBACK;")
         If Not Error Then
           con.Exec(sql)
-          Print Replace(Error.Text, "\n", " ")
+          ' Print Replace(Error.Text, "\n", " ")
         Endif
         con.Close
         con.Open
       Endif
     Else
-      Print ("The database not exists") & " " & dbn
+      ' Print ("The database not exists") & " " & dbn
       con.Databases.Add(dbn)
       con.Close
       con.Name = dbn
@@ -140,7 +140,7 @@ Public Sub Run()
       Try con.Exec("BEGIN TRANSACTION;\n" & sql & "\nROLLBACK;")
       If Not Error Then
         con.Exec(sql)
-        Print Replace(Error.Text, "\n", " ")
+        ' Print Replace(Error.Text, "\n", " ")
       Endif
       con.Close
       con.Open
@@ -159,7 +159,7 @@ Public Sub Run()
   If Exist(dbc) = False Then
     rpl = Replacements()
     sFile = dbs.DBConf(con, dbc, rpl)
-    Print "log" & sFile
+    ' Print "log" & sFile
   Endif
 
   'Internal editor theme

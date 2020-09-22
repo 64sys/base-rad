@@ -875,7 +875,7 @@ Public Function ID(stx As String[]) As String
           Endif
         Endif
         int = CInt(str)
-        Print int Mod 23
+        ' Print int Mod 23
 
       Case "vru-cl"
 

@@ -154,8 +154,8 @@ Public Function ImageR180Flop(sPath As String) As String
 
   strCommand1 = "convert -rotate 180 '" & sPath & "' '" & sPath & "'"
   strCommand2 = "convert -flop '" & sPath & "' '" & sPath & "'"
-  Print strCommand1
-  Print strCommand2
+  ' Print strCommand1
+  ' Print strCommand2
 
   prs1 = Shell strCommand1
 
@@ -907,7 +907,7 @@ Public Function ImageMontage22(stxFiles As String[]) As String[]
       'str1 &= "-geometry 2479x3508\\>+2+2 "
       str1 &= "-geometry 1240x1754\\>+2+2 "
       str1 &= strPage1
-      Print str1
+      ' Print str1
       Shell str1 Wait
       stxOut.Add(strPage1)
     Next
@@ -1364,7 +1364,7 @@ Public Function PdfReplace(inp As String, s As String, r As String, Optional out
   ' com &= s & "/"
   ' com &= r & "/g\" <'"
   ' com &= inp & "' >'" & out & "'"
-  Print com
+  ' Print com
 
   Shell com Wait
 
@@ -1396,7 +1396,7 @@ Public Function PdfDecrypt(inp As String, Optional out As String) As String
 
   com = "gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile='"
   com &= out & "' -c .setpdfwrite -f '" & inp & "'"
-  Print com
+  ' Print com
 
   Shell com Wait
 
@@ -1431,7 +1431,7 @@ Public Function PdfExtractImages(inp As String, i As Integer, Optional out As St
   com &= " -f " & CStr(i) & " -l " & CStr(i)
   com &= " '" & inp & "' '" & out &/ Format(i, "0000") & "'"
 
-  Print com
+  ' Print com
 
   Shell com Wait
 
@@ -1471,7 +1471,7 @@ Public Function PdfPage2Image(inp As String, i As Integer, Optional odr As Strin
   ' Salia con fondo negro asi que le pude "-alpha remove" y solucionado
   com = "convert -alpha remove -density 300 -resample 300x300 -quality 30 '"
   com &= inp & "'[" & CStr(i - 1) & "] '" & out & "'"
-  Print com
+  ' Print com
 
   Shell com Wait
 
@@ -1552,7 +1552,7 @@ Public Function Pdf2Text2(sPath As String, i As Integer) As String
   xpdf = New PdfDocument
   xpdf.Open(sPath)
   If xpdf.HasIndex Then
-    Print xpdf.Index.Text
+    ' Print xpdf.Index.Text
   Endif
 
   tcom = "pdftotext -f " & CStr(i) & " -l " & CStr(i) & " '" & sPath & "' - 2>&1"

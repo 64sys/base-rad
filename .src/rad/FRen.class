@@ -85,7 +85,7 @@ Public Sub Run(c As Collection) As Integer
                   If Exist(ictn[obj.Tag]) Then
                     If Stat(ictn[obj.Tag]).Type = gb.File Or Stat(ictn[obj.Tag]).Type = gb.Link Then
                       obj.Picture = Image.Load(ictn[obj.Tag]).Stretch(20, 20).Picture
-                      Print "> Control con icono: " & obj.Tag
+                      ' Print "> Control con icono: " & obj.Tag
                     Endif
                   Endif
                 Endif
@@ -145,7 +145,7 @@ Public Sub Run(c As Collection) As Integer
                   .Picture = img.Stretch(W, H).Picture
                 Endif
               Case Else
-                Print mim
+                'Print mim
                 D = t.W - 4
                 def = "./icons/vertex/" & grp & "-" & cls & ".svg"
                 alt = "./icons/alt/" & grp & "-" & cls & ".svg"
