@@ -1,4 +1,4 @@
-![logo](logo.svg)
+![logo](logo.svg width="48" height="48")
 # BASE-RAD
 ## Rapid Application Development for Gambas
 ### 0.0.123
