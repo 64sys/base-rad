@@ -27,6 +27,7 @@ Translate=1
 Language=en
 SourcePath=/home/administrador/Documentos/coding/rad-apps
 Maintainer=Belmotek
+Vendor=belmotek
 Address=info@belmotek.net
 Url=www.belmotek.net
 License=General Public License
