@@ -8,7 +8,7 @@
     Text = ("Preferences")
     { mnuNewconfig Menu config
       Name = "mnuNewconfig"
-      Text = ("New preferences")
+      Text = ("New settings")
       Picture = Picture["icon:/32/new"]
       Tag = "new-configuration"
     }
@@ -26,7 +26,7 @@
     }
     { mnuBackupconfig Menu config
       Name = "mnuBackupconfig"
-      Text = ("Save configuration")
+      Text = ("Save settings")
       Picture = Picture["icon:/32/archive"]
       Tag = "backup-configuration"
     }
@@ -50,35 +50,35 @@
       Name = "tobNewconfig"
       MoveScaled(0,0,5,5)
       Tag = "new"
-      ToolTip = ("New preferences")
+      ToolTip = ("New settings")
       Picture = Picture["icon:/22/new"]
     }
     { tobApplyconfig ToolButton config
       Name = "tobApplyconfig"
       MoveScaled(7,0,5,5)
       Tag = "save"
-      ToolTip = ("Apply preferences")
+      ToolTip = ("Apply settings")
       Picture = Picture["icon:/22/save"]
     }
     { tobRestoreconfig ToolButton config
       Name = "tobRestoreconfig"
       MoveScaled(14,0,5,5)
       Tag = "open"
-      ToolTip = ("Restore preferences")
+      ToolTip = ("Restore settings")
       Picture = Picture["icon:/22/open"]
     }
     { tobBackupconfig ToolButton config
       Name = "tobBackupconfig"
       MoveScaled(23,0,5,5)
       Tag = "archive"
-      ToolTip = ("Archive preferences")
+      ToolTip = ("Archive settings")
       Picture = Picture["icon:/22/archive"]
     }
     { tobOpenDir ToolButton config
       Name = "tobOpenDir"
       MoveScaled(29,0,5,5)
       Tag = "directory"
-      ToolTip = ("Open the preferences directory")
+      ToolTip = ("Open the settings directory")
       Picture = Picture["icon:/22/directory"]
     }
     { Panel1 Panel

@@ -2,7 +2,7 @@
 Title=base-rad
 Startup=Main
 Icon=logo.svg
-Version=0.0.123
+Version=0.0.125
 Component=gb.image
 Component=gb.gui
 Component=gb.form

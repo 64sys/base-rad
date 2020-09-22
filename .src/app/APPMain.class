@@ -87,6 +87,8 @@ Public Sub Run(cin As Collection)
 
   Observer = New Observer(TreeView1) As "Observer"
 
+  Me.Maximized = True
+
   Me.Show()
 
 End
@@ -220,21 +222,21 @@ Public Sub TreeView1_Select()
 
   Dim stx As New String[]
   Dim i As Integer
-  Dim tbl As Table
-  Dim chk As New Collection
+  'Dim tbl As Table
+  'Dim chk As New Collection
   Dim info As Variant
   ' para trabajar con workspaces
   Dim Ez As FEdit                   '' Formulario de edición de registros.
   Dim wtag As String
-  Dim w As Window
+  ' Dim w As Window
   Dim bt As Control
   Dim win As Window
   Dim x As Integer
 
   If ldd = True Then
 
-    Print TreeView1.Key
-    Ckey = TreeView1.Key
+    'Print TreeView1.Key
+    'Ckey = TreeView1.Key
     AType = ""
 
     For Each bt In pnlIcons.Children
@@ -249,58 +251,62 @@ Public Sub TreeView1_Select()
 
       Select AType
         Case "table"
+
           If stx.Count > 1 Then
             tab = stx[1]
-            'Habilitando el boton de importación para la table
-            For Each bt In pnlIcons.Children
-              If bt.Tag = "import" Then
-                bt.Enabled = True
-              Endif
-            Next
-            chk.Clear
-            chk = dbs.CheckTable(con, tab)
-            If con.Tables.Exist(tab) Then
-              tbl = con.Tables[tab]
-            Endif
-            If chk["PrimaryKey"] > 0 Then
-              If chk["Indexes"] > 0 Then
-                If tbl.Fields.Exist(chk["UniqueField"]) Then
-                  '-----------------------------------
-                  wtag = "Table/" & tab
-                  If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
-                    cex.Add(tab, "CTable")
-                    cex.Add(0, "RegKey")
-                    Ez = New FEdit(cex)
-                    info = xmg.GetVar(wtag & "/Title", dbc)
-                    Ez.Title = info
-                    Ez.Tag = wtag
-                    Ez.Name = wtag
-                    Ez.Icon = Picture["icon:/16/table"]
-                    Workspace1.Add(Ez)
-                    TreeView1[Ckey].Picture = picOpen
-
-                    'Ckey = TreeView1.Key
-
-                  Else
-                    For Each w In Workspace1.Windows
-                      If w.Tag = wtag Then
-                        Workspace1.ActiveWindow = w
-                        TreeView1[Ckey].Picture = picOpen 'Picture["icon:/16/blue"]
-                        Break
-                      Endif
-                    Next
-                  Endif
-
-                Else
-                  Message.Warning(("Table does not have a unique value field"))
-                Endif
-              Else
-                Message.Warning(("The table has no index"))
-              Endif
-            Else
-              Message.Warning(("Table does not have a primary key field"))
-            Endif
+            OpenTable(tab)
           Endif
+          '   tab = stx[1]
+          '   'Habilitando el boton de importación para la table
+          '   For Each bt In pnlIcons.Children
+          '     If bt.Tag = "import" Then
+          '       bt.Enabled = True
+          '     Endif
+          '   Next
+          '   chk.Clear
+          '   chk = dbs.CheckTable(con, tab)
+          '   If con.Tables.Exist(tab) Then
+          '     tbl = con.Tables[tab]
+          '   Endif
+          '   If chk["PrimaryKey"] > 0 Then
+          '     If chk["Indexes"] > 0 Then
+          '       If tbl.Fields.Exist(chk["UniqueField"]) Then
+          '         '-----------------------------------
+          '         wtag = "Table/" & tab
+          '         If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
+          '           cex.Add(tab, "CTable")
+          '           cex.Add(0, "RegKey")
+          '           Ez = New FEdit(cex)
+          '           info = xmg.GetVar(wtag & "/Title", dbc)
+          '           Ez.Title = info
+          '           Ez.Tag = wtag
+          '           Ez.Name = wtag
+          '           Ez.Icon = Picture["icon:/16/table"]
+          '           Workspace1.Add(Ez)
+          '           TreeView1[Ckey].Picture = picOpen
+          '
+          '           'Ckey = TreeView1.Key
+          '
+          '         Else
+          '           For Each w In Workspace1.Windows
+          '             If w.Tag = wtag Then
+          '               Workspace1.ActiveWindow = w
+          '               TreeView1[Ckey].Picture = picOpen 'Picture["icon:/16/blue"]
+          '               Break
+          '             Endif
+          '           Next
+          '         Endif
+          '
+          '       Else
+          '         Message.Warning(("Table does not have a unique value field"))
+          '       Endif
+          '     Else
+          '       Message.Warning(("The table has no index"))
+          '     Endif
+          '   Else
+          '     Message.Warning(("Table does not have a primary key field"))
+          '   Endif
+          ' Endif
 
         Case "data"
           If stx.Count > 2 Then
@@ -337,6 +343,76 @@ Public Sub TreeView1_Select()
 
 End
 
+Public Sub OpenTable(xtab As String)
+
+  'Dim stx As New String[]
+  Dim chk As New Collection
+  Dim tbl As Table
+  Dim info As Variant
+  Dim Ez As FEdit                   '' Formulario de edición de registros.
+  Dim wtag As String
+  Dim w As Window
+  Dim bt As Control
+  'Dim win As Window
+  'Dim x As Integer
+
+  'If stx.Count > 1 Then
+  'tab = stx[1]
+  'Habilitando el boton de importación para la table
+
+  Ckey = "table\t" & xtab
+  For Each bt In pnlIcons.Children
+    If bt.Tag = "import" Then
+      bt.Enabled = True
+    Endif
+  Next
+  chk.Clear
+  chk = dbs.CheckTable(con, xtab)
+  If con.Tables.Exist(xtab) Then
+    tbl = con.Tables[xtab]
+  Endif
+  If chk["PrimaryKey"] > 0 Then
+    If chk["Indexes"] > 0 Then
+      If tbl.Fields.Exist(chk["UniqueField"]) Then
+        '-----------------------------------
+        wtag = "Table/" & xtab
+        If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
+          cex.Add(xtab, "CTable")
+          cex.Add(0, "RegKey")
+          Ez = New FEdit(cex)
+          info = xmg.GetVar(wtag & "/Title", dbc)
+          Ez.Title = info
+          Ez.Tag = wtag
+          Ez.Name = wtag
+          Ez.Icon = Picture["icon:/16/table"]
+          Workspace1.Add(Ez)
+          TreeView1[Ckey].Picture = picOpen
+
+          'Ckey = TreeView1.Key
+
+        Else
+          For Each w In Workspace1.Windows
+            If w.Tag = wtag Then
+              Workspace1.ActiveWindow = w
+              TreeView1[Ckey].Picture = picOpen 'Picture["icon:/16/blue"]
+              Break
+            Endif
+          Next
+        Endif
+
+      Else
+        Message.Warning(("Table does not have a unique value field"))
+      Endif
+    Else
+      Message.Warning(("The table has no index"))
+    Endif
+  Else
+    Message.Warning(("Table does not have a primary key field"))
+  Endif
+  'Endif
+
+End
+
 Public Sub menuapp_Click()
 
   Dim obj As Object
@@ -361,12 +437,12 @@ Public Sub menuapp_Click()
   Dim cls As Collection
   Dim met As Collection
   Dim i As Integer
-  Dim sNames As String[]
+  'Dim sNames As String[]
   Dim xNames As String[]
   Dim sName As String
   Dim bSpec As Boolean
-  Dim p As Variant
-  Dim pr As String
+  'Dim p As Variant
+  'Dim pr As String
   Dim compo As Variant
   Dim xDir As String
   Dim xOut As String
@@ -413,7 +489,7 @@ Public Sub menuapp_Click()
       '' Typical program buttons
     Case "info" ' FAbout.form
       If Workspace1.Count = 0 Or ExistWin(wtag, Workspace1) = False Then
-        cfg = sog.ProjInfo(Application.Path & "/.project")
+        cfg = cdg.ProjInfo(Application.Path & "/.project")
         Ax = New FAbout(cfg)
         Ax.Tag = wtag
         Ax.Title = ("About") & " " & Application.Name
@@ -558,13 +634,13 @@ Public Sub mnuTesting_Click()
   Dim met As Collection
   Dim s As String
   Dim i As Integer
-  Dim sNames As String[]
+  'Dim sNames As String[]
   Dim xNames As String[]
   Dim sName As String
   Dim bSpec As Boolean
   Dim prinf As Collection
-  Dim p As Variant
-  Dim pr As String
+  'Dim p As Variant
+  'Dim pr As String
 
   Select obj.Tag
     Case "document"
@@ -620,39 +696,47 @@ Public Sub mnuTesting_Click()
 
 End
 
-Public Sub TreeView1_Click()
-
-  Print TreeView1.Current.Key
-
-End
+' Public Sub TreeView1_Click()
+'
+'   Print TreeView1.Current.Key
+'
+' End
 
 Public Sub TreeView1_DblClick()
 
   Dim sTag As String
   Dim sVal As String
   Dim w As Window
+  Dim s As String
+  Dim wName As String
 
   If InStr(TreeView1.Current.Key, "\t") Then
     sTag = Split(TreeView1.Current.Key, "\t")[0]
     sVal = Split(TreeView1.Current.Key, "\t")[1]
-    'If sTag = "table" Then
-    '  TreeView1[TreeView1.Current.Key].Picture = picClosed 'Picture["icon:/16/battery"]
-    'For Each w In Workspace1.Windows
-    '  If w.Tag = sVal Then
-    '    Workspace1.ActiveWindow.Close
-    '    Break
-    '  Endif
-    'Next
-    'Endif
+    If sTag = "table" Then
+      For Each w In Workspace1.Windows
+        s = w.Tag
+        s = Replace(s, "/", "\t")
+        s = Replace(s, "Table", "table")
+        wName = Split(s, "\t")[1]
+        If wName = sVal Then
+          TreeView1[TreeView1.Current.Key].Picture = Null
+          Workspace1.ActiveWindow.Close
+          Break
+        Endif
+      Next
+    Endif
   Endif
 
 End
 
-Public Sub Workspace1_Close(Window As Window)
+Public Sub Workspace1_Close(zWindow As Window)
+  'Public Sub Workspace1_Close()
 
   Dim s As String
 
-  s = Workspace1.ActiveWindow.Name
+  's = Workspace1.ActiveWindow.Name
+  s = zWindow.Name
   s = Replace(s, "/", "\t")
   s = Replace(s, "Table", "table")
 
@@ -664,7 +748,7 @@ End
 
 Public Sub Workspace1_CloseAll()
 
-  Dim s As String
+  'Dim s As String
   Dim tvi As String
 
   For Each tvi In TreeView1.Keys

@@ -98,21 +98,29 @@
       Arrangement = Arrange.Horizontal
       { Panel6 Panel
         MoveScaled(0,0,1,5)
+        Visible = False
+      }
+      { txoFieldTitle TextBox
+        MoveScaled(2,0,15,5)
+        ToolTip = ("Edit the field title")
+      }
+      { Separator5 Separator
+        MoveScaled(25,1,0,3)
       }
       { lxaFiterField TextLabel
-        MoveScaled(2,0,9,5)
+        MoveScaled(27,0,9,5)
         Alignment = Align.Normal
       }
-      { tobNegation ToolButton applyfilter
+      { tobNegation ToolButton applychanges
         Name = "tobNegation"
-        MoveScaled(15,0,5,5)
+        MoveScaled(36,0,5,5)
         #Translate = False
         Text = "Not"
         Toggle = True
       }
       { pnlCondition Panel
-        MoveScaled(23,0,20,5)
-        { tobLike ToolButton applyfilter
+        MoveScaled(44,0,20,5)
+        { tobLike ToolButton applychanges
           Name = "tobLike"
           MoveScaled(0,0,5,5)
           #Translate = False
@@ -121,7 +129,7 @@
           Radio = True
           Toggle = True
         }
-        { tobEqual ToolButton applyfilter
+        { tobEqual ToolButton applychanges
           Name = "tobEqual"
           MoveScaled(6,0,6,5)
           #Translate = False
@@ -130,7 +138,7 @@
           Radio = True
           Toggle = True
         }
-        { tobNull ToolButton applyfilter
+        { tobNull ToolButton applychanges
           Name = "tobNull"
           MoveScaled(12,0,6,5)
           #Translate = False
@@ -141,23 +149,23 @@
         }
       }
       { txoFilter TextBox
-        MoveScaled(45,0,16,5)
+        MoveScaled(65,0,12,5)
         Expand = True
         Alignment = Align.Center
       }
-      { tobSaveFilter2 ToolButton applyfilter
+      { tobSaveFilter2 ToolButton applychanges
         Name = "tobSaveFilter2"
-        MoveScaled(74,0,5,5)
+        MoveScaled(78,0,5,5)
         Tag = "clear"
         Picture = Picture["icon:/22/clear"]
       }
-      { tobCancel ToolButton applyfilter
+      { tobCancel ToolButton applychanges
         Name = "tobCancel"
-        MoveScaled(82,0,5,5)
+        MoveScaled(84,0,5,5)
         Tag = "close"
         Picture = Picture["icon:/22/close"]
       }
-      { tobSaveFilter ToolButton applyfilter
+      { tobSaveFilter ToolButton applychanges
         Name = "tobSaveFilter"
         MoveScaled(89,0,5,5)
         Tag = "save"

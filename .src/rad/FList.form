@@ -1,14 +1,14 @@
 # Gambas Form File 3.0
 
 { Form Form
-  MoveScaled(0,0,42,27)
+  MoveScaled(0,0,42,34)
   Resizable = False
   Border = False
   Stacking = Window.Above
   Arrangement = Arrange.Vertical
   Spacing = True
   { Panel1 Panel
-    MoveScaled(1,1,40,25)
+    MoveScaled(1,1,40,31)
     Expand = True
     Arrangement = Arrange.Vertical
     Spacing = True
@@ -37,6 +37,19 @@
       Background = Color.ButtonBackground
       Expand = True
       Border = False
+    }
+    { Panel3 Panel
+      MoveScaled(1,26,37,4)
+      Arrangement = Arrange.Horizontal
+      { lblForeignTable Label
+        MoveScaled(2,0,24,4)
+        Expand = True
+      }
+      { btnOpenForeignTable Button
+        MoveScaled(31,0,4,4)
+        ToolTip = ("Open foreign table")
+        Picture = Picture["icon:/22/table"]
+      }
     }
   }
 }

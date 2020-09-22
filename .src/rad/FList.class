@@ -32,6 +32,7 @@ Private con As Connection
 Private dbc As String
 Private frm As Object
 Private xflag As Boolean
+Private sTab As String
 
 Public Sub _new()
 
@@ -40,7 +41,12 @@ End
 Public Sub Run(ByRef ctn As Collection, ob As Object) As Boolean
 
   Dim w As Window
-  Dim dbc As String
+  'Dim dbc As String
+  Dim ct As Variant
+  'Dim strRTab As String
+  Dim sMessage As String
+
+  'Dim sTab As String
 
   oco = ctn
   obj = ob
@@ -62,6 +68,20 @@ Public Sub Run(ByRef ctn As Collection, ob As Object) As Boolean
   Next
   frm.xloaded = False
   xflag = True
+
+  sMessage = ("Foreign table") & ": "
+
+  If InStr(ob.Tag, ".") > 0 Then
+    sTab = Split(ob.Tag, ".")[1]
+    ct = xmg.GetVar("Table/" & sTab & "/Title", dbc)
+    If CStr(ct) <> "" Then
+      sMessage &= CStr(ct) & " [" & sTab & "]"
+    Else
+      sMessage &= "[" & sTab & "]"
+    Endif
+    lblForeignTable.Text = sMessage
+
+  Endif
 
 End
 
@@ -228,6 +248,23 @@ Public Sub btnInsert_Click()
   xflag = True
   frm.xloaded = True
   Wait 0.1
+  Me.Close
+
+End
+
+Public Sub btnOpenForeignTable_Click()
+
+  If frm Not Null Then
+    If frm.Closed = False Then
+      frm.xloaded = True
+      obj.Enabled = True
+      frm.currJob = ""
+    Endif
+  Endif
+
+  APPMain.OpenTable(sTab)
+
+  Wait 0.01
   Me.Close
 
 End
