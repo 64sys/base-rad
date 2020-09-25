@@ -1663,7 +1663,7 @@ Public Function Svg2Pdf(svg As String, sPath As String) As Collection
   If Exist(svg) Then
     ctn.Add(svg, "svg")
 
-    Shell "inkscape '" & svg & "' -D --export-pdf='" & sPath & "'" Wait
+    Shell "inkscape -D '" & svg & "' -o '" & sPath & "'" Wait
 
     If Exist(sPath) Then
       ctn.Add(sPath, "pdf")

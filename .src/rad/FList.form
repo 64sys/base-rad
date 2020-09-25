@@ -18,17 +18,21 @@
     { Panel2 Panel
       MoveScaled(2,1,37,4)
       Arrangement = Arrange.Horizontal
-      { TextBox1 TextBox
-        MoveScaled(0,0,15,4)
+      { txoFilter TextBox
+        MoveScaled(0,0,12,4)
         Expand = True
       }
+      { Button1 Button
+        MoveScaled(14,0,4,4)
+        Picture = Picture["icon:/22/clear"]
+      }
       { btnInsert Button
-        MoveScaled(17,0,9,4)
+        MoveScaled(19,0,9,4)
         Enabled = False
         Text = ("Insert")
       }
       { btnCancel Button
-        MoveScaled(27,0,9,4)
+        MoveScaled(28,0,9,4)
         Text = ("Cancel")
       }
     }

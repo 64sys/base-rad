@@ -2,6 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: base-rad 3.15.1\n"
+"POT-Creation-Date: 2020-09-22 23:36 UTC\n"
 "PO-Revision-Date: 2020-09-22 23:26 UTC\n"
 "Last-Translator: belmotek <bmk@gaucho>\n"
 "Language: es_AR\n"
@@ -185,23 +186,23 @@ msgstr "Eliminar registro"
 msgid "Export data"
 msgstr "Exportar datos"
 
-#: FCustom.form:110 FEdit.form:121
+#: FCustom.form:110 FEdit.form:122
 msgid "Show filters"
 msgstr "Mostrar filtros"
 
-#: FCustom.form:118 FEdit.form:129
+#: FCustom.form:118 FEdit.form:130
 msgid "Edit table and field titles"
 msgstr "Editar títulos de tabla y campo"
 
-#: FCustom.form:126 FEdit.form:137
+#: FCustom.form:126 FEdit.form:138
 msgid "Print"
 msgstr "Impresión"
 
-#: FCustom.form:269 FEdit.form:333
+#: FCustom.form:269 FEdit.form:334
 msgid "aliments"
 msgstr "alimentos"
 
-#: FEdit.class:344 FExch.form:67 FList.form:48 FOptions.form:64
+#: FEdit.class:344 FExch.form:67 FList.form:54 FOptions.form:64
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -249,31 +250,31 @@ msgstr "Campo clave principal"
 msgid "Tipo"
 msgstr "Tipo"
 
-#: FEdit.class:1249
+#: FEdit.class:1260
 msgid "Tab separated text"
 msgstr "Texto separado por tabuladores"
 
-#: FEdit.class:1265
+#: FEdit.class:1276
 msgid "You must select a table before importing data"
 msgstr "Debe seleccionar una tabla antes de importar datos"
 
-#: FEdit.class:1595
+#: FEdit.class:1682
 msgid "You must save the record first"
 msgstr "Debes guardar el registro primero"
 
-#: FEdit.class:1620
+#: FEdit.class:1707
 msgid "Do you want to replace it?"
 msgstr "¿Quieres cambiarlo?"
 
-#: FEdit.class:1620
+#: FEdit.class:1707
 msgid "Replaze"
 msgstr "Reemplazar"
 
-#: FEdit.class:1620
+#: FEdit.class:1707
 msgid "The file already exists"
 msgstr "El archivo ya existe"
 
-#: FEdit.form:168
+#: FEdit.form:169
 msgid "Edit the field title"
 msgstr "Editar el título del campo"
 
@@ -297,15 +298,15 @@ msgstr "Importar datos"
 msgid "Cancel import"
 msgstr "Cancelar importación"
 
-#: FList.class:72
+#: FList.class:81
 msgid "Foreign table"
 msgstr "Tabla externa"
 
-#: FList.form:43
+#: FList.form:49
 msgid "Insert"
 msgstr "Insertar"
 
-#: FList.form:70
+#: FList.form:76
 msgid "Open foreign table"
 msgstr "Abrir la tabla externa"
 
@@ -513,27 +514,27 @@ msgstr "Formateo de datos de"
 msgid "Database completed"
 msgstr "Base de datos completada"
 
-#: cad.module:2248 xmg.module:907
+#: cad.module:2248 xmg.module:911
 msgid "Program"
 msgstr "Programa"
 
-#: cad.module:2252 xmg.module:911
+#: cad.module:2252 xmg.module:915
 msgid "Application directory"
 msgstr "Directorio del programa"
 
-#: cad.module:2262 xmg.module:921
+#: cad.module:2262 xmg.module:945
 msgid "Window background color"
 msgstr ""
 
-#: cad.module:2274 xmg.module:933
+#: cad.module:2274 xmg.module:957
 msgid "Desktop"
 msgstr "Escritorio"
 
-#: cad.module:2278 xmg.module:937
+#: cad.module:2278 xmg.module:961
 msgid "Simple text editor by default"
 msgstr ""
 
-#: cad.module:2288 xmg.module:947
+#: cad.module:2288 xmg.module:971
 msgid "Program icons"
 msgstr ""
 
@@ -1225,3 +1226,12 @@ msgstr "Excluido"
 msgid "More than one capital letter"
 msgstr "Más de una letra mayúscula"
 
+#: xmg.module:925
+#, fuzzy
+msgid "Application templates"
+msgstr "Directorio del programa"
+
+#: xmg.module:935
+#, fuzzy
+msgid "Application reports"
+msgstr "Directorio del programa"

@@ -1216,6 +1216,17 @@ Public Sub menudata_Click()
   Dim fsql As String
   Dim fres As Result
   Dim FVal As String
+  Dim Tx As Variant
+  Dim cEnt As New Collection
+  Dim cFld As New Collection
+  Dim cTit As New Collection
+  Dim cVal As New Collection
+  Dim cModel As New Collection
+  Dim cLay As New Collection
+  Dim x As Integer
+  Dim y As Integer
+  Dim cEntities As New Collection
+  Dim i As Integer
 
   obj = Last
 
@@ -1269,14 +1280,34 @@ Public Sub menudata_Click()
       Endif
 
     Case "print"
-      xTmp = adi &/ "svg/" & tab & ".svg"
-      svg = "/tmp/" & tab & ".svg"
-      xpdf = adi &/ "rpt/" & ctnDat["bname"] & ".pdf"
+
+      Select edmod
+        Case "list"
+          fsql = "SELECT * FROM view_" & tab
+
+          xTmp = adi &/ "svg/" & tab & "list.xml"
+          svg = "/tmp/" & tab & ".ods"
+
+          xpdf = adi &/ "rpt/" & ctnDat["bname"] & ".pdf"
+
+        Case "single"
+          fsql = "SELECT * FROM view_" & tab
+          fsql &= " WHERE " & stxUni[0] & "='" & cex["FFtr"] & "'"
+
+          xTmp = xmg.GetVar("Application.Templates", apc)
+          xTmp &= "/" & tab & "-single.svg"
+          svg = "/tmp/" & tab & "-single.svg"
+
+          xpdf = xmg.GetVar("Application.Reports", apc)
+
+          xpdf &= "/" & ctnDat[stxUni[0]] & ".pdf"
+
+      End Select
 
       ctmp.Clear
 
-      fsql = "SELECT * FROM view_" & tab
-      fsql &= " WHERE " & stxUni[0] & "='" & cex["FFtr"] & "'"
+      'fsql = "SELECT * FROM view_" & tab
+      'fsql &= " WHERE " & stxUni[0] & "='" & cex["FFtr"] & "'"
       fres = con.Exec(fsql)
       While fres.Available
         For Each rfd In fres.Fields
@@ -1291,7 +1322,6 @@ Public Sub menudata_Click()
                 FVal = Format(FVal, "#.##")
               Endif
             Case Else
-              'Print TypeOf(fres[rfd.Name]) & " [" & fres[rfd.Name] & "]"
               FVal = fres[rfd.Name]
           End Select
           ctmp.Add(FVal, rfd.Name)
@@ -1305,7 +1335,6 @@ Public Sub menudata_Click()
 
       ''If the table is related to another table, the information is added
       If cex.Exist("FFld") Then
-        'Print cex["FFld"] & ":" & cex["FFtr"]
         subsql = "SELECT * FROM qty_" & cex["CTable"]
         subsql &= " WHERE " & cex["FFld"] & "='" & cex["FFtr"] & "'"
         subres = con.Exec(subsql)
@@ -1320,8 +1349,62 @@ Public Sub menudata_Click()
 
       Endif
 
-      If Exist(adi &/ "rpt") = False Then
-        Shell "mkdir -p '" & adi &/ "rpt'" Wait
+      If Exist(xTmp) = False Then
+        cEnt.Add("LWPOLYLINE", "Name")
+        cEnt.Add(0, "Colour")
+        cEnt.Add("Report", "Layer")
+        cEnt.Add([0, 0], "P0")
+        cEnt.Add([210, 0], "P1")
+        cEnt.Add([210, 297], "P2")
+        cEnt.Add([0, 297], "P3")
+        cEnt.Add([0, 0], "P4")
+        cEnt.Add(5, "Points")
+
+        cEntities.Add(cEnt.Copy(), "frame")
+        cEnt.Clear
+        cLay.Add(["Name": "Report", "Color": 0], "Report")
+        cModel.Add(cLay.Copy(), "Layers")
+        cLay.Clear
+
+        x = xmg.Mm2Px(2)
+        y = xmg.Mm2Px(2)
+
+        For Each Tx In ctmp
+          cFld.Add("TEXT", "Name")
+          cFld.Add(0, "Colour")
+          cFld.Add([x, y], "P1")
+          cFld.Add(ctmp.Key, "Text")
+          cFld.Add("Report", "Layer")
+
+          cTit.Add("TEXT", "Name")
+          cTit.Add(0, "Colour")
+          cTit.Add([x + xmg.Mm2Px(5), y], "P1")
+          cTit.Add(ctmp.Key, "Text")
+          cTit.Add("Report", "Layer")
+
+          cVal.Add("TEXT", "Name")
+          cVal.Add(0, "Colour")
+          cVal.Add([x + xmg.Mm2Px(15), y], "P1")
+          cVal.Add(CStr(Tx), "Text")
+          cVal.Add("Report", "Layer")
+          cVal.Add(ctmp.Key, "Id")
+
+          If y >= xmg.Mm2Px(277) Then
+            x = x + xmg.Mm2Px(30)
+            y = xmg.Mm2Px(10)
+          Endif
+          y = y + xmg.Mm2Px(2)
+
+          cEntities.Add(cFld.Copy(), "Fld." & CStr(i))
+          cEntities.Add(cTit.Copy(), "Tit." & CStr(i))
+          cEntities.Add(cVal.Copy(), "Val." & CStr(i))
+          i += 1
+          cFld.Clear
+          cTit.Clear
+          cVal.Clear
+        Next
+        cModel.Add(cEntities, "Entities")
+        xmg.XmlSVG(xTmp, cModel, "Test")
       Endif
 
       If Exist(svg) Then
@@ -1346,10 +1429,12 @@ Public Sub menudata_Click()
       Save2Database()
       resShow = con.Exec(sqlShow)
       LoadGrid(tab)
-      ActionMode("list", cex.Copy())
+      edmod = "list"
+      ActionMode(edmod, cex.Copy())
 
     Case "close"
-      ActionMode("list", cex.Copy())
+      edmod = "list"
+      ActionMode(edmod, cex.Copy())
 
   End Select
 
@@ -1481,7 +1566,8 @@ Public Sub GridView1_DblClick()
     Case Else
       intKey = CInt(GridView1[GridView1.Row, 0].Text)
       If xloaded = True Then
-        ActionMode("single", cex.Copy())
+        edmod = "single"
+        ActionMode(edmod, cex.Copy())
       Endif
 
   End Select

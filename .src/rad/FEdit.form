@@ -62,6 +62,7 @@
     { tobFilterShow ToolButton menudata
       Name = "tobFilterShow"
       MoveScaled(39,0,5,5)
+      Visible = False
       Tag = "filter"
       ToolTip = ("Show filters")
       Picture = Picture["icon:/22/filter"]

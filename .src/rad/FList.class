@@ -53,13 +53,13 @@ Public Sub Run(ByRef ctn As Collection, ob As Object) As Boolean
   con = oco["connection"]
   dbc = oco["dbconfig"]
   ListView1.Clear
-  TextBox1.Text = ob.Text
+  'txoFilter.Text = ob.Text
 
   Me.Stacking = Window.Above
   Me.Move(oco["\tx"], oco["\ty"])
   Me.Show
   'ListView1.SetFocus
-  TextBox1.SetFocus
+  txoFilter.SetFocus
 
   For Each w In Windows
     If w.Tag = oco["wtag"] Then
@@ -68,6 +68,15 @@ Public Sub Run(ByRef ctn As Collection, ob As Object) As Boolean
   Next
   frm.xloaded = False
   xflag = True
+
+  Select ob.Text
+    Case ""
+      txoFilter.Text = " "
+      txoFilter.Text = ""
+    Case Else
+      txoFilter.Text = ""
+      txoFilter.Text = ob.Text
+  End Select
 
   sMessage = ("Foreign table") & ": "
 
@@ -99,7 +108,7 @@ Public Sub ListView1_Select()
 
 End
 
-Public Sub TextBox1_Change()
+Public Sub txoFilter_Change()
 
   Dim i As Integer
   Dim o As Object
@@ -107,12 +116,12 @@ Public Sub TextBox1_Change()
   Dim x As String
 
   If xflag = True Then
-    TextBox1.Tag = obj.Tag
-    o = TextBox1
+    txoFilter.Tag = obj.Tag
+    o = txoFilter
     lsx = xList(o)
     ListView1.Clear
     If lsx.Count > 0 Then
-      Me.H = lsx.Count * 35 + 35
+      'Me.H = lsx.Count * 35 + 35
       Select Object.Type(obj)
         Case "TextBox"
           If InStr(o.Tag, ".") > 0 Then
@@ -123,7 +132,7 @@ Public Sub TextBox1_Change()
           Endif
       End Select
     Else
-      Me.H = 35
+      'Me.H = 35
     Endif
   Endif
 
@@ -207,9 +216,9 @@ Public Sub btnInsert_Click()
   Dim fld As Field
   Dim inf As Collection
 
-  CurrentText = TextBox1.Text
+  CurrentText = txoFilter.Text
 
-  o = TextBox1
+  o = txoFilter
 
   strRTab = Split(o.Tag, ".")[1]
   strRKey = Split(o.Tag, ".")[2]
@@ -266,5 +275,18 @@ Public Sub btnOpenForeignTable_Click()
 
   Wait 0.01
   Me.Close
+
+End
+
+Public Sub Button1_Click()
+
+  If txoFilter.Text = "" Then
+    txoFilter.Text = " "
+    txoFilter.Text = ""
+  Else
+    txoFilter.Text = ""
+  Endif
+
+  txoFilter.SetFocus
 
 End

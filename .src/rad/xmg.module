@@ -24,13 +24,40 @@
 
 Export
 
+'' Convert pixels to millimeters
+
+Public Function Px2mm(px As Float) As Float
+
+  Dim mm As Float
+
+  mm = px / 3.779527559
+
+  Return mm
+
+End
+
+'' Convert millimeters to pixels
+
+Public Function Mm2Px(mm As Float) As Float
+
+  Dim px As Float
+
+  px = mm * 3.779527559
+
+  Return px
+
+End
+
 '' Crete a simple SVG file.
 
 Public Function XmlSVG(xf As String, model As Collection, Optional strComment As String) As Integer
 
   Dim writer As New XmlWriter
   Dim i As Integer
-  Dim Layer As Variant
+  Dim c As Integer
+  Dim cLayers As Collection
+  Dim cEntities As Collection
+  Dim Layer As Collection
   Dim Entity As Variant
   Dim xstyle As String
   Dim part As Variant
@@ -52,92 +79,102 @@ Public Function XmlSVG(xf As String, model As Collection, Optional strComment As
     writer.Comment(strComment)
   Endif
   writer.StartElement("svg")             ' Compatibility with SVG
+  writer.Attribute("height", "297mm")
+  writer.Attribute("width", "210mm")
+  writer.Attribute("viewBox", "0 0 210 297")
   writer.StartElement("metadata")             ' Compatibility with SVG
-  writer.Attribute("id", "metadata5")
+  writer.Attribute("id", "metadata166")
+
+  writer.StartElement("rdf:RDF")
+  writer.StartElement("cc:Work")
+  'writer.StartElement("rdf:about", "")
+
   writer.StartElement("dc:format")
   writer.Text("image/svg+xml")
   writer.EndElement ' dc:format
+
+  'writer.EndElement 'rdf:about
+  writer.EndElement 'cc:Work"
+  writer.EndElement 'rdf:RDF
+
   writer.EndElement ' metadata
 
-  For Each Layer In model["Layers"]
+  cLayers = model["Layers"]
+  cEntities = model["Entities"]
+
+  For Each Layer In cLayers 'model["Layers"]
     writer.StartElement("g")
-    For Each part In model
+    'For Each part In model
+    '  Select model.Key
+    '    Case "Entities"
+    For Each Entity In cEntities
+      If Entity.Exist("Layer") Then
+        If Entity["Layer"] = Layer["Name"] Then
 
-      Select model.Key
-
-        Case "Entities"
-
-          For Each Entity In part
-            If Entity.Exist("Layer") Then
-              If Entity["Layer"] = Layer["Name"] Then
-
-                Select Entity["Name"]
-                  Case "LINE"
-                    writer.StartElement("line")
-                    '<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
-                    writer.Attribute("x1", Entity["P1"][0])
-                    writer.Attribute("y1", (Entity["P1"][1] * -1))
-                    writer.Attribute("x2", Entity["P2"][0])
-                    writer.Attribute("y2", (Entity["P2"][1] * -1))
-                    i = Entity["Colour"]
-                    If i >= 0 And i < 256 Then
-                      xstyle = "stroke:rgb(" & rgbx[i] & ")"
-                      xstyle &= ";stroke-width:1"
-                    Else
-                      xstyle = "stroke:rgb(255,0,0);stroke-width:1"
-                    Endif
-                    writer.Attribute("style", xstyle)
-                    writer.EndElement
-                  Case "LWPOLYLINE"
-                    Points.Clear
-                    Count = Entity["Points"] - 1
-                    i = Entity["Colour"]
-                    If i >= 0 And i < 256 Then
-                      xstyle = ""
-                      xstyle = "fill:none;stroke:rgb(" & rgbx[i] & ")"
-                      xstyle &= ";stroke-width:1"
-                    Else
-                      xstyle = "fill:none;stroke:rgb(0,255,0);stroke-width:2"
-                    Endif
-
-                    writer.StartElement("polyline")
-
-                    For i = 0 To Count
-                      Point = Entity["P" & CStr(i)]
-                      Points.Add(Point[0] & "," & (Point[1] * -1))
-                    Next
-
-                    writer.Attribute("points", Points.Join(" "))
-                    writer.Attribute("style", xstyle)
-                    writer.EndElement
-
-                  Case "TEXT"
-                    If i >= 0 And i < 256 Then
-                      xfill = "rgb(" & rgbx[i] & ")"
-                    Else
-                      xfill = "yellow"
-                    Endif
-
-                    If Entity.Exist("Height") Then
-
-                      H = Round(Entity["Height"], 0)
-
-                      font = "font:" & H & "px"
-
-                    Else
-                      font = "font:" & 10 & "px"
-                    Endif
-
-                    writer.StartElement("text", ["x", Entity["P1"][0], "y", (Entity["P1"][1] * -1), "fill", xfill, "font", font])
-                    writer.Text(Entity["Text"])
-
-                    writer.EndElement
-
-                End Select
+          Select Entity["Name"]
+            Case "LINE"
+              writer.StartElement("line")
+              '<line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2" />
+              writer.Attribute("x1", Mm2Px(Entity["P1"][0]))
+              writer.Attribute("y1", (Mm2Px(Entity["P1"][1]) * -1))
+              writer.Attribute("x2", Mm2Px(Entity["P2"][0]))
+              writer.Attribute("y2", (Mm2Px(Entity["P2"][1]) * -1))
+              i = Entity["Colour"]
+              If i >= 0 And i < 256 Then
+                xstyle = "stroke:rgb(" & rgbx[i] & ")"
+                xstyle &= ";stroke-width:1"
+              Else
+                xstyle = "stroke:rgb(255,0,0);stroke-width:1"
               Endif
-            Endif
-          Next
-      End Select
+              writer.Attribute("style", xstyle)
+              writer.EndElement
+            Case "LWPOLYLINE"
+              Points.Clear
+              If Entity.Exist("Points") Then
+                Count = Entity["Points"] - 1
+                c = Entity["Colour"]
+                If c >= 0 And c < 256 Then
+                  xstyle = ""
+                  xstyle = "fill:none;stroke:rgb(" & rgbx[c] & ")"
+                  xstyle &= ";stroke-width:1"
+                Else
+                  xstyle = "fill:none;stroke:rgb(0,255,0);stroke-width:2"
+                Endif
+
+                writer.StartElement("polyline")
+
+                For i = 0 To Count
+                  Point = Entity["P" & CStr(i)]
+                  Points.Add(Mm2Px(Point[0]) & "," & (Mm2Px(Point[1]) * -1))
+                Next
+                writer.Attribute("points", Points.Join(" "))
+                writer.Attribute("style", xstyle)
+                writer.EndElement
+              Endif
+
+            Case "TEXT"
+              If i >= 0 And i < 256 Then
+                xfill = "rgb(" & rgbx[i] & ")"
+              Else
+                xfill = "yellow"
+              Endif
+
+              If Entity.Exist("Height") Then
+                H = Round(Entity["Height"], 0)
+                font = "font:" & H & "px"
+              Else
+                font = "font:" & 10 & "px"
+              Endif
+
+              writer.StartElement("text", ["x", Mm2Px(Entity["P1"][0]), "y", (Mm2Px(Entity["P1"][1]) * -1), "fill", xfill, "font", font])
+              writer.Text(Entity["Text"])
+              writer.EndElement
+
+          End Select
+        Endif
+      Endif
+      'Next
+      'End Select
     Next
 
     writer.EndElement 'g
@@ -909,6 +946,26 @@ Public Function XmlIni() As Collection
   ctnTmp.Add("String", "Data")
   ctnTmp.Add("dio", "Ctrl")
   ctnTmp.Add(("Application directory"), "Desc")
+  str = ctnTmp["Name"]
+  ctnOut.Add(ctnTmp.Copy(), str)
+
+  ctnTmp.Clear
+  ctnTmp.Add("Application.Templates", "Name")
+  ctnTmp.Add(("Program"), "Group")
+  ctnTmp.Add(sBase, "Value")
+  ctnTmp.Add("String", "Data")
+  ctnTmp.Add("dio", "Ctrl")
+  ctnTmp.Add(("Application templates"), "Desc")
+  str = ctnTmp["Name"]
+  ctnOut.Add(ctnTmp.Copy(), str)
+
+  ctnTmp.Clear
+  ctnTmp.Add("Application.Reports", "Name")
+  ctnTmp.Add(("Program"), "Group")
+  ctnTmp.Add(sBase, "Value")
+  ctnTmp.Add("String", "Data")
+  ctnTmp.Add("dio", "Ctrl")
+  ctnTmp.Add(("Application reports"), "Desc")
   str = ctnTmp["Name"]
   ctnOut.Add(ctnTmp.Copy(), str)
 
