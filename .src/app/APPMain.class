@@ -52,7 +52,7 @@ Public Sub Run(cin As Collection)
   rmeta.Add(False, "text")
   rmeta.Add(False, "application")
 
-  Me.Menus.Hide
+  'Me.Menus.Hide
 
   For Each mnu In Me.Menus
     For Each obj In mnu.Children

@@ -780,8 +780,6 @@ Public Function RecordDelete(con As Connection, tab As String, inx As Integer[])
 
 End
 
-'' Create an sql query.
-
 Public Function SqlMake(strTbl As String, stxFld As String[][]) As String
 
   Dim int As Integer

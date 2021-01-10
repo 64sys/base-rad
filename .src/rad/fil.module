@@ -48,14 +48,13 @@ Public Struct stat_
 End Struct
 
 Private Const _STAT_VER_LINUX As Integer = 1
-
 Private Extern __xstat(_STAT_VER As Integer, __path As String, __statbuf As Stat_) As Integer
 
 '' Create a file parameters list using the GNU coreutils program stat. Note: the tags for access to the information are:<br>
 '' Dev, Ino, Path, Link, Mode, SetUID, SetGID, Rdev, Size, BlkSize, Blocks, LastAccess, LastModified, LastChange<br>
 '' Original <https://www.gambas-it.org/wiki/index.php?title=Stat_()>
 
-Public Sub Stat(f As String) As Collection
+Public Sub Stat2(f As String) As Collection
 
   Dim i As Integer
   Dim st As New Stat_
@@ -84,8 +83,6 @@ Public Sub Stat(f As String) As Collection
   Return inf
 
 End
-
-'' You must have a list of directives that are included in the route that is passed as a parameter.
 
 Public Function RListDir(strPath As String) As String[]
 

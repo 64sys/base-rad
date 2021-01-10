@@ -1,0 +1,31 @@
+' Gambas module file
+
+Export
+
+'' Return the same image but with a frame
+
+Public Function ImageFrame(img As Image) As Image
+
+  Dim lt As Variant
+  'Dim img As Image
+
+  For Each lt In Starter.cColors
+
+    Paint.Begin(img)
+    Paint.NewPath
+    Paint.Brush = Paint.Color(Color.Black)
+
+    Paint.LineWidth = 3
+    Paint.MoveTo(2, 2)
+
+    Paint.LineTo(img.W - 2, 2)
+    Paint.LineTo(img.W - 2, img.H - 2)
+    Paint.LineTo(2, img.H - 2)
+    Paint.LineTo(2, 2)
+
+    Paint.Stroke
+    Paint.End
+  Next
+  Return img
+
+End

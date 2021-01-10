@@ -55,7 +55,7 @@
     }
   }
   { pnlIcons Panel
-    MoveScaled(1,13,3.875,54)
+    MoveScaled(1,8,3.875,54)
     Arrangement = Arrange.Vertical
   }
   { Separator1 Separator

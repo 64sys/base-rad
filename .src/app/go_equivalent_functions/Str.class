@@ -1,0 +1,329 @@
+' Gambas class file
+
+''' Class strings implements simple functions to manipulate UTF-8 encoded strings.
+
+Export
+
+Create Static
+
+'Inherits String
+
+' ------------------------------------- Others Functions
+
+'' Counts how much times some string apear in other
+
+Public Function Count(sWhere As String, sWhich As String) As Integer
+
+  Dim k As Integer = 1
+  Dim q As Integer
+  Dim r As Integer
+
+  Repeat
+    q = InStr(sWhere, sWhich, k)
+    If q > 0 Then
+      Inc r
+      k = q + String.Len(sWhich)
+    Endif
+  Until InStr(sWhere, sWhich, k) = 0 Or k > String.Len(sWhere)
+
+  Return r
+
+End
+
+'' Replace unicode like \U+0023 by # the character
+
+Public Function Flat(s As String) As String
+
+  Dim k As Integer = 1
+  Dim q As Integer
+  Dim r As Integer
+
+  Dim uni As String
+  Dim stx As New String[]
+  Dim u As String
+  Dim rep As String
+  Dim i As Integer
+
+  Repeat
+    q = InStr(s, "\\U+", k)
+    If q > 0 Then
+      Inc r
+      uni = String.Mid(s, q, 7)
+      stx.Add(uni)
+      k = q + String.Len("\\U+")
+    Endif
+  Until InStr(s, "\\U+", k) = 0 Or k > String.Len(s)
+
+  For Each u In stx
+    i = Val("&h" & String.Mid(u, 4, 4) & "&")
+    rep = String.Chr(i)
+    s = Replace(s, u, rep)
+  Next
+
+  Return s
+
+End
+
+' ------------------------------------- GO Package strings
+
+'' GO Package strings
+'' Compare returns an integer comparing two strings lexicographically.The result will be 0 If a == b, -1 If a < b, And +1 If a > b.
+
+Public Function Compare(a As String, b As String) As Integer
+
+End
+
+'' GO Package strings
+
+Public Function Contains(s As String, substr As String) As Boolean
+
+End
+
+'' GO Package strings
+
+Public Function ContainsAny(s As String, chars As String) As Boolean
+
+End
+
+' GO Package strings
+'Public Function ContainsRune(s As String, r rune) As Boolean
+'
+'End
+
+' GO Package strings
+'Public Function Count(s As String, substr As String) As Integer
+'
+'End
+
+'' GO Package strings
+
+Public Function EqualFold(s As String, t As String) As Boolean
+
+End
+
+'' GO Package strings
+
+Public Function Fields(s As String) As String[]
+
+End
+
+' GO Package strings
+'Public Function FieldsFunc(s As String, f func(rune)bool) As String[]
+'
+'End
+
+'' GO Package strings
+
+Public Function HasPrefix(s As String, prefix As String) As Boolean
+
+End
+
+'' GO Package strings
+
+Public Function HasSuffix(s As String, suffix As String) As Boolean
+
+End
+
+'' Index returns the index of the first instance of substr in s, or -1 if substr is not present in s.
+
+Public Function Index(s As String, substr As String) As Integer
+
+  Return String.InStr(s, substr)
+
+End
+
+'' GO Package strings
+
+Public Function IndexAny(s As String, chars As String) As Integer
+
+End
+
+'' GO Package strings
+
+Public Function IndexByte(s As String, c As Byte) As Integer
+
+  Return String.Index(s, c)
+
+End
+
+' GO Package strings
+'Public Function IndexFunc(s As String, f func(rune)bool) As Integer
+'
+'End
+
+' GO Package strings
+'Public Function IndexRune(s string, r rune) As Integer
+'
+'End
+
+'' GO Package strings
+
+Public Function Join(elems As String[], sep As String) As String
+
+End
+
+'' GO Package strings
+
+Public Function LastIndex(s As String, substr As String) As Integer
+
+End
+
+'' GO Package strings
+
+Public Function LastIndexAny(s As String, chars As String) As Integer
+
+End
+
+'' GO Package strings
+
+Public Function LastIndexByte(s As String, c As Byte) As Integer
+
+End
+
+' GO Package strings
+'Public Function LastIndexFunc(s string, f func(rune)bool) As Integer
+'
+'End
+
+' GO Package strings
+'Public Function Map(mapping func(rune)rune, s string) As String
+'
+'End
+
+'' GO Package strings
+
+Public Function Repeat(s As String, count As Integer) As String
+
+End
+
+'' GO Package strings
+
+Public Function Replace(s As String, orig As String, chan As String, n As Integer) As String
+
+End
+
+'' GO Package strings
+
+Public Function ReplaceAll(s As String, orig As String, chan As String) As String
+
+End
+
+'' GO Package strings
+
+Public Function Split(s As String, sep As String) As String[]
+
+End
+
+'' GO Package strings
+
+Public Function SplitAfter(s As String, sep As String) As String[]
+
+End
+
+'' GO Package strings
+
+Public Function SplitAfterN(s As String, sep As String, n As Integer) As String[]
+
+End
+
+'' GO Package strings
+
+Public Function SplitN(s As String, sep As String, n As Integer) As String[]
+
+End
+
+'' GO Package strings
+
+Public Function Title(s As String) As String
+
+End
+
+Public Function ToLower(s As String) As String
+
+End
+
+' GO Package strings
+'Public Function ToLowerSpecial(c unicode.SpecialCase, s As String) As String
+'
+'End
+
+'' GO Package strings
+
+Public Function ToTitle(s As String) As String
+
+End
+
+' GO Package strings
+'Public Function ToTitleSpecial(c As Unicode.SpecialCase, s As String) As String
+'
+'End
+
+'' GO Package strings
+
+Public Function ToUpper(s As String) As String
+
+End
+
+' GO Package strings
+'Public Function ToUpperSpecial(c As Unicode.SpecialCase, s As String) As String
+'
+'End
+
+'' GO Package strings
+
+Public Function ToValidUTF8(s As String, replacement As String) As String
+
+End
+
+'' GO Package strings
+
+Public Function Trim(s As String, cutset As String) As String
+
+End
+
+' GO Package strings
+'Public Function TrimFunc(s As String, f func(rune)bool) As String
+'
+'End
+
+'' GO Package strings
+
+Public Function TrimLeft(s As String, cutset As String) As String
+
+End
+
+' GO Package strings
+'Public Function TrimLeftFunc(s As String, f func(rune)bool) As String
+'
+'End
+
+'' GO Package strings
+
+Public Function TrimPrefix(s As String, prefix As String) As String
+
+End
+
+'' GO Package strings
+
+Public Function TrimRight(s As String, cutset As String) As String
+
+End
+
+' GO Package strings
+'Public Function TrimRightFunc(s As String, f func(rune)bool) As String
+'
+'End
+
+'' GO Package strings
+
+Public Function TrimSpace(s As String) As String
+
+  Return Trim(s)
+
+End
+
+'' GO Package strings
+
+Public Function TrimSuffix(s As String, suffix As String) As String
+
+End

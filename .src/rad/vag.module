@@ -24,6 +24,36 @@
 
 Export
 
+'' Return a float value, trim spaces, replace coma to point if is necesary.
+
+Public Function CFloat(var As Variant) As Float
+
+  Dim str As String
+  Dim flo As Float
+
+  Select TypeOf(var)
+    Case gb.String
+      str = Trim(var)
+      If InStr(var, ",") > 0 Then
+        str = Replace(str, ",", ".")
+        If InStr(var, " ") > 0 Then
+          str = Replace(str, " ", "")
+        Endif
+      Endif
+      flo = CFloat(str)
+
+    Case gb.Float
+      flo = var
+
+    Case gb.Integer, gb.Byte, gb.Long, gb.Short
+      flo = CFloat(var)
+
+  End Select
+
+  Return flo
+
+End
+
 '' Function that count the times that a substring appear in other string
 
 Public Function StrCount(sWhere As String, sWhich As String) As Integer

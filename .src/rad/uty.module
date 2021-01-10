@@ -1,6 +1,6 @@
 ' Gambas module file
 
-'
+''' Utilities to validate and manage values.
 ' RADG
 ' Rapid Application Development for Gambas
 '
